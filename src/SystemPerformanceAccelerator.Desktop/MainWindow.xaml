@@ -1,6 +1,7 @@
 <Window x:Class="SystemPerformanceAccelerator.Desktop.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:behaviors="clr-namespace:SystemPerformanceAccelerator.Desktop.Behaviors"
         Title="System Performance Accelerator"
         Width="1240"
         Height="780"
@@ -412,8 +413,9 @@
 
                 <Border Grid.Row="2" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
                     <DataGrid ItemsSource="{Binding Candidates}"
+                              behaviors:DataGridSelectionBehavior.IsEnabled="True"
                               AutoGenerateColumns="False"
-                              IsReadOnly="False"
+                              IsReadOnly="True"
                               CanUserAddRows="False"
                               CanUserDeleteRows="False"
                               CanUserReorderColumns="False"
@@ -434,7 +436,9 @@
                                         <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                   HorizontalAlignment="Center"
                                                   VerticalAlignment="Center"
-                                                  Focusable="False" />
+                                                  Focusable="False"
+                                                  IsTabStop="False"
+                                                  Cursor="Hand" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -541,13 +545,16 @@
 
                         <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Bottom">
                             <Button Command="{Binding ScanCommand}" Content="Scan" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
+                            <Button Command="{Binding DeleteSelectedCommand}" Content="Delete selected" Style="{StaticResource CleanButtonStyle}" Margin="0,0,8,0" />
                             <Button Command="{Binding CancelCommand}" Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" />
                         </StackPanel>
                     </Grid>
                 </Border>
 
                 <Border Grid.Row="2" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
-                    <DataGrid ItemsSource="{Binding Results}"
+                    <DataGrid x:Name="LargeFilesGrid"
+                              ItemsSource="{Binding Results}"
+                              behaviors:DataGridSelectionBehavior.IsEnabled="True"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
                               CanUserAddRows="False"
@@ -563,10 +570,22 @@
                               EnableRowVirtualization="True"
                               EnableColumnVirtualization="True">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="FILE NAME" Binding="{Binding Name}" Width="2*" MinWidth="190" />
-                            <DataGridTextColumn Header="SIZE" Binding="{Binding SizeDisplay}" Width="110" />
-                            <DataGridTextColumn Header="MODIFIED" Binding="{Binding LastModified, StringFormat={}{0:dd MMM yyyy  HH:mm}}" Width="170" />
-                            <DataGridTextColumn Header="LOCATION" Binding="{Binding Location}" Width="3*" MinWidth="260" />
+                            <DataGridTemplateColumn Header="SELECT" Width="72">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  Focusable="False"
+                                                  IsTabStop="False"
+                                                  Cursor="Hand" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="FILE NAME" Binding="{Binding Name}" IsReadOnly="True" Width="2*" MinWidth="190" />
+                            <DataGridTextColumn Header="SIZE" Binding="{Binding SizeDisplay}" IsReadOnly="True" Width="110" />
+                            <DataGridTextColumn Header="MODIFIED" Binding="{Binding LastModified, StringFormat={}{0:dd MMM yyyy  HH:mm}}" IsReadOnly="True" Width="170" />
+                            <DataGridTextColumn Header="LOCATION" Binding="{Binding Location}" IsReadOnly="True" Width="3*" MinWidth="260" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Border>

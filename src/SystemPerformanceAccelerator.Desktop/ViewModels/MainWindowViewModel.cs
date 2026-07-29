@@ -26,10 +26,13 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public MainWindowViewModel(
         ITemporaryFileService temporaryFileService,
-        ILargeFileService largeFileService)
+        ILargeFileService largeFileService,
+        ILargeFileCleanupService largeFileCleanupService)
     {
         _temporaryFileService = temporaryFileService;
-        LargeFileFinder = new LargeFileFinderViewModel(largeFileService);
+        LargeFileFinder = new LargeFileFinderViewModel(
+            largeFileService,
+            largeFileCleanupService);
         LargeFileFinder.PropertyChanged += OnLargeFileFinderPropertyChanged;
 
         ScanCommand = new AsyncRelayCommand(ScanAsync, () => !IsBusy);
@@ -56,7 +59,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public string ModuleTitle => IsCleanerActive ? "Cleaner" : "Large File Finder";
     public string ModuleSubtitle => IsCleanerActive
         ? "Safely review and remove temporary files"
-        : "Find large files without changing or deleting anything";
+        : "Find and safely move selected large files to the Windows Recycle Bin";
 
     public bool IsBusy
     {

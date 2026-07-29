@@ -4,7 +4,7 @@ using SystemPerformanceAccelerator.Core.Models;
 
 namespace SystemPerformanceAccelerator.Desktop.ViewModels;
 
-public sealed class CleanupCandidateViewModel : INotifyPropertyChanged
+public sealed class CleanupCandidateViewModel : INotifyPropertyChanged, ISelectableItem
 {
     private bool _isSelected;
 

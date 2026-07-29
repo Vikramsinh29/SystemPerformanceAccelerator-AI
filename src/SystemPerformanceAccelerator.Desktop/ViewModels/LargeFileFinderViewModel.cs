@@ -1,7 +1,8 @@
-using System.IO;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using Microsoft.Win32;
 using SystemPerformanceAccelerator.Core.Interfaces;
 using SystemPerformanceAccelerator.Core.Models;
@@ -12,26 +13,35 @@ namespace SystemPerformanceAccelerator.Desktop.ViewModels;
 public sealed class LargeFileFinderViewModel : INotifyPropertyChanged
 {
     private readonly ILargeFileService _largeFileService;
+    private readonly ILargeFileCleanupService _largeFileCleanupService;
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _isBusy;
     private int _progress;
     private string _selectedFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
     private string _minimumSizeText = "100";
-    private string _status = "Choose a folder or drive, set the minimum size, and start a read-only scan.";
+    private string _status = "Choose a folder or drive, set the minimum size, and start a scan.";
     private string _scanStatus = "Not scanned";
     private string _progressText = "0 files checked";
 
-    public LargeFileFinderViewModel(ILargeFileService largeFileService)
+    public LargeFileFinderViewModel(
+        ILargeFileService largeFileService,
+        ILargeFileCleanupService largeFileCleanupService)
     {
         _largeFileService = largeFileService;
+        _largeFileCleanupService = largeFileCleanupService;
+
         BrowseCommand = new RelayCommand(Browse, () => !IsBusy);
         ScanCommand = new AsyncRelayCommand(ScanAsync, () => !IsBusy);
+        DeleteSelectedCommand = new AsyncRelayCommand(
+            DeleteSelectedAsync,
+            () => !IsBusy && Results.Any(result => result.IsSelected));
         CancelCommand = new RelayCommand(Cancel, () => IsBusy);
     }
 
-    public ObservableCollection<LargeFileCandidate> Results { get; } = [];
+    public ObservableCollection<LargeFileCandidateViewModel> Results { get; } = [];
     public RelayCommand BrowseCommand { get; }
     public AsyncRelayCommand ScanCommand { get; }
+    public AsyncRelayCommand DeleteSelectedCommand { get; }
     public RelayCommand CancelCommand { get; }
 
     public bool IsBusy
@@ -46,6 +56,7 @@ public sealed class LargeFileFinderViewModel : INotifyPropertyChanged
 
             BrowseCommand.RaiseCanExecuteChanged();
             ScanCommand.RaiseCanExecuteChanged();
+            DeleteSelectedCommand.RaiseCanExecuteChanged();
             CancelCommand.RaiseCanExecuteChanged();
         }
     }
@@ -87,7 +98,7 @@ public sealed class LargeFileFinderViewModel : INotifyPropertyChanged
     }
 
     public string FilesFound => Results.Count.ToString("N0");
-    public string TotalSize => MainWindowViewModel.FormatBytes(Results.Sum(result => result.SizeBytes));
+    public string TotalSize => MainWindowViewModel.FormatBytes(Results.Sum(result => result.Model.SizeBytes));
 
     private void Browse()
     {
@@ -128,8 +139,11 @@ public sealed class LargeFileFinderViewModel : INotifyPropertyChanged
             return;
         }
 
-        BeginOperation();
-        Results.Clear();
+        BeginOperation(
+            "Scanning the selected location. No files will be changed.",
+            "Starting scan...",
+            "Scanning...");
+        ClearResults();
         RefreshSummary();
 
         try
@@ -147,7 +161,9 @@ public sealed class LargeFileFinderViewModel : INotifyPropertyChanged
 
             foreach (var candidate in result.Candidates)
             {
-                Results.Add(candidate);
+                var viewModel = new LargeFileCandidateViewModel(candidate);
+                viewModel.PropertyChanged += OnCandidatePropertyChanged;
+                Results.Add(viewModel);
             }
 
             Progress = 100;
@@ -160,7 +176,7 @@ public sealed class LargeFileFinderViewModel : INotifyPropertyChanged
                 : $"Completed - {elapsed} - {result.Errors.Count:N0} skipped";
 
             Status = result.Errors.Count == 0
-                ? $"Scan complete. Found {result.Candidates.Count:N0} file(s) at least {minimumSizeMb:N0} MB. No files were changed."
+                ? $"Scan complete. Found {result.Candidates.Count:N0} file(s) at least {minimumSizeMb:N0} MB. Select only files you recognize before deletion."
                 : $"Scan complete with {result.Errors.Count:N0} skipped item(s). First issue: {result.Errors[0]}";
         }
         catch (OperationCanceledException)
@@ -174,14 +190,109 @@ public sealed class LargeFileFinderViewModel : INotifyPropertyChanged
         }
     }
 
-    private void BeginOperation()
+    private async Task DeleteSelectedAsync()
+    {
+        var selected = Results.Where(result => result.IsSelected).ToArray();
+        if (selected.Length == 0)
+        {
+            Status = "Select at least one file.";
+            return;
+        }
+
+        var selectedBytes = selected.Sum(result => result.Model.SizeBytes);
+        var answer = MessageBox.Show(
+            $"Move {selected.Length:N0} selected file(s) ({MainWindowViewModel.FormatBytes(selectedBytes)}) to the Windows Recycle Bin?\n\nProtected, locked, missing, or inaccessible files will be skipped. Recycled files can normally be restored from Windows Recycle Bin.",
+            "Confirm large-file cleanup",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning,
+            MessageBoxResult.No);
+
+        if (answer != MessageBoxResult.Yes)
+        {
+            Status = "Large-file cleanup not started.";
+            return;
+        }
+
+        BeginOperation(
+            "Moving selected files to the Windows Recycle Bin...",
+            $"0 of {selected.Length:N0} processed",
+            "Cleaning...");
+
+        try
+        {
+            var progress = new Progress<LargeFileCleanupProgress>(value =>
+            {
+                Progress = value.TotalCount == 0
+                    ? 100
+                    : (int)Math.Round(value.ProcessedCount * 100d / value.TotalCount);
+                ProgressText = $"{value.ProcessedCount:N0} of {value.TotalCount:N0} processed";
+            });
+
+            var result = await _largeFileCleanupService.CleanAsync(
+                SelectedFolder,
+                selected.Select(item => item.Model).ToArray(),
+                progress,
+                _cancellationTokenSource!.Token);
+
+            var recycledPaths = result.RecycledPaths.ToHashSet(StringComparer.OrdinalIgnoreCase);
+            foreach (var item in Results.Where(item => recycledPaths.Contains(item.FullPath)).ToArray())
+            {
+                item.PropertyChanged -= OnCandidatePropertyChanged;
+                Results.Remove(item);
+            }
+
+            Progress = 100;
+            RefreshSummary();
+            DeleteSelectedCommand.RaiseCanExecuteChanged();
+
+            var elapsed = FormatElapsed(result.Elapsed);
+            ScanStatus = result.CompletedWithoutErrors
+                ? $"Cleanup completed - {elapsed}"
+                : $"Cleanup completed - {elapsed} - {result.SkippedCount:N0} skipped";
+
+            Status = result.CompletedWithoutErrors
+                ? $"Cleanup complete: {result.RecycledCount:N0} file(s) moved to the Recycle Bin and {MainWindowViewModel.FormatBytes(result.ReclaimedBytes)} reclaimed."
+                : $"Cleanup finished: {result.RecycledCount:N0} moved to the Recycle Bin, {result.SkippedCount:N0} skipped, and {MainWindowViewModel.FormatBytes(result.ReclaimedBytes)} reclaimed. First issue: {result.Errors[0]}";
+        }
+        catch (OperationCanceledException)
+        {
+            RefreshSummary();
+            ScanStatus = "Cleanup cancelled";
+            Status = "Cleanup cancelled. Files already moved to the Recycle Bin remain there; remaining files were untouched.";
+        }
+        finally
+        {
+            EndOperation();
+        }
+    }
+
+    private void OnCandidatePropertyChanged(object? sender, PropertyChangedEventArgs args)
+    {
+        if (args.PropertyName == nameof(LargeFileCandidateViewModel.IsSelected))
+        {
+            DeleteSelectedCommand.RaiseCanExecuteChanged();
+        }
+    }
+
+    private void ClearResults()
+    {
+        foreach (var result in Results)
+        {
+            result.PropertyChanged -= OnCandidatePropertyChanged;
+        }
+
+        Results.Clear();
+        DeleteSelectedCommand.RaiseCanExecuteChanged();
+    }
+
+    private void BeginOperation(string status, string progressText, string scanStatus)
     {
         _cancellationTokenSource?.Dispose();
         _cancellationTokenSource = new CancellationTokenSource();
         Progress = 0;
-        ProgressText = "Starting scan...";
-        ScanStatus = "Scanning...";
-        Status = "Scanning the selected location. This operation is read-only.";
+        ProgressText = progressText;
+        ScanStatus = scanStatus;
+        Status = status;
         IsBusy = true;
     }
 
@@ -232,4 +343,3 @@ public sealed class LargeFileFinderViewModel : INotifyPropertyChanged
     private void OnPropertyChanged([CallerMemberName] string? name = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 }
-

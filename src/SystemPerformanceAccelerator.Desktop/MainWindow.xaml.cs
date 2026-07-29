@@ -11,6 +11,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContext = new MainWindowViewModel(
             new TemporaryFileService(),
-            new LargeFileService());
+            new LargeFileService(),
+            new LargeFileCleanupService());
     }
 }
