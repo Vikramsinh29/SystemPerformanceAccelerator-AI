@@ -77,6 +77,19 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Results refresh after cleanup
 - Structured completion statistics with truncated status text and a full-message tooltip
 
+### Startup Manager
+
+- Completely read-only startup inventory
+- HKCU and HKLM `Run` key enumeration
+- 64-bit and 32-bit registry views where applicable
+- Current-user and all-users Startup folder enumeration
+- Name, command/path, source, location, and status display
+- Read-only StartupApproved status detection when available
+- Missing, unresolved, and malformed target reporting
+- Shortcut resolution without executing startup items
+- Safe handling of inaccessible keys/folders, malformed values, and cancellation
+- No enable, disable, delete, edit, execution, or registry-writing actions
+
 ### Shared WPF table interaction
 
 All selectable result tables must use the same application-wide behaviour:
@@ -91,7 +104,7 @@ All selectable result tables must use the same application-wide behaviour:
 ## Verified state
 
 - Release build succeeds.
-- xUnit suite: 23 passed, 0 failed.
+- xUnit suite: 31 passed, 0 failed.
 - Cleaner scan and safe cleanup manually verified.
 - Large File Finder scan and Recycle Bin cleanup manually verified.
 - Shared one-click checkbox and double-click row selection manually verified in all selectable tables.
@@ -100,6 +113,10 @@ All selectable result tables must use the same application-wide behaviour:
 - Locked/in-use duplicate files are skipped without crashing or removing the remaining copy.
 - Duplicate Finder status layout, full-message tooltip, and maximize/restore behaviour manually verified.
 - Cleaner and Large File Finder regression opening checks passed after Sprint 6.
+- Startup Manager registry and Startup-folder enumeration manually verified.
+- Startup Manager re-scan, cancellation, status reporting, restored/maximized layout, and read-only controls manually verified.
+- Cleaner and Duplicate File Finder regression opening checks passed after Sprint 7.
+- Large File Finder remained functional after Sprint 7; its pre-existing narrow-window Folder or Drive field compression is deferred to a dedicated responsive-layout sprint.
 
 ## Canonical commands
 
