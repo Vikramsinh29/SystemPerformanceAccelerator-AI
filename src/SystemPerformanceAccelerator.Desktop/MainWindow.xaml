@@ -270,7 +270,19 @@
                         </StackPanel>
                     </Button>
 
-                    <Button Style="{StaticResource NavigationButtonStyle}" IsEnabled="False">
+                    <Button Command="{Binding ShowDuplicateFileFinderCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource NavigationButtonStyle}">
+                                <Setter Property="Cursor" Value="Hand" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsDuplicateFileFinderActive}" Value="True">
+                                        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+                                        <Setter Property="Foreground" Value="White" />
+                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Width="28" Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
                             <TextBlock Text="Duplicate Finder" VerticalAlignment="Center" />
@@ -610,6 +622,138 @@
                     </Grid>
                 </Border>
             </Grid>
+
+            <Grid Grid.Row="1"
+                  Margin="22,18,22,20"
+                  DataContext="{Binding DuplicateFileFinder}"
+                  Visibility="{Binding DataContext.IsDuplicateFileFinderActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource SummaryCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="DUPLICATE GROUPS" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
+                            <TextBlock Margin="0,4,0,0" Text="{Binding GroupsFound}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{StaticResource SummaryCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="CONFIRMED FILES" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
+                            <TextBlock Margin="0,4,0,0" Text="{Binding DuplicateFiles}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="4" Style="{StaticResource SummaryCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="POTENTIAL RECLAIMABLE" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
+                            <TextBlock Margin="0,4,0,0" Text="{Binding PotentialReclaimableSpace}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <Border Grid.Row="1" Margin="0,16,0,12" Padding="16,14" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="FOLDER OR DRIVE" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
+                            <Grid Margin="0,6,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SelectedFolder, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" />
+                                <Button Grid.Column="2" Command="{Binding BrowseCommand}" Content="Browse" Style="{StaticResource SecondaryButtonStyle}" MinWidth="90" />
+                            </Grid>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Bottom">
+                            <Button Command="{Binding ScanCommand}" Content="Scan" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
+                            <Button Command="{Binding CancelCommand}" Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="2" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
+                    <DataGrid x:Name="DuplicateFilesGrid"
+                              ItemsSource="{Binding Results}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              CanUserReorderColumns="False"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="None"
+                              BorderThickness="0"
+                              RowHeaderWidth="0"
+                              SelectionMode="Single"
+                              SelectionUnit="FullRow"
+                              Background="White"
+                              EnableRowVirtualization="True"
+                              EnableColumnVirtualization="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="GROUP" Binding="{Binding GroupDisplay}" IsReadOnly="True" Width="120" />
+                            <DataGridTextColumn Header="FILE NAME" Binding="{Binding Name}" IsReadOnly="True" Width="2*" MinWidth="180" />
+                            <DataGridTextColumn Header="SIZE" Binding="{Binding SizeDisplay}" IsReadOnly="True" Width="100" />
+                            <DataGridTextColumn Header="GROUP POTENTIAL" Binding="{Binding GroupReclaimableDisplay}" IsReadOnly="True" Width="135" />
+                            <DataGridTextColumn Header="SHA-256" Binding="{Binding HashDisplay}" IsReadOnly="True" Width="120" />
+                            <DataGridTextColumn Header="LOCATION" Binding="{Binding Location}" IsReadOnly="True" Width="3*" MinWidth="250" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+
+                <Border Grid.Row="3" Margin="0,14,0,0" Padding="16,12" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <ProgressBar Height="6"
+                                     Minimum="0"
+                                     Maximum="100"
+                                     Value="{Binding Progress, Mode=OneWay}"
+                                     IsIndeterminate="{Binding IsBusy}"
+                                     Foreground="{StaticResource AccentBrush}"
+                                     Background="#E7ECF2" />
+                        <TextBlock Grid.Row="1"
+                                   Margin="0,8,0,0"
+                                   Text="{Binding Status}"
+                                   ToolTip="{Binding Status}"
+                                   Foreground="#465468"
+                                   FontSize="12"
+                                   TextTrimming="CharacterEllipsis"
+                                   TextWrapping="NoWrap" />
+                        <StackPanel Grid.Row="2"
+                                    Margin="0,5,0,0"
+                                    HorizontalAlignment="Right"
+                                    Orientation="Horizontal">
+                            <TextBlock Text="{Binding ScanStatus}" Foreground="#5F6D80" FontSize="11" FontWeight="SemiBold" Margin="0,0,14,0" />
+                            <TextBlock Text="{Binding ProgressText}" Foreground="#7A8798" FontSize="11" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
         </Grid>
     </Grid>
 </Window>

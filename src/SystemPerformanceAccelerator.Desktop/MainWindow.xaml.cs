@@ -12,6 +12,7 @@ public partial class MainWindow : Window
         DataContext = new MainWindowViewModel(
             new TemporaryFileService(),
             new LargeFileService(),
-            new LargeFileCleanupService());
+            new LargeFileCleanupService(),
+            new DuplicateFileService());
     }
 }

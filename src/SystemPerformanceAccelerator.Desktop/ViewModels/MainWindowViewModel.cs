@@ -13,7 +13,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private enum ApplicationModule
     {
         Cleaner,
-        LargeFileFinder
+        LargeFileFinder,
+        DuplicateFileFinder
     }
 
     private readonly ITemporaryFileService _temporaryFileService;
@@ -27,13 +28,16 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public MainWindowViewModel(
         ITemporaryFileService temporaryFileService,
         ILargeFileService largeFileService,
-        ILargeFileCleanupService largeFileCleanupService)
+        ILargeFileCleanupService largeFileCleanupService,
+        IDuplicateFileService duplicateFileService)
     {
         _temporaryFileService = temporaryFileService;
         LargeFileFinder = new LargeFileFinderViewModel(
             largeFileService,
             largeFileCleanupService);
-        LargeFileFinder.PropertyChanged += OnLargeFileFinderPropertyChanged;
+        LargeFileFinder.PropertyChanged += OnChildModulePropertyChanged;
+        DuplicateFileFinder = new DuplicateFileFinderViewModel(duplicateFileService);
+        DuplicateFileFinder.PropertyChanged += OnChildModulePropertyChanged;
 
         ScanCommand = new AsyncRelayCommand(ScanAsync, () => !IsBusy);
         CleanCommand = new AsyncRelayCommand(CleanAsync, () => !IsBusy && Candidates.Any(x => x.IsSelected));
@@ -44,22 +48,39 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ShowLargeFileFinderCommand = new RelayCommand(
             () => SwitchModule(ApplicationModule.LargeFileFinder),
             CanSwitchModule);
+        ShowDuplicateFileFinderCommand = new RelayCommand(
+            () => SwitchModule(ApplicationModule.DuplicateFileFinder),
+            CanSwitchModule);
     }
 
     public ObservableCollection<CleanupCandidateViewModel> Candidates { get; } = [];
     public LargeFileFinderViewModel LargeFileFinder { get; }
+    public DuplicateFileFinderViewModel DuplicateFileFinder { get; }
     public AsyncRelayCommand ScanCommand { get; }
     public AsyncRelayCommand CleanCommand { get; }
     public RelayCommand CancelCommand { get; }
     public RelayCommand ShowCleanerCommand { get; }
     public RelayCommand ShowLargeFileFinderCommand { get; }
+    public RelayCommand ShowDuplicateFileFinderCommand { get; }
 
     public bool IsCleanerActive => _currentModule == ApplicationModule.Cleaner;
     public bool IsLargeFileFinderActive => _currentModule == ApplicationModule.LargeFileFinder;
-    public string ModuleTitle => IsCleanerActive ? "Cleaner" : "Large File Finder";
-    public string ModuleSubtitle => IsCleanerActive
-        ? "Safely review and remove temporary files"
-        : "Find and safely move selected large files to the Windows Recycle Bin";
+    public bool IsDuplicateFileFinderActive => _currentModule == ApplicationModule.DuplicateFileFinder;
+    public string ModuleTitle => _currentModule switch
+    {
+        ApplicationModule.Cleaner => "Cleaner",
+        ApplicationModule.LargeFileFinder => "Large File Finder",
+        ApplicationModule.DuplicateFileFinder => "Duplicate File Finder",
+        _ => "System Performance Accelerator"
+    };
+
+    public string ModuleSubtitle => _currentModule switch
+    {
+        ApplicationModule.Cleaner => "Safely review and remove temporary files",
+        ApplicationModule.LargeFileFinder => "Find and safely move selected large files to the Windows Recycle Bin",
+        ApplicationModule.DuplicateFileFinder => "Find SHA-256 content-confirmed duplicates without changing files",
+        _ => string.Empty
+    };
 
     public bool IsBusy
     {
@@ -110,13 +131,17 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         _currentModule = module;
         OnPropertyChanged(nameof(IsCleanerActive));
         OnPropertyChanged(nameof(IsLargeFileFinderActive));
+        OnPropertyChanged(nameof(IsDuplicateFileFinderActive));
         OnPropertyChanged(nameof(ModuleTitle));
         OnPropertyChanged(nameof(ModuleSubtitle));
     }
 
-    private bool CanSwitchModule() => !IsBusy && !LargeFileFinder.IsBusy;
+    private bool CanSwitchModule() =>
+        !IsBusy &&
+        !LargeFileFinder.IsBusy &&
+        !DuplicateFileFinder.IsBusy;
 
-    private void OnLargeFileFinderPropertyChanged(object? sender, PropertyChangedEventArgs args)
+    private void OnChildModulePropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
         if (args.PropertyName == nameof(LargeFileFinderViewModel.IsBusy))
         {
@@ -128,6 +153,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     {
         ShowCleanerCommand.RaiseCanExecuteChanged();
         ShowLargeFileFinderCommand.RaiseCanExecuteChanged();
+        ShowDuplicateFileFinderCommand.RaiseCanExecuteChanged();
     }
 
     private async Task ScanAsync()

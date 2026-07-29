@@ -57,6 +57,19 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Protection for Windows, Program Files, ProgramData, application, recovery, boot, reparse-point, system, and out-of-scope paths
 - Deleted/skipped/reclaimed totals
 
+### Duplicate File Finder
+
+- Folder or drive selection
+- Recursive, completely read-only scanning
+- Files grouped by size before hashing
+- SHA-256 hashing only for same-sized candidate files
+- Duplicate groups confirmed by matching file content, never by filename
+- Progress, cancellation, and honest skipped-item reporting
+- Safe handling of inaccessible folders, locked files, reparse points, scan errors, and files changed during scanning
+- Duplicate-group, confirmed-file, and potential-reclaimable-space summaries
+- No selection, deletion, Recycle Bin, or cleanup operation
+- Structured completion statistics with truncated status text and a full-message tooltip
+
 ### Shared WPF table interaction
 
 All selectable result tables must use the same application-wide behaviour:
@@ -71,10 +84,14 @@ All selectable result tables must use the same application-wide behaviour:
 ## Verified state
 
 - Release build succeeds.
-- xUnit suite: 12 passed, 0 failed.
+- xUnit suite: 17 passed, 0 failed.
 - Cleaner scan and safe cleanup manually verified.
 - Large File Finder scan and Recycle Bin cleanup manually verified.
-- Shared one-click checkbox and double-click row selection manually verified in both tables.
+- Shared one-click checkbox and double-click row selection manually verified in both selectable tables.
+- Duplicate File Finder content-confirmed, read-only scanning manually verified.
+- Locked/in-use files are skipped and reported without stopping the scan.
+- Duplicate Finder status layout, full-message tooltip, and maximize/restore behaviour manually verified.
+- Cleaner and Large File Finder regression opening checks passed after Sprint 5.
 
 ## Canonical commands
 
