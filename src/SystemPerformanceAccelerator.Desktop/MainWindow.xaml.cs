@@ -9,6 +9,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        DataContext = new MainWindowViewModel(new TemporaryFileService());
+        DataContext = new MainWindowViewModel(
+            new TemporaryFileService(),
+            new LargeFileService());
     }
 }

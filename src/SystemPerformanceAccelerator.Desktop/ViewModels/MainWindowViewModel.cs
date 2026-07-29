@@ -10,35 +10,68 @@ namespace SystemPerformanceAccelerator.Desktop.ViewModels;
 
 public sealed class MainWindowViewModel : INotifyPropertyChanged
 {
+    private enum ApplicationModule
+    {
+        Cleaner,
+        LargeFileFinder
+    }
+
     private readonly ITemporaryFileService _temporaryFileService;
     private CancellationTokenSource? _cancellationTokenSource;
+    private ApplicationModule _currentModule = ApplicationModule.Cleaner;
     private bool _isBusy;
     private int _progress;
     private string _status = "Ready. Scan before cleaning anything.";
     private string _scanStatus = "Not scanned";
 
-    public MainWindowViewModel(ITemporaryFileService temporaryFileService)
+    public MainWindowViewModel(
+        ITemporaryFileService temporaryFileService,
+        ILargeFileService largeFileService)
     {
         _temporaryFileService = temporaryFileService;
+        LargeFileFinder = new LargeFileFinderViewModel(largeFileService);
+        LargeFileFinder.PropertyChanged += OnLargeFileFinderPropertyChanged;
+
         ScanCommand = new AsyncRelayCommand(ScanAsync, () => !IsBusy);
         CleanCommand = new AsyncRelayCommand(CleanAsync, () => !IsBusy && Candidates.Any(x => x.IsSelected));
         CancelCommand = new RelayCommand(Cancel, () => IsBusy);
+        ShowCleanerCommand = new RelayCommand(
+            () => SwitchModule(ApplicationModule.Cleaner),
+            CanSwitchModule);
+        ShowLargeFileFinderCommand = new RelayCommand(
+            () => SwitchModule(ApplicationModule.LargeFileFinder),
+            CanSwitchModule);
     }
 
     public ObservableCollection<CleanupCandidateViewModel> Candidates { get; } = [];
+    public LargeFileFinderViewModel LargeFileFinder { get; }
     public AsyncRelayCommand ScanCommand { get; }
     public AsyncRelayCommand CleanCommand { get; }
     public RelayCommand CancelCommand { get; }
+    public RelayCommand ShowCleanerCommand { get; }
+    public RelayCommand ShowLargeFileFinderCommand { get; }
+
+    public bool IsCleanerActive => _currentModule == ApplicationModule.Cleaner;
+    public bool IsLargeFileFinderActive => _currentModule == ApplicationModule.LargeFileFinder;
+    public string ModuleTitle => IsCleanerActive ? "Cleaner" : "Large File Finder";
+    public string ModuleSubtitle => IsCleanerActive
+        ? "Safely review and remove temporary files"
+        : "Find large files without changing or deleting anything";
 
     public bool IsBusy
     {
         get => _isBusy;
         private set
         {
-            if (!SetField(ref _isBusy, value)) return;
+            if (!SetField(ref _isBusy, value))
+            {
+                return;
+            }
+
             ScanCommand.RaiseCanExecuteChanged();
             CleanCommand.RaiseCanExecuteChanged();
             CancelCommand.RaiseCanExecuteChanged();
+            RaiseNavigationCanExecuteChanged();
         }
     }
 
@@ -63,6 +96,36 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public string FilesFound => Candidates.Count.ToString("N0");
     public string ReclaimableSpace => FormatBytes(Candidates.Sum(x => x.Model.SizeBytes));
     public string Summary => $"{FilesFound} files • {ReclaimableSpace}";
+
+    private void SwitchModule(ApplicationModule module)
+    {
+        if (_currentModule == module || !CanSwitchModule())
+        {
+            return;
+        }
+
+        _currentModule = module;
+        OnPropertyChanged(nameof(IsCleanerActive));
+        OnPropertyChanged(nameof(IsLargeFileFinderActive));
+        OnPropertyChanged(nameof(ModuleTitle));
+        OnPropertyChanged(nameof(ModuleSubtitle));
+    }
+
+    private bool CanSwitchModule() => !IsBusy && !LargeFileFinder.IsBusy;
+
+    private void OnLargeFileFinderPropertyChanged(object? sender, PropertyChangedEventArgs args)
+    {
+        if (args.PropertyName == nameof(LargeFileFinderViewModel.IsBusy))
+        {
+            RaiseNavigationCanExecuteChanged();
+        }
+    }
+
+    private void RaiseNavigationCanExecuteChanged()
+    {
+        ShowCleanerCommand.RaiseCanExecuteChanged();
+        ShowLargeFileFinderCommand.RaiseCanExecuteChanged();
+    }
 
     private async Task ScanAsync()
     {
@@ -225,7 +288,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     private bool SetField<T>(ref T field, T value, [CallerMemberName] string? name = null)
     {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        if (EqualityComparer<T>.Default.Equals(field, value))
+        {
+            return false;
+        }
+
         field = value;
         OnPropertyChanged(name);
         return true;
