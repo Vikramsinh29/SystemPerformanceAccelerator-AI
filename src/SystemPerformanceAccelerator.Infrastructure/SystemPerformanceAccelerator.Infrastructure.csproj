@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\SystemPerformanceAccelerator.Core\SystemPerformanceAccelerator.Core.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SystemPerformanceAccelerator.Core\SystemPerformanceAccelerator.Core.csproj" />
+    <ProjectReference Include="..\SystemPerformanceAccelerator.Infrastructure\SystemPerformanceAccelerator.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>
+
+
+

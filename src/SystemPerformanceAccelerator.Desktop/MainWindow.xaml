@@ -1,0 +1,442 @@
+<Window x:Class="SystemPerformanceAccelerator.Desktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="System Performance Accelerator"
+        Width="1240"
+        Height="780"
+        MinWidth="1000"
+        MinHeight="650"
+        WindowStartupLocation="CenterScreen"
+        Background="#EEF2F6"
+        FontFamily="Segoe UI">
+    <Window.Resources>
+        <SolidColorBrush x:Key="SidebarBrush" Color="#18212F" />
+        <SolidColorBrush x:Key="SidebarHoverBrush" Color="#243145" />
+        <SolidColorBrush x:Key="AccentBrush" Color="#2583E9" />
+        <SolidColorBrush x:Key="SuccessBrush" Color="#22A765" />
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#172033" />
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#687386" />
+        <SolidColorBrush x:Key="BorderBrush" Color="#DDE3EA" />
+
+        <Style x:Key="NavigationButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="44" />
+            <Setter Property="Margin" Value="10,2" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="#C7D0DD" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Cursor" Value="Arrow" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="NavBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter VerticalAlignment="Center"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="NavBorder" Property="Background" Value="{StaticResource SidebarHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.68" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ActiveNavigationButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource NavigationButtonStyle}">
+            <Setter Property="Background" Value="#2583E9" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="38" />
+            <Setter Property="MinWidth" Value="112" />
+            <Setter Property="Padding" Value="18,0" />
+            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="5"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.88" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.75" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#AEB8C5" />
+                                <Setter Property="Cursor" Value="Arrow" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CleanButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource PrimaryButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource SuccessBrush}" />
+            <Setter Property="MinWidth" Value="132" />
+        </Style>
+
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="38" />
+            <Setter Property="MinWidth" Value="96" />
+            <Setter Property="Padding" Value="18,0" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="Foreground" Value="#485568" />
+            <Setter Property="BorderBrush" Value="#CBD3DD" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#F1F4F7" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.48" />
+                                <Setter Property="Cursor" Value="Arrow" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SummaryCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="18,14" />
+        </Style>
+
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Background" Value="#F4F6F8" />
+            <Setter Property="Foreground" Value="#4E5B6D" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="BorderBrush" Value="#E0E5EB" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
+
+        <Style TargetType="DataGridCell">
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="#263244" />
+        </Style>
+
+        <Style TargetType="DataGridRow">
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#EEF1F4" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F5F9FD" />
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#E8F2FC" />
+                    <Setter Property="Foreground" Value="#172033" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="238" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" Background="{StaticResource SidebarBrush}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border Padding="20,20,16,18" BorderBrush="#2A3749" BorderThickness="0,0,0,1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="42" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border Width="34" Height="34" Background="{StaticResource AccentBrush}" CornerRadius="7">
+                            <TextBlock Text="SPA"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Foreground="White"
+                                       FontSize="11"
+                                       FontWeight="Bold" />
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="SYSTEM PERFORMANCE" Foreground="White" FontSize="10" FontWeight="Bold" />
+                            <TextBlock Text="ACCELERATOR" Foreground="#9FAABC" FontSize="10" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <StackPanel Grid.Row="1" Margin="0,16,0,0">
+                    <TextBlock Margin="22,0,0,7" Text="TOOLS" Foreground="#718096" FontSize="10" FontWeight="Bold" />
+
+                    <Button Style="{StaticResource ActiveNavigationButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Width="28" Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
+                            <TextBlock Text="Cleaner" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{StaticResource NavigationButtonStyle}" IsEnabled="False">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Width="28" Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
+                            <TextBlock Text="Health Check" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{StaticResource NavigationButtonStyle}" IsEnabled="False">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Width="28" Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
+                            <TextBlock Text="Custom Clean" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{StaticResource NavigationButtonStyle}" IsEnabled="False">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Width="28" Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
+                            <TextBlock Text="Large File Finder" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{StaticResource NavigationButtonStyle}" IsEnabled="False">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Width="28" Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
+                            <TextBlock Text="Duplicate Finder" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{StaticResource NavigationButtonStyle}" IsEnabled="False">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Width="28" Text="&#xE768;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
+                            <TextBlock Text="Startup Manager" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{StaticResource NavigationButtonStyle}" IsEnabled="False">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Width="28" Text="&#xE9D2;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
+                            <TextBlock Text="System Monitor" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{StaticResource NavigationButtonStyle}" IsEnabled="False">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Width="28" Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
+                            <TextBlock Text="Settings" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <Border Grid.Row="2" Margin="14" Padding="12" Background="#121A26" CornerRadius="6">
+                    <StackPanel>
+                        <TextBlock Text="OFFLINE &amp; SAFE" Foreground="#83C8FF" FontSize="10" FontWeight="Bold" />
+                        <TextBlock Margin="0,4,0,0"
+                                   Text="No cloud services. Review every file before cleanup."
+                                   Foreground="#9FAABC"
+                                   FontSize="11"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="72" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                <Grid Margin="24,0">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Cleaner" Foreground="{StaticResource TextPrimaryBrush}" FontSize="22" FontWeight="SemiBold" />
+                        <TextBlock Text="Safely review and remove temporary files" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" />
+                    </StackPanel>
+                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <TextBlock Text="Windows 10/11" Foreground="#506074" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Right" />
+                        <TextBlock Text="Local system utility" Foreground="#8A95A5" FontSize="11" HorizontalAlignment="Right" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="1" Margin="22,18,22,20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource SummaryCardStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="42" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="FILES FOUND" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
+                                <TextBlock Margin="0,4,0,0" Text="{Binding FilesFound}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" />
+                            </StackPanel>
+                            <Border Grid.Column="1" Width="36" Height="36" Background="#E8F2FC" CornerRadius="18">
+                                <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource AccentBrush}" FontSize="17" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{StaticResource SummaryCardStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="42" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="RECLAIMABLE SPACE" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
+                                <TextBlock Margin="0,4,0,0" Text="{Binding ReclaimableSpace}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" />
+                            </StackPanel>
+                            <Border Grid.Column="1" Width="36" Height="36" Background="#E6F6EE" CornerRadius="18">
+                                <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource SuccessBrush}" FontSize="17" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Column="4" Style="{StaticResource SummaryCardStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="42" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="SCAN STATUS / TIME" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
+                                <TextBlock Margin="0,7,0,0" Text="{Binding ScanStatus}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="15" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                            <Border Grid.Column="1" Width="36" Height="36" Background="#F1EDF9" CornerRadius="18">
+                                <TextBlock Text="&#xE823;" FontFamily="Segoe MDL2 Assets" Foreground="#7757B7" FontSize="17" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="1" Margin="0,16,0,12">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Temporary files" Foreground="{StaticResource TextPrimaryBrush}" FontSize="16" FontWeight="SemiBold" />
+                        <TextBlock Margin="0,3,0,0" Text="Only the current user's Windows temporary folder is scanned." Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Command="{Binding ScanCommand}" Content="Scan" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
+                        <Button Command="{Binding CleanCommand}" Content="Clean selected" Style="{StaticResource CleanButtonStyle}" Margin="0,0,8,0" />
+                        <Button Command="{Binding CancelCommand}" Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" />
+                    </StackPanel>
+                </Grid>
+
+                <Border Grid.Row="2" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
+                    <DataGrid ItemsSource="{Binding Candidates}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              CanUserReorderColumns="False"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="None"
+                              BorderThickness="0"
+                              RowHeaderWidth="0"
+                              SelectionMode="Extended"
+                              SelectionUnit="FullRow"
+                              Background="White"
+                              AlternationCount="2"
+                              EnableRowVirtualization="True"
+                              EnableColumnVirtualization="True">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="SELECT" Width="74">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  Focusable="False" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="FILE NAME" Binding="{Binding Name}" IsReadOnly="True" Width="2*" MinWidth="180" />
+                            <DataGridTextColumn Header="SIZE" Binding="{Binding Size}" IsReadOnly="True" Width="105" />
+                            <DataGridTextColumn Header="MODIFIED" Binding="{Binding LastModified, StringFormat={}{0:dd MMM yyyy  HH:mm}}" IsReadOnly="True" Width="170" />
+                            <DataGridTextColumn Header="LOCATION" Binding="{Binding FullPath}" IsReadOnly="True" Width="3*" MinWidth="240" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+
+                <Border Grid.Row="3" Margin="0,14,0,0" Padding="16,12" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <ProgressBar Height="6"
+                                     Minimum="0"
+                                     Maximum="100"
+                                     Value="{Binding Progress, Mode=OneWay}"
+                                     Foreground="{StaticResource AccentBrush}"
+                                     Background="#E7ECF2" />
+                        <Grid Grid.Row="1" Margin="0,8,0,0">
+                            <TextBlock Text="{Binding Status}" Foreground="#465468" FontSize="12" TextWrapping="Wrap" />
+                            <TextBlock HorizontalAlignment="Right" Text="{Binding Progress, StringFormat={}{0}%}" Foreground="#7A8798" FontSize="11" />
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

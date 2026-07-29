@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="src/SystemPerformanceAccelerator.Core/SystemPerformanceAccelerator.Core.csproj" />
+  <Project Path="src/SystemPerformanceAccelerator.Infrastructure/SystemPerformanceAccelerator.Infrastructure.csproj" />
+  <Project Path="src/SystemPerformanceAccelerator.Desktop/SystemPerformanceAccelerator.Desktop.csproj" />
+  <Project Path="tests/SystemPerformanceAccelerator.Tests/SystemPerformanceAccelerator.Tests.csproj" />
+</Solution>
