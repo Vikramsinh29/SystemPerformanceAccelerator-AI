@@ -185,6 +185,136 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="OperationStatusPanelStyle" TargetType="Border">
+            <Setter Property="Padding" Value="16,12" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+        </Style>
+
+        <Style x:Key="OperationStatusLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+
+        <Style x:Key="OperationStatusMessageStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#344256" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+
+        <Style x:Key="OperationMetaChipStyle" TargetType="Border">
+            <Setter Property="Padding" Value="10,5" />
+            <Setter Property="Background" Value="#F2F5F8" />
+            <Setter Property="BorderBrush" Value="#DCE3EA" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="ResultMetricCardStyle" TargetType="Border">
+            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="Background" Value="#F7F9FB" />
+            <Setter Property="BorderBrush" Value="#E2E7ED" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+
+        <Style x:Key="ResultMetricLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#788597" />
+            <Setter Property="FontSize" Value="9" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+
+        <Style x:Key="ResultMetricValueStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,3,0,0" />
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <DataTemplate x:Key="OperationResultSummaryTemplate">
+            <StackPanel Margin="45,10,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="6" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="6" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="6" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="6" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource ResultMetricCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding ProcessedLabel}" Style="{StaticResource ResultMetricLabelStyle}" />
+                            <TextBlock Text="{Binding ProcessedValue}" Style="{StaticResource ResultMetricValueStyle}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{StaticResource ResultMetricCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="SKIPPED" Style="{StaticResource ResultMetricLabelStyle}" />
+                            <TextBlock Text="{Binding SkippedValue}" Style="{StaticResource ResultMetricValueStyle}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="4" Style="{StaticResource ResultMetricCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="FAILED" Style="{StaticResource ResultMetricLabelStyle}" />
+                            <TextBlock Text="{Binding FailedValue}" Style="{StaticResource ResultMetricValueStyle}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="6" Style="{StaticResource ResultMetricCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="RECLAIMED" Style="{StaticResource ResultMetricLabelStyle}" />
+                            <TextBlock Text="{Binding ReclaimedValue}" Style="{StaticResource ResultMetricValueStyle}" ToolTip="{Binding ReclaimedValue}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="8" Style="{StaticResource ResultMetricCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="DURATION" Style="{StaticResource ResultMetricLabelStyle}" />
+                            <TextBlock Text="{Binding DurationValue}" Style="{StaticResource ResultMetricValueStyle}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <Border Margin="0,7,0,0"
+                        Padding="10,8"
+                        Background="#FFF8E8"
+                        BorderBrush="#F0D9A4"
+                        BorderThickness="1"
+                        CornerRadius="6"
+                        Visibility="{Binding HasDetail, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" Foreground="#B7791F" FontSize="14" VerticalAlignment="Top" />
+                        <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                            <TextBlock Text="FIRST ISSUE" Foreground="#9A681D" FontSize="9" FontWeight="Bold" />
+                            <TextBlock Margin="0,2,0,0"
+                                       Text="{Binding Detail}"
+                                       ToolTip="{Binding Detail}"
+                                       Foreground="#6E5529"
+                                       FontSize="11"
+                                       TextWrapping="Wrap"
+                                       MaxHeight="34" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </DataTemplate>
     </Window.Resources>
 
     <Grid>
@@ -514,7 +644,9 @@
                     </DataGrid>
                 </Border>
 
-                <Border Grid.Row="3" Margin="0,14,0,0" Padding="16,12" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+                <Border Grid.Row="3"
+                        Margin="0,14,0,0"
+                        Style="{StaticResource OperationStatusPanelStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -530,18 +662,32 @@
                                      Foreground="{StaticResource AccentBrush}"
                                      Background="#E7ECF2" />
 
-                        <TextBlock Grid.Row="1"
-                                   Margin="0,8,0,0"
-                                   Text="{Binding Status}"
-                                   ToolTip="{Binding Status}"
-                                   Foreground="#465468"
-                                   FontSize="12"
-                                   TextTrimming="CharacterEllipsis"
-                                   TextWrapping="NoWrap" />
+                        <Grid Grid.Row="1" Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
 
-                        <StackPanel Grid.Row="2" Margin="0,5,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
-                            <TextBlock Text="{Binding CheckState}" Foreground="#5F6D80" FontSize="11" FontWeight="SemiBold" Margin="0,0,14,0" />
-                            <TextBlock Text="{Binding LastChecked, StringFormat='Checked: {0}'}" Foreground="#7A8798" FontSize="11" Margin="0,0,14,0" />
+                            <Border Width="34" Height="34" Background="#E8F2FC" CornerRadius="17">
+                                <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource AccentBrush}" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+
+                            <StackPanel Grid.Column="1" Margin="11,0,18,0">
+                                <TextBlock Text="HEALTH CHECK STATUS" Style="{StaticResource OperationStatusLabelStyle}" />
+                                <TextBlock Margin="0,3,0,0"
+                                           Text="{Binding Status}"
+                                           ToolTip="{Binding Status}"
+                                           Style="{StaticResource OperationStatusMessageStyle}" />
+                            </StackPanel>
+
+                            <Border Grid.Column="2" Style="{StaticResource OperationMetaChipStyle}">
+                                <TextBlock Text="{Binding CheckState}" Foreground="#4D5B6E" FontSize="11" FontWeight="SemiBold" />
+                            </Border>
+                        </Grid>
+
+                        <StackPanel Grid.Row="2" Margin="45,7,0,0" Orientation="Horizontal">
+                            <TextBlock Text="{Binding LastChecked, StringFormat='Checked: {0}'}" Foreground="#7A8798" FontSize="11" Margin="0,0,16,0" />
                             <TextBlock Text="{Binding WarningText}" Foreground="#7A8798" FontSize="11" />
                         </StackPanel>
                     </Grid>
@@ -667,22 +813,58 @@
                     </DataGrid>
                 </Border>
 
-                <Border Grid.Row="3" Margin="0,14,0,0" Padding="16,12" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+                <Border Grid.Row="3"
+                        Margin="0,14,0,0"
+                        Style="{StaticResource OperationStatusPanelStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
+
                         <ProgressBar Height="6"
                                      Minimum="0"
                                      Maximum="100"
                                      Value="{Binding Progress, Mode=OneWay}"
                                      Foreground="{StaticResource AccentBrush}"
                                      Background="#E7ECF2" />
-                        <Grid Grid.Row="1" Margin="0,8,0,0">
-                            <TextBlock Text="{Binding Status}" Foreground="#465468" FontSize="12" TextWrapping="Wrap" Margin="0,0,60,0" />
-                            <TextBlock HorizontalAlignment="Right" Text="{Binding Progress, StringFormat={}{0}%}" Foreground="#7A8798" FontSize="11" />
+
+                        <Grid Grid.Row="1" Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Width="34" Height="34" Background="#E6F6EE" CornerRadius="17">
+                                <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource SuccessBrush}" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+
+                            <StackPanel Grid.Column="1" Margin="11,0,18,0">
+                                <TextBlock Text="CLEANER STATUS" Style="{StaticResource OperationStatusLabelStyle}" />
+                                <TextBlock Margin="0,3,0,0"
+                                           Text="{Binding Status}"
+                                           ToolTip="{Binding Status}"
+                                           Style="{StaticResource OperationStatusMessageStyle}" />
+                            </StackPanel>
+
+                            <Border Grid.Column="2" Style="{StaticResource OperationMetaChipStyle}">
+                                <TextBlock Text="{Binding ScanStatus}" Foreground="#4D5B6E" FontSize="11" FontWeight="SemiBold" />
+                            </Border>
                         </Grid>
+
+                        <ContentControl Grid.Row="2"
+                                        Content="{Binding OperationResult}"
+                                        ContentTemplate="{StaticResource OperationResultSummaryTemplate}"
+                                        Visibility="{Binding OperationResult.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                        <TextBlock Grid.Row="3"
+                                   Margin="45,7,0,0"
+                                   Text="{Binding Progress, StringFormat='Progress: {0}%'}"
+                                   Foreground="#7A8798"
+                                   FontSize="11" />
                     </Grid>
                 </Border>
             </Grid>
@@ -839,38 +1021,56 @@
 
                 <Border Grid.Row="3"
                         Margin="0,14,0,0"
-                        Padding="16,12"
-                        Background="White"
-                        BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8">
+                        Style="{StaticResource OperationStatusPanelStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
+
                         <ProgressBar Height="6"
                                      Minimum="0"
                                      Maximum="100"
                                      Value="{Binding Progress, Mode=OneWay}"
                                      Foreground="{StaticResource AccentBrush}"
                                      Background="#E7ECF2" />
-                        <TextBlock Grid.Row="1"
-                                   Margin="0,8,0,0"
-                                   Text="{Binding Status}"
-                                   ToolTip="{Binding Status}"
-                                   Foreground="#465468"
-                                   FontSize="12"
-                                   TextTrimming="CharacterEllipsis"
-                                   TextWrapping="NoWrap" />
-                        <StackPanel Grid.Row="2"
-                                    Margin="0,5,0,0"
-                                    HorizontalAlignment="Right"
-                                    Orientation="Horizontal">
-                            <TextBlock Text="{Binding PreviewStatus}" Foreground="#5F6D80" FontSize="11" FontWeight="SemiBold" Margin="0,0,14,0" />
-                            <TextBlock Text="{Binding Progress, StringFormat={}{0}%}" Foreground="#7A8798" FontSize="11" />
-                        </StackPanel>
+
+                        <Grid Grid.Row="1" Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Width="34" Height="34" Background="#E6F6EE" CornerRadius="17">
+                                <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource SuccessBrush}" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+
+                            <StackPanel Grid.Column="1" Margin="11,0,18,0">
+                                <TextBlock Text="CUSTOM CLEAN STATUS" Style="{StaticResource OperationStatusLabelStyle}" />
+                                <TextBlock Margin="0,3,0,0"
+                                           Text="{Binding Status}"
+                                           ToolTip="{Binding Status}"
+                                           Style="{StaticResource OperationStatusMessageStyle}" />
+                            </StackPanel>
+
+                            <Border Grid.Column="2" Style="{StaticResource OperationMetaChipStyle}">
+                                <TextBlock Text="{Binding PreviewStatus}" Foreground="#4D5B6E" FontSize="11" FontWeight="SemiBold" />
+                            </Border>
+                        </Grid>
+
+                        <ContentControl Grid.Row="2"
+                                        Content="{Binding OperationResult}"
+                                        ContentTemplate="{StaticResource OperationResultSummaryTemplate}"
+                                        Visibility="{Binding OperationResult.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                        <TextBlock Grid.Row="3"
+                                   Margin="45,7,0,0"
+                                   Text="{Binding Progress, StringFormat='Progress: {0}%'}"
+                                   Foreground="#7A8798"
+                                   FontSize="11" />
                     </Grid>
                 </Border>
             </Grid>
@@ -995,12 +1195,17 @@
                     </DataGrid>
                 </Border>
 
-                <Border Grid.Row="3" Margin="0,14,0,0" Padding="16,12" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+                <Border Grid.Row="3"
+                        Margin="0,14,0,0"
+                        Style="{StaticResource OperationStatusPanelStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
+
                         <ProgressBar Height="6"
                                      Minimum="0"
                                      Maximum="100"
@@ -1008,10 +1213,41 @@
                                      IsIndeterminate="{Binding IsBusy}"
                                      Foreground="{StaticResource AccentBrush}"
                                      Background="#E7ECF2" />
-                        <Grid Grid.Row="1" Margin="0,8,0,0">
-                            <TextBlock Text="{Binding Status}" Foreground="#465468" FontSize="12" TextWrapping="Wrap" Margin="0,0,230,0" />
-                            <TextBlock HorizontalAlignment="Right" Text="{Binding ProgressText}" Foreground="#7A8798" FontSize="11" />
+
+                        <Grid Grid.Row="1" Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Width="34" Height="34" Background="#E6F6EE" CornerRadius="17">
+                                <TextBlock Text="&#xE7C3;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource SuccessBrush}" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+
+                            <StackPanel Grid.Column="1" Margin="11,0,18,0">
+                                <TextBlock Text="LARGE FILE OPERATION STATUS" Style="{StaticResource OperationStatusLabelStyle}" />
+                                <TextBlock Margin="0,3,0,0"
+                                           Text="{Binding Status}"
+                                           ToolTip="{Binding Status}"
+                                           Style="{StaticResource OperationStatusMessageStyle}" />
+                            </StackPanel>
+
+                            <Border Grid.Column="2" Style="{StaticResource OperationMetaChipStyle}">
+                                <TextBlock Text="{Binding ScanStatus}" Foreground="#4D5B6E" FontSize="11" FontWeight="SemiBold" />
+                            </Border>
                         </Grid>
+
+                        <ContentControl Grid.Row="2"
+                                        Content="{Binding OperationResult}"
+                                        ContentTemplate="{StaticResource OperationResultSummaryTemplate}"
+                                        Visibility="{Binding OperationResult.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                        <TextBlock Grid.Row="3"
+                                   Margin="45,7,0,0"
+                                   Text="{Binding ProgressText}"
+                                   Foreground="#7A8798"
+                                   FontSize="11" />
                     </Grid>
                 </Border>
             </Grid>
@@ -1135,13 +1371,17 @@
                     </DataGrid>
                 </Border>
 
-                <Border Grid.Row="3" Margin="0,14,0,0" Padding="16,12" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+                <Border Grid.Row="3"
+                        Margin="0,14,0,0"
+                        Style="{StaticResource OperationStatusPanelStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
+
                         <ProgressBar Height="6"
                                      Minimum="0"
                                      Maximum="100"
@@ -1149,21 +1389,41 @@
                                      IsIndeterminate="{Binding IsBusy}"
                                      Foreground="{StaticResource AccentBrush}"
                                      Background="#E7ECF2" />
-                        <TextBlock Grid.Row="1"
-                                   Margin="0,8,0,0"
-                                   Text="{Binding Status}"
-                                   ToolTip="{Binding Status}"
-                                   Foreground="#465468"
-                                   FontSize="12"
-                                   TextTrimming="CharacterEllipsis"
-                                   TextWrapping="NoWrap" />
-                        <StackPanel Grid.Row="2"
-                                    Margin="0,5,0,0"
-                                    HorizontalAlignment="Right"
-                                    Orientation="Horizontal">
-                            <TextBlock Text="{Binding ScanStatus}" Foreground="#5F6D80" FontSize="11" FontWeight="SemiBold" Margin="0,0,14,0" />
-                            <TextBlock Text="{Binding ProgressText}" Foreground="#7A8798" FontSize="11" />
-                        </StackPanel>
+
+                        <Grid Grid.Row="1" Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Width="34" Height="34" Background="#F1EDF9" CornerRadius="17">
+                                <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" Foreground="#7757B7" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+
+                            <StackPanel Grid.Column="1" Margin="11,0,18,0">
+                                <TextBlock Text="DUPLICATE OPERATION STATUS" Style="{StaticResource OperationStatusLabelStyle}" />
+                                <TextBlock Margin="0,3,0,0"
+                                           Text="{Binding Status}"
+                                           ToolTip="{Binding Status}"
+                                           Style="{StaticResource OperationStatusMessageStyle}" />
+                            </StackPanel>
+
+                            <Border Grid.Column="2" Style="{StaticResource OperationMetaChipStyle}">
+                                <TextBlock Text="{Binding ScanStatus}" Foreground="#4D5B6E" FontSize="11" FontWeight="SemiBold" />
+                            </Border>
+                        </Grid>
+
+                        <ContentControl Grid.Row="2"
+                                        Content="{Binding OperationResult}"
+                                        ContentTemplate="{StaticResource OperationResultSummaryTemplate}"
+                                        Visibility="{Binding OperationResult.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                        <TextBlock Grid.Row="3"
+                                   Margin="45,7,0,0"
+                                   Text="{Binding ProgressText}"
+                                   Foreground="#7A8798"
+                                   FontSize="11" />
                     </Grid>
                 </Border>
             </Grid>
@@ -1287,13 +1547,16 @@
                     </DataGrid>
                 </Border>
 
-                <Border Grid.Row="3" Margin="0,14,0,0" Padding="16,12" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+                <Border Grid.Row="3"
+                        Margin="0,14,0,0"
+                        Style="{StaticResource OperationStatusPanelStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
+
                         <ProgressBar Height="6"
                                      Minimum="0"
                                      Maximum="100"
@@ -1301,21 +1564,36 @@
                                      IsIndeterminate="{Binding IsBusy}"
                                      Foreground="{StaticResource AccentBrush}"
                                      Background="#E7ECF2" />
-                        <TextBlock Grid.Row="1"
-                                   Margin="0,8,0,0"
-                                   Text="{Binding Status}"
-                                   ToolTip="{Binding Status}"
-                                   Foreground="#465468"
-                                   FontSize="12"
-                                   TextTrimming="CharacterEllipsis"
-                                   TextWrapping="NoWrap" />
-                        <StackPanel Grid.Row="2"
-                                    Margin="0,5,0,0"
-                                    HorizontalAlignment="Right"
-                                    Orientation="Horizontal">
-                            <TextBlock Text="{Binding ScanStatus}" Foreground="#5F6D80" FontSize="11" FontWeight="SemiBold" Margin="0,0,14,0" />
-                            <TextBlock Text="{Binding ProgressText}" Foreground="#7A8798" FontSize="11" />
-                        </StackPanel>
+
+                        <Grid Grid.Row="1" Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Width="34" Height="34" Background="#E8F2FC" CornerRadius="17">
+                                <TextBlock Text="&#xE768;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource AccentBrush}" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+
+                            <StackPanel Grid.Column="1" Margin="11,0,18,0">
+                                <TextBlock Text="STARTUP INVENTORY STATUS" Style="{StaticResource OperationStatusLabelStyle}" />
+                                <TextBlock Margin="0,3,0,0"
+                                           Text="{Binding Status}"
+                                           ToolTip="{Binding Status}"
+                                           Style="{StaticResource OperationStatusMessageStyle}" />
+                            </StackPanel>
+
+                            <Border Grid.Column="2" Style="{StaticResource OperationMetaChipStyle}">
+                                <TextBlock Text="{Binding ScanStatus}" Foreground="#4D5B6E" FontSize="11" FontWeight="SemiBold" />
+                            </Border>
+                        </Grid>
+
+                        <TextBlock Grid.Row="2"
+                                   Margin="45,7,0,0"
+                                   Text="{Binding ProgressText}"
+                                   Foreground="#7A8798"
+                                   FontSize="11" />
                     </Grid>
                 </Border>
             </Grid>
@@ -1495,28 +1773,42 @@
 
                 <Border Grid.Row="3"
                         Margin="0,14,0,0"
-                        Padding="16,12"
-                        Background="White"
-                        BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8">
+                        Style="{StaticResource OperationStatusPanelStyle}">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-                        <TextBlock Text="{Binding Status}"
-                                   ToolTip="{Binding Status}"
-                                   Foreground="#465468"
-                                   FontSize="12"
-                                   TextTrimming="CharacterEllipsis"
-                                   TextWrapping="NoWrap" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
 
-                        <StackPanel Grid.Column="1" Margin="18,0,0,0" Orientation="Horizontal">
-                            <TextBlock Text="{Binding MonitoringState}" Foreground="#5F6D80" FontSize="11" FontWeight="SemiBold" Margin="0,0,14,0" />
-                            <TextBlock Text="{Binding LastUpdated, StringFormat='Updated: {0}'}" Foreground="#7A8798" FontSize="11" />
-                        </StackPanel>
+                            <Border Width="34" Height="34" Background="#E8F2FC" CornerRadius="17">
+                                <TextBlock Text="&#xE9D2;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource AccentBrush}" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+
+                            <StackPanel Grid.Column="1" Margin="11,0,18,0">
+                                <TextBlock Text="MONITOR STATUS" Style="{StaticResource OperationStatusLabelStyle}" />
+                                <TextBlock Margin="0,3,0,0"
+                                           Text="{Binding Status}"
+                                           ToolTip="{Binding Status}"
+                                           Style="{StaticResource OperationStatusMessageStyle}" />
+                            </StackPanel>
+
+                            <Border Grid.Column="2" Style="{StaticResource OperationMetaChipStyle}">
+                                <TextBlock Text="{Binding MonitoringState}" Foreground="#4D5B6E" FontSize="11" FontWeight="SemiBold" />
+                            </Border>
+                        </Grid>
+
+                        <TextBlock Grid.Row="1"
+                                   Margin="45,7,0,0"
+                                   Text="{Binding LastUpdated, StringFormat='Last updated: {0}'}"
+                                   Foreground="#7A8798"
+                                   FontSize="11" />
                     </Grid>
                 </Border>
             </Grid>

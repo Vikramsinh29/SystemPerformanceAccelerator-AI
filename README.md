@@ -127,6 +127,15 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Safe cancellation and honest partial-failure reporting
 - No cleanup, repair, optimization, process termination, registry writing, or system-setting changes
 
+### Cross-tool result presentation
+
+- Consistent wrapped status panels across Cleaner, Custom Clean, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Health Check
+- Structured cleanup summaries for Cleaner, Custom Clean, Large File Finder, and Duplicate File Finder
+- Deleted or recycled, skipped, failed, reclaimed-space, and duration values shown separately
+- First issue displayed in a dedicated readable warning area
+- Long completion and error messages wrap cleanly
+- Presentation-only implementation with no scanning, cleanup, safety-rule, or business-logic changes
+
 ### Shared WPF table interaction
 
 All selectable result tables must use the same application-wide behaviour:
@@ -165,7 +174,8 @@ All selectable result tables must use the same application-wide behaviour:
 - Custom Clean confirmation-No, confirmation-Yes, preview-only scope, safe execution, result totals, cancellation, and locked/unavailable-file handling manually verified.
 - Custom Clean cleanup was verified to process only previewed items from the supported selected category through the existing safe Cleaner cleanup service.
 - Cleaner, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Health Check regression checks passed after Sprint 11.
-- Cross-tool completion/result panels remain functionally correct but their dense message presentation is deferred to a dedicated UI result-panel polish sprint.
+- Cross-tool structured result panels, summary values, first-issue presentation, message wrapping, and consistent status styling manually verified after Sprint 12.
+- Cleaner, Custom Clean, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Health Check remained functionally unchanged during Sprint 12 regression verification.
 
 ## Canonical commands
 

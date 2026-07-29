@@ -23,6 +23,7 @@ public sealed class DuplicateFileFinderViewModel : INotifyPropertyChanged
     private string _status = "Choose a folder or drive, scan for duplicates, then manually select copies to recycle.";
     private string _scanStatus = "Not scanned";
     private string _progressText = "0 files checked";
+    private OperationResultPresentation _operationResult = OperationResultPresentation.Hidden;
 
     public DuplicateFileFinderViewModel(
         IDuplicateFileService duplicateFileService,
@@ -90,6 +91,12 @@ public sealed class DuplicateFileFinderViewModel : INotifyPropertyChanged
     {
         get => _progressText;
         private set => SetField(ref _progressText, value);
+    }
+
+    public OperationResultPresentation OperationResult
+    {
+        get => _operationResult;
+        private set => SetField(ref _operationResult, value);
     }
 
     public string GroupsFound => _confirmedGroups.Count.ToString("N0");
@@ -250,23 +257,30 @@ public sealed class DuplicateFileFinderViewModel : INotifyPropertyChanged
             ProgressText = $"{result.RecycledCount + result.SkippedCount:N0} of {selected.Length:N0} processed";
             var elapsed = FormatElapsed(result.Elapsed);
 
+            OperationResult = new OperationResultPresentation(
+                true,
+                "RECYCLED",
+                result.RecycledCount.ToString("N0"),
+                result.SkippedCount.ToString("N0"),
+                "0",
+                MainWindowViewModel.FormatBytes(result.ReclaimedBytes),
+                elapsed,
+                result.Errors.Count > 0 ? result.Errors[0] : string.Empty);
+
             if (result.WasCancelled)
             {
                 ScanStatus = $"Cleanup cancelled - {elapsed}";
-                Status = $"Cleanup cancelled: {result.RecycledCount:N0} file(s) moved to the Recycle Bin, {MainWindowViewModel.FormatBytes(result.ReclaimedBytes)} reclaimed, and remaining files left untouched.";
+                Status = "Duplicate cleanup was cancelled. Completed Recycle Bin moves remain applied; remaining files were untouched.";
             }
             else if (result.CompletedWithoutErrors)
             {
                 ScanStatus = $"Cleanup completed - {elapsed}";
-                Status = $"Cleanup complete: {result.RecycledCount:N0} file(s) moved to the Recycle Bin and {MainWindowViewModel.FormatBytes(result.ReclaimedBytes)} reclaimed. Results were refreshed.";
+                Status = "Duplicate cleanup completed successfully. Results were refreshed.";
             }
             else
             {
                 ScanStatus = $"Cleanup completed - {elapsed} - {result.SkippedCount:N0} skipped";
-                var firstIssue = result.Errors.Count > 0
-                    ? $" First issue: {result.Errors[0]}"
-                    : string.Empty;
-                Status = $"Cleanup finished: {result.RecycledCount:N0} moved to the Recycle Bin, {result.SkippedCount:N0} skipped, and {MainWindowViewModel.FormatBytes(result.ReclaimedBytes)} reclaimed. Results were refreshed.{firstIssue}";
+                Status = "Duplicate cleanup completed with skipped items. Results were refreshed.";
             }
         }
         finally
@@ -370,6 +384,7 @@ public sealed class DuplicateFileFinderViewModel : INotifyPropertyChanged
         _cancellationTokenSource?.Dispose();
         _cancellationTokenSource = new CancellationTokenSource();
         Progress = 0;
+        OperationResult = OperationResultPresentation.Hidden;
         ProgressText = progressText;
         ScanStatus = scanStatus;
         Status = status;

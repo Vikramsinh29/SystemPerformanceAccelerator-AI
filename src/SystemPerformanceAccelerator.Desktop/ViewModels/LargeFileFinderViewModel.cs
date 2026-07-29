@@ -22,6 +22,7 @@ public sealed class LargeFileFinderViewModel : INotifyPropertyChanged
     private string _status = "Choose a folder or drive, set the minimum size, and start a scan.";
     private string _scanStatus = "Not scanned";
     private string _progressText = "0 files checked";
+    private OperationResultPresentation _operationResult = OperationResultPresentation.Hidden;
 
     public LargeFileFinderViewModel(
         ILargeFileService largeFileService,
@@ -95,6 +96,12 @@ public sealed class LargeFileFinderViewModel : INotifyPropertyChanged
     {
         get => _progressText;
         private set => SetField(ref _progressText, value);
+    }
+
+    public OperationResultPresentation OperationResult
+    {
+        get => _operationResult;
+        private set => SetField(ref _operationResult, value);
     }
 
     public string FilesFound => Results.Count.ToString("N0");
@@ -250,9 +257,18 @@ public sealed class LargeFileFinderViewModel : INotifyPropertyChanged
                 ? $"Cleanup completed - {elapsed}"
                 : $"Cleanup completed - {elapsed} - {result.SkippedCount:N0} skipped";
 
+            OperationResult = new OperationResultPresentation(
+                true,
+                "RECYCLED",
+                result.RecycledCount.ToString("N0"),
+                result.SkippedCount.ToString("N0"),
+                "0",
+                MainWindowViewModel.FormatBytes(result.ReclaimedBytes),
+                elapsed,
+                result.Errors.Count > 0 ? result.Errors[0] : string.Empty);
             Status = result.CompletedWithoutErrors
-                ? $"Cleanup complete: {result.RecycledCount:N0} file(s) moved to the Recycle Bin and {MainWindowViewModel.FormatBytes(result.ReclaimedBytes)} reclaimed."
-                : $"Cleanup finished: {result.RecycledCount:N0} moved to the Recycle Bin, {result.SkippedCount:N0} skipped, and {MainWindowViewModel.FormatBytes(result.ReclaimedBytes)} reclaimed. First issue: {result.Errors[0]}";
+                ? "Large-file cleanup completed successfully."
+                : "Large-file cleanup completed with skipped items.";
         }
         catch (OperationCanceledException)
         {
@@ -290,6 +306,7 @@ public sealed class LargeFileFinderViewModel : INotifyPropertyChanged
         _cancellationTokenSource?.Dispose();
         _cancellationTokenSource = new CancellationTokenSource();
         Progress = 0;
+        OperationResult = OperationResultPresentation.Hidden;
         ProgressText = progressText;
         ScanStatus = scanStatus;
         Status = status;

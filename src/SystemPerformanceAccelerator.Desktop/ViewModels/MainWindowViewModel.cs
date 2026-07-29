@@ -28,6 +28,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private int _progress;
     private string _status = "Ready. Scan before cleaning anything.";
     private string _scanStatus = "Not scanned";
+    private OperationResultPresentation _operationResult = OperationResultPresentation.Hidden;
 
     public MainWindowViewModel(
         ITemporaryFileService temporaryFileService,
@@ -165,6 +166,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     {
         get => _scanStatus;
         private set => SetField(ref _scanStatus, value);
+    }
+
+    public OperationResultPresentation OperationResult
+    {
+        get => _operationResult;
+        private set => SetField(ref _operationResult, value);
     }
 
     public string FilesFound => Candidates.Count.ToString("N0");
@@ -307,14 +314,18 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
             RefreshSummary();
             var elapsed = FormatElapsed(result.Elapsed);
-            if (result.CompletedWithoutErrors)
-            {
-                Status = $"Cleanup complete in {elapsed}: {result.DeletedCount:N0} files deleted, {FormatBytes(result.ReclaimedBytes)} reclaimed.";
-            }
-            else
-            {
-                Status = $"Cleanup finished in {elapsed}: {result.DeletedCount:N0} deleted, {result.Errors.Count:N0} skipped, {FormatBytes(result.ReclaimedBytes)} reclaimed. First issue: {result.Errors[0]}";
-            }
+            OperationResult = new OperationResultPresentation(
+                true,
+                "DELETED",
+                result.DeletedCount.ToString("N0"),
+                result.Errors.Count.ToString("N0"),
+                "0",
+                FormatBytes(result.ReclaimedBytes),
+                elapsed,
+                result.Errors.Count > 0 ? result.Errors[0] : string.Empty);
+            Status = result.CompletedWithoutErrors
+                ? "Cleanup completed successfully."
+                : "Cleanup completed with skipped items.";
         }
         catch (OperationCanceledException)
         {
@@ -332,6 +343,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         _cancellationTokenSource?.Dispose();
         _cancellationTokenSource = new CancellationTokenSource();
         Progress = 0;
+        OperationResult = OperationResultPresentation.Hidden;
         Status = status;
         IsBusy = true;
     }

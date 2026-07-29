@@ -19,6 +19,7 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
     private string _status =
         "Choose existing Cleaner categories, preview the targets, then confirm cleanup.";
     private string _previewStatus = "Not previewed";
+    private OperationResultPresentation _operationResult = OperationResultPresentation.Hidden;
 
     public CustomCleanViewModel(ICustomCleanService customCleanService)
     {
@@ -55,6 +56,7 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
             Progress = 0;
             PreviewStatus = "Selection changed";
             Status = "Category selection changed. Run Preview before cleaning.";
+            OperationResult = OperationResultPresentation.Hidden;
             RefreshSummary();
             RaiseOperationCanExecuteChanged();
         }
@@ -91,6 +93,12 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
     {
         get => _previewStatus;
         private set => SetField(ref _previewStatus, value);
+    }
+
+    public OperationResultPresentation OperationResult
+    {
+        get => _operationResult;
+        private set => SetField(ref _operationResult, value);
     }
 
     public int SelectedCategoryCount => IncludeTemporaryFiles ? 1 : 0;
@@ -204,20 +212,18 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
                 ? $"Cleanup complete - {elapsed}"
                 : $"Cleanup complete - {elapsed} - issues reported";
 
-            if (result.CompletedWithoutIssues)
-            {
-                Status =
-                    $"Custom Clean complete in {elapsed}: {result.DeletedCount:N0} deleted, {MainWindowViewModel.FormatBytes(result.ReclaimedBytes)} reclaimed.";
-            }
-            else
-            {
-                var issueDetail = result.Errors.Count > 0
-                    ? $" First issue: {result.Errors[0]}"
-                    : string.Empty;
-
-                Status =
-                    $"Custom Clean finished in {elapsed}: {result.DeletedCount:N0} deleted, {result.SkippedCount:N0} skipped, {result.FailedCount:N0} failed, {MainWindowViewModel.FormatBytes(result.ReclaimedBytes)} reclaimed.{issueDetail}";
-            }
+            OperationResult = new OperationResultPresentation(
+                true,
+                "DELETED",
+                result.DeletedCount.ToString("N0"),
+                result.SkippedCount.ToString("N0"),
+                result.FailedCount.ToString("N0"),
+                MainWindowViewModel.FormatBytes(result.ReclaimedBytes),
+                elapsed,
+                result.Errors.Count > 0 ? result.Errors[0] : string.Empty);
+            Status = result.CompletedWithoutIssues
+                ? "Custom Clean completed successfully."
+                : "Custom Clean completed with skipped or failed items.";
         }
         catch (OperationCanceledException)
         {
@@ -258,6 +264,7 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
         _cancellationTokenSource?.Dispose();
         _cancellationTokenSource = new CancellationTokenSource();
         Progress = 0;
+        OperationResult = OperationResultPresentation.Hidden;
         PreviewStatus = operationStatus;
         Status = status;
         IsBusy = true;
