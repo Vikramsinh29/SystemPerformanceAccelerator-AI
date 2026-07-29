@@ -90,6 +90,17 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Safe handling of inaccessible keys/folders, malformed values, and cancellation
 - No enable, disable, delete, edit, execution, or registry-writing actions
 
+### System Monitor
+
+- Completely read-only live system monitoring
+- Total CPU usage sampled from Windows system processor times
+- Physical memory used, available, total, and usage percentage
+- Approximately one refresh per second
+- Explicit Start and Stop controls
+- Monitoring stops automatically when leaving the System Monitor tab
+- Safe cancellation and Windows API failure handling
+- No process termination, memory optimization, cleanup, disk/network monitoring, or system-setting changes
+
 ### Shared WPF table interaction
 
 All selectable result tables must use the same application-wide behaviour:
@@ -104,7 +115,7 @@ All selectable result tables must use the same application-wide behaviour:
 ## Verified state
 
 - Release build succeeds.
-- xUnit suite: 31 passed, 0 failed.
+- xUnit suite: 35 passed, 0 failed.
 - Cleaner scan and safe cleanup manually verified.
 - Large File Finder scan and Recycle Bin cleanup manually verified.
 - Shared one-click checkbox and double-click row selection manually verified in all selectable tables.
@@ -117,6 +128,8 @@ All selectable result tables must use the same application-wide behaviour:
 - Startup Manager re-scan, cancellation, status reporting, restored/maximized layout, and read-only controls manually verified.
 - Cleaner and Duplicate File Finder regression opening checks passed after Sprint 7.
 - Large File Finder remained functional after Sprint 7; its pre-existing narrow-window Folder or Drive field compression is deferred to a dedicated responsive-layout sprint.
+- System Monitor live CPU and physical-memory values, Start/Stop controls, automatic stop on tab change, and read-only scope manually verified.
+- Cleaner, Large File Finder, Duplicate File Finder, and Startup Manager regression opening checks passed after Sprint 8.
 
 ## Canonical commands
 

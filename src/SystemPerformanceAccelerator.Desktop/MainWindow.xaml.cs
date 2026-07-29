@@ -17,6 +17,7 @@ public partial class MainWindow : Window
             largeFileCleanupService,
             new DuplicateFileService(),
             new DuplicateFileCleanupService(largeFileCleanupService),
-            new StartupItemService());
+            new StartupItemService(),
+            new SystemMonitorService());
     }
 }

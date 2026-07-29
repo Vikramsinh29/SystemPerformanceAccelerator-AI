@@ -15,7 +15,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         Cleaner,
         LargeFileFinder,
         DuplicateFileFinder,
-        StartupManager
+        StartupManager,
+        SystemMonitor
     }
 
     private readonly ITemporaryFileService _temporaryFileService;
@@ -32,7 +33,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ILargeFileCleanupService largeFileCleanupService,
         IDuplicateFileService duplicateFileService,
         IDuplicateFileCleanupService duplicateFileCleanupService,
-        IStartupItemService startupItemService)
+        IStartupItemService startupItemService,
+        ISystemMonitorService systemMonitorService)
     {
         _temporaryFileService = temporaryFileService;
         LargeFileFinder = new LargeFileFinderViewModel(
@@ -45,6 +47,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         DuplicateFileFinder.PropertyChanged += OnChildModulePropertyChanged;
         StartupManager = new StartupManagerViewModel(startupItemService);
         StartupManager.PropertyChanged += OnChildModulePropertyChanged;
+        SystemMonitor = new SystemMonitorViewModel(systemMonitorService);
 
         ScanCommand = new AsyncRelayCommand(ScanAsync, () => !IsBusy);
         CleanCommand = new AsyncRelayCommand(CleanAsync, () => !IsBusy && Candidates.Any(x => x.IsSelected));
@@ -61,12 +64,16 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ShowStartupManagerCommand = new RelayCommand(
             () => SwitchModule(ApplicationModule.StartupManager),
             CanSwitchModule);
+        ShowSystemMonitorCommand = new RelayCommand(
+            () => SwitchModule(ApplicationModule.SystemMonitor),
+            CanSwitchModule);
     }
 
     public ObservableCollection<CleanupCandidateViewModel> Candidates { get; } = [];
     public LargeFileFinderViewModel LargeFileFinder { get; }
     public DuplicateFileFinderViewModel DuplicateFileFinder { get; }
     public StartupManagerViewModel StartupManager { get; }
+    public SystemMonitorViewModel SystemMonitor { get; }
     public AsyncRelayCommand ScanCommand { get; }
     public AsyncRelayCommand CleanCommand { get; }
     public RelayCommand CancelCommand { get; }
@@ -74,17 +81,20 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public RelayCommand ShowLargeFileFinderCommand { get; }
     public RelayCommand ShowDuplicateFileFinderCommand { get; }
     public RelayCommand ShowStartupManagerCommand { get; }
+    public RelayCommand ShowSystemMonitorCommand { get; }
 
     public bool IsCleanerActive => _currentModule == ApplicationModule.Cleaner;
     public bool IsLargeFileFinderActive => _currentModule == ApplicationModule.LargeFileFinder;
     public bool IsDuplicateFileFinderActive => _currentModule == ApplicationModule.DuplicateFileFinder;
     public bool IsStartupManagerActive => _currentModule == ApplicationModule.StartupManager;
+    public bool IsSystemMonitorActive => _currentModule == ApplicationModule.SystemMonitor;
     public string ModuleTitle => _currentModule switch
     {
         ApplicationModule.Cleaner => "Cleaner",
         ApplicationModule.LargeFileFinder => "Large File Finder",
         ApplicationModule.DuplicateFileFinder => "Duplicate File Finder",
         ApplicationModule.StartupManager => "Startup Manager",
+        ApplicationModule.SystemMonitor => "System Monitor",
         _ => "System Performance Accelerator"
     };
 
@@ -94,6 +104,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ApplicationModule.LargeFileFinder => "Find and safely move selected large files to the Windows Recycle Bin",
         ApplicationModule.DuplicateFileFinder => "Find content-confirmed duplicates and safely recycle selected copies",
         ApplicationModule.StartupManager => "Review Windows startup entries without changing them",
+        ApplicationModule.SystemMonitor => "View live total CPU and physical-memory usage without changing the system",
         _ => string.Empty
     };
 
@@ -143,11 +154,18 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             return;
         }
 
+        if (_currentModule == ApplicationModule.SystemMonitor &&
+            module != ApplicationModule.SystemMonitor)
+        {
+            SystemMonitor.StopMonitoring();
+        }
+
         _currentModule = module;
         OnPropertyChanged(nameof(IsCleanerActive));
         OnPropertyChanged(nameof(IsLargeFileFinderActive));
         OnPropertyChanged(nameof(IsDuplicateFileFinderActive));
         OnPropertyChanged(nameof(IsStartupManagerActive));
+        OnPropertyChanged(nameof(IsSystemMonitorActive));
         OnPropertyChanged(nameof(ModuleTitle));
         OnPropertyChanged(nameof(ModuleSubtitle));
     }
@@ -172,6 +190,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ShowLargeFileFinderCommand.RaiseCanExecuteChanged();
         ShowDuplicateFileFinderCommand.RaiseCanExecuteChanged();
         ShowStartupManagerCommand.RaiseCanExecuteChanged();
+        ShowSystemMonitorCommand.RaiseCanExecuteChanged();
     }
 
     private async Task ScanAsync()
