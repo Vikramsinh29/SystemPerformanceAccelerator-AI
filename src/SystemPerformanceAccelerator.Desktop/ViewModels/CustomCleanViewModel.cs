@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using SystemPerformanceAccelerator.Core.Interfaces;
 using SystemPerformanceAccelerator.Core.Models;
 using SystemPerformanceAccelerator.Desktop.Commands;
@@ -15,7 +17,7 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
     private bool _isBusy;
     private int _progress;
     private string _status =
-        "Choose existing Cleaner categories, then preview the files. Nothing can be deleted here.";
+        "Choose existing Cleaner categories, preview the targets, then confirm cleanup.";
     private string _previewStatus = "Not previewed";
 
     public CustomCleanViewModel(ICustomCleanService customCleanService)
@@ -25,11 +27,15 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
         PreviewCommand = new AsyncRelayCommand(
             PreviewAsync,
             () => !IsBusy && SelectedCategoryCount > 0);
+        CleanCommand = new AsyncRelayCommand(
+            CleanAsync,
+            () => !IsBusy && SelectedCategoryCount > 0 && Results.Count > 0);
         CancelCommand = new RelayCommand(Cancel, () => IsBusy);
     }
 
     public ObservableCollection<CustomCleanPreviewItemViewModel> Results { get; } = [];
     public AsyncRelayCommand PreviewCommand { get; }
+    public AsyncRelayCommand CleanCommand { get; }
     public RelayCommand CancelCommand { get; }
 
     public bool IncludeTemporaryFiles
@@ -48,9 +54,9 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
             Results.Clear();
             Progress = 0;
             PreviewStatus = "Selection changed";
-            Status = "Category selection changed. Run Preview to refresh the read-only results.";
+            Status = "Category selection changed. Run Preview before cleaning.";
             RefreshSummary();
-            PreviewCommand.RaiseCanExecuteChanged();
+            RaiseOperationCanExecuteChanged();
         }
     }
 
@@ -64,7 +70,7 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
                 return;
             }
 
-            PreviewCommand.RaiseCanExecuteChanged();
+            RaiseOperationCanExecuteChanged();
             CancelCommand.RaiseCanExecuteChanged();
         }
     }
@@ -102,9 +108,12 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
             return;
         }
 
-        BeginOperation();
+        BeginOperation(
+            "Previewing...",
+            "Scanning selected Cleaner categories in read-only mode...");
         Results.Clear();
         RefreshSummary();
+        RaiseOperationCanExecuteChanged();
 
         try
         {
@@ -120,24 +129,112 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
 
             Progress = 100;
             RefreshSummary();
+            RaiseOperationCanExecuteChanged();
 
             var elapsed = FormatElapsed(result.Elapsed);
             PreviewStatus = result.Errors.Count == 0
-                ? $"Completed - {elapsed}"
-                : $"Completed - {elapsed} - {result.Errors.Count:N0} issue(s)";
+                ? $"Preview complete - {elapsed}"
+                : $"Preview complete - {elapsed} - {result.Errors.Count:N0} issue(s)";
             Status = result.Errors.Count == 0
-                ? $"Read-only preview complete. Found {result.Items.Count:N0} file(s)."
-                : $"Read-only preview complete with {result.Errors.Count:N0} issue(s). First issue: {result.Errors[0]}";
+                ? $"Preview complete. Found {result.Items.Count:N0} file(s). Review the list before cleaning."
+                : $"Preview complete with {result.Errors.Count:N0} issue(s). First issue: {result.Errors[0]}";
         }
         catch (OperationCanceledException)
         {
-            PreviewStatus = "Cancelled";
+            PreviewStatus = "Preview cancelled";
             Status = "Custom Clean preview cancelled. No files were deleted or changed.";
         }
         catch (Exception ex)
         {
-            PreviewStatus = "Failed";
+            PreviewStatus = "Preview failed";
             Status = $"Custom Clean preview failed safely. No files were changed. {ex.Message}";
+        }
+        finally
+        {
+            EndOperation();
+        }
+    }
+
+    private async Task CleanAsync()
+    {
+        var selectedCategories = GetSelectedCategories();
+        var previewItems = Results
+            .Select(item => item.Model)
+            .ToArray();
+
+        if (selectedCategories.Count == 0 || previewItems.Length == 0)
+        {
+            Status = "Run Preview and review at least one file before cleaning.";
+            return;
+        }
+
+        var totalBytes = previewItems.Sum(item => item.SizeBytes);
+        var answer = MessageBox.Show(
+            $"Delete {previewItems.Length:N0} previewed temporary file(s) from the selected Custom Clean categories and attempt to reclaim {MainWindowViewModel.FormatBytes(totalBytes)}?\n\nThis cannot be undone.",
+            "Confirm Custom Clean",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning,
+            MessageBoxResult.No);
+
+        if (answer != MessageBoxResult.Yes)
+        {
+            Status = "Custom Clean cleanup not started.";
+            return;
+        }
+
+        BeginOperation(
+            "Cleaning...",
+            "Cleaning the previewed files from the selected categories...");
+
+        try
+        {
+            var result = await _customCleanService.CleanAsync(
+                selectedCategories,
+                previewItems,
+                new Progress<int>(value => Progress = Math.Clamp(value, 0, 100)),
+                _cancellationTokenSource!.Token);
+
+            RemoveDeletedResults();
+            Progress = 100;
+            RefreshSummary();
+            RaiseOperationCanExecuteChanged();
+
+            var elapsed = FormatElapsed(result.Elapsed);
+            PreviewStatus = result.CompletedWithoutIssues
+                ? $"Cleanup complete - {elapsed}"
+                : $"Cleanup complete - {elapsed} - issues reported";
+
+            if (result.CompletedWithoutIssues)
+            {
+                Status =
+                    $"Custom Clean complete in {elapsed}: {result.DeletedCount:N0} deleted, {MainWindowViewModel.FormatBytes(result.ReclaimedBytes)} reclaimed.";
+            }
+            else
+            {
+                var issueDetail = result.Errors.Count > 0
+                    ? $" First issue: {result.Errors[0]}"
+                    : string.Empty;
+
+                Status =
+                    $"Custom Clean finished in {elapsed}: {result.DeletedCount:N0} deleted, {result.SkippedCount:N0} skipped, {result.FailedCount:N0} failed, {MainWindowViewModel.FormatBytes(result.ReclaimedBytes)} reclaimed.{issueDetail}";
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            RemoveDeletedResults();
+            RefreshSummary();
+            RaiseOperationCanExecuteChanged();
+            PreviewStatus = "Cleanup cancelled";
+            Status = "Custom Clean cancelled. Files already deleted remain deleted; remaining files were untouched.";
+        }
+        catch (Exception ex)
+        {
+            RemoveDeletedResults();
+            RefreshSummary();
+            RaiseOperationCanExecuteChanged();
+            PreviewStatus = "Cleanup failed";
+            Status =
+                $"Custom Clean stopped unexpectedly. Files already deleted remain deleted; remaining files were not intentionally changed. {ex.Message}";
         }
         finally
         {
@@ -156,13 +253,13 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
         return categories;
     }
 
-    private void BeginOperation()
+    private void BeginOperation(string operationStatus, string status)
     {
         _cancellationTokenSource?.Dispose();
         _cancellationTokenSource = new CancellationTokenSource();
         Progress = 0;
-        PreviewStatus = "Previewing...";
-        Status = "Scanning selected Cleaner categories in read-only mode...";
+        PreviewStatus = operationStatus;
+        Status = status;
         IsBusy = true;
     }
 
@@ -175,10 +272,26 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
 
     private void Cancel() => _cancellationTokenSource?.Cancel();
 
+    private void RemoveDeletedResults()
+    {
+        foreach (var item in Results
+            .Where(item => !File.Exists(item.FullPath))
+            .ToArray())
+        {
+            Results.Remove(item);
+        }
+    }
+
     private void RefreshSummary()
     {
         OnPropertyChanged(nameof(FilesFound));
         OnPropertyChanged(nameof(ReclaimableSpace));
+    }
+
+    private void RaiseOperationCanExecuteChanged()
+    {
+        PreviewCommand.RaiseCanExecuteChanged();
+        CleanCommand.RaiseCanExecuteChanged();
     }
 
     private static string FormatElapsed(TimeSpan elapsed)

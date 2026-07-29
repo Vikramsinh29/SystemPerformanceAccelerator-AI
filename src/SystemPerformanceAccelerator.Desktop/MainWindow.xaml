@@ -763,7 +763,7 @@
                                 </CheckBox.Style>
                             </CheckBox>
                             <TextBlock Margin="22,3,0,0"
-                                       Text="Uses the same current-user Windows temporary-folder scanner as Cleaner. Preview only; no deletion is available."
+                                       Text="Uses the same current-user Windows temporary-folder scanner and safe cleanup service as Cleaner. Preview first; cleanup always requires confirmation."
                                        Foreground="{StaticResource TextSecondaryBrush}"
                                        FontSize="11"
                                        TextWrapping="Wrap" />
@@ -774,6 +774,7 @@
                                     Orientation="Horizontal"
                                     VerticalAlignment="Center">
                             <Button Command="{Binding PreviewCommand}" Content="Preview" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
+                            <Button Command="{Binding CleanCommand}" Content="Clean previewed" Style="{StaticResource CleanButtonStyle}" Margin="0,0,8,0" />
                             <Button Command="{Binding CancelCommand}" Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" />
                         </StackPanel>
                     </Grid>

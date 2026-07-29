@@ -124,7 +124,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     {
         ApplicationModule.Cleaner => "Safely review and remove temporary files",
         ApplicationModule.HealthCheck => "Review key system conditions without changing Windows",
-        ApplicationModule.CustomClean => "Choose existing Cleaner categories and preview targets without deleting anything",
+        ApplicationModule.CustomClean => "Preview and safely clean selected existing Cleaner categories",
         ApplicationModule.LargeFileFinder => "Find and safely move selected large files to the Windows Recycle Bin",
         ApplicationModule.DuplicateFileFinder => "Find content-confirmed duplicates and safely recycle selected copies",
         ApplicationModule.StartupManager => "Review Windows startup entries without changing them",

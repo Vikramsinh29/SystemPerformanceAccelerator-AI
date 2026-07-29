@@ -8,4 +8,10 @@ public interface ICustomCleanService
         IReadOnlyCollection<CustomCleanCategory> categories,
         IProgress<int>? progress = null,
         CancellationToken cancellationToken = default);
+
+    Task<CustomCleanExecutionResult> CleanAsync(
+        IReadOnlyCollection<CustomCleanCategory> categories,
+        IReadOnlyCollection<CustomCleanPreviewItem> items,
+        IProgress<int>? progress = null,
+        CancellationToken cancellationToken = default);
 }

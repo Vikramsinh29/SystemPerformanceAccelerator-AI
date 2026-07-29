@@ -47,15 +47,19 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 
 ### Custom Clean
 
-- Completely read-only preview foundation
-- Uses the existing Cleaner temporary-file scanning service
+- Uses the existing Cleaner temporary-file scanning and safe cleanup services
 - Existing Cleaner category selection only; no new cleanup rules
 - Temporary Files selected by default
 - Category, filename, size, modified date, and location display
-- Preview and Cancel controls only
-- Category deselection prevents preview
-- Safe cancellation and honest scan-error reporting
-- No cleanup, delete, registry-writing, or system-changing action
+- Read-only preview before cleanup
+- Cleanup remains disabled until a successful preview exists
+- Explicit confirmation before processing previewed items
+- Selecting No leaves all previewed files unchanged
+- Selecting Yes processes only the previewed items from supported selected categories
+- Safe cancellation during preview and cleanup
+- Locked, unavailable, missing, unsafe, and failed files are skipped and reported honestly
+- Deleted, skipped, failed, reclaimed-space, and duration reporting
+- No registry cleanup or unrelated system-changing action
 
 ### Large File Finder
 
@@ -137,7 +141,7 @@ All selectable result tables must use the same application-wide behaviour:
 ## Verified state
 
 - Release build succeeds.
-- xUnit suite: 43 passed, 0 failed.
+- xUnit suite: 48 passed, 0 failed.
 - Cleaner scan and safe cleanup manually verified.
 - Large File Finder scan and Recycle Bin cleanup manually verified.
 - Shared one-click checkbox and double-click row selection manually verified in all selectable tables.
@@ -158,6 +162,10 @@ All selectable result tables must use the same application-wide behaviour:
 - Custom Clean category selection, read-only preview, cancellation, summaries, and no-delete scope manually verified.
 - Custom Clean preview results were verified against the existing Cleaner temporary-file scan.
 - Cleaner, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Health Check regression opening checks passed after Sprint 10.
+- Custom Clean confirmation-No, confirmation-Yes, preview-only scope, safe execution, result totals, cancellation, and locked/unavailable-file handling manually verified.
+- Custom Clean cleanup was verified to process only previewed items from the supported selected category through the existing safe Cleaner cleanup service.
+- Cleaner, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Health Check regression checks passed after Sprint 11.
+- Cross-tool completion/result panels remain functionally correct but their dense message presentation is deferred to a dedicated UI result-panel polish sprint.
 
 ## Canonical commands
 
