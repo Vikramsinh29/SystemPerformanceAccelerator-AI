@@ -14,6 +14,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     {
         Cleaner,
         HealthCheck,
+        CustomClean,
         LargeFileFinder,
         DuplicateFileFinder,
         StartupManager,
@@ -30,6 +31,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public MainWindowViewModel(
         ITemporaryFileService temporaryFileService,
+        ICustomCleanService customCleanService,
         ILargeFileService largeFileService,
         ILargeFileCleanupService largeFileCleanupService,
         IDuplicateFileService duplicateFileService,
@@ -41,6 +43,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         _temporaryFileService = temporaryFileService;
         HealthCheck = new HealthCheckViewModel(healthCheckService);
         HealthCheck.PropertyChanged += OnChildModulePropertyChanged;
+        CustomClean = new CustomCleanViewModel(customCleanService);
+        CustomClean.PropertyChanged += OnChildModulePropertyChanged;
         LargeFileFinder = new LargeFileFinderViewModel(
             largeFileService,
             largeFileCleanupService);
@@ -62,6 +66,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ShowHealthCheckCommand = new RelayCommand(
             () => SwitchModule(ApplicationModule.HealthCheck),
             CanSwitchModule);
+        ShowCustomCleanCommand = new RelayCommand(
+            () => SwitchModule(ApplicationModule.CustomClean),
+            CanSwitchModule);
         ShowLargeFileFinderCommand = new RelayCommand(
             () => SwitchModule(ApplicationModule.LargeFileFinder),
             CanSwitchModule);
@@ -78,6 +85,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public ObservableCollection<CleanupCandidateViewModel> Candidates { get; } = [];
     public HealthCheckViewModel HealthCheck { get; }
+    public CustomCleanViewModel CustomClean { get; }
     public LargeFileFinderViewModel LargeFileFinder { get; }
     public DuplicateFileFinderViewModel DuplicateFileFinder { get; }
     public StartupManagerViewModel StartupManager { get; }
@@ -87,6 +95,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public RelayCommand CancelCommand { get; }
     public RelayCommand ShowCleanerCommand { get; }
     public RelayCommand ShowHealthCheckCommand { get; }
+    public RelayCommand ShowCustomCleanCommand { get; }
     public RelayCommand ShowLargeFileFinderCommand { get; }
     public RelayCommand ShowDuplicateFileFinderCommand { get; }
     public RelayCommand ShowStartupManagerCommand { get; }
@@ -94,6 +103,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public bool IsCleanerActive => _currentModule == ApplicationModule.Cleaner;
     public bool IsHealthCheckActive => _currentModule == ApplicationModule.HealthCheck;
+    public bool IsCustomCleanActive => _currentModule == ApplicationModule.CustomClean;
     public bool IsLargeFileFinderActive => _currentModule == ApplicationModule.LargeFileFinder;
     public bool IsDuplicateFileFinderActive => _currentModule == ApplicationModule.DuplicateFileFinder;
     public bool IsStartupManagerActive => _currentModule == ApplicationModule.StartupManager;
@@ -102,6 +112,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     {
         ApplicationModule.Cleaner => "Cleaner",
         ApplicationModule.HealthCheck => "Health Check",
+        ApplicationModule.CustomClean => "Custom Clean",
         ApplicationModule.LargeFileFinder => "Large File Finder",
         ApplicationModule.DuplicateFileFinder => "Duplicate File Finder",
         ApplicationModule.StartupManager => "Startup Manager",
@@ -113,6 +124,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     {
         ApplicationModule.Cleaner => "Safely review and remove temporary files",
         ApplicationModule.HealthCheck => "Review key system conditions without changing Windows",
+        ApplicationModule.CustomClean => "Choose existing Cleaner categories and preview targets without deleting anything",
         ApplicationModule.LargeFileFinder => "Find and safely move selected large files to the Windows Recycle Bin",
         ApplicationModule.DuplicateFileFinder => "Find content-confirmed duplicates and safely recycle selected copies",
         ApplicationModule.StartupManager => "Review Windows startup entries without changing them",
@@ -175,6 +187,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         _currentModule = module;
         OnPropertyChanged(nameof(IsCleanerActive));
         OnPropertyChanged(nameof(IsHealthCheckActive));
+        OnPropertyChanged(nameof(IsCustomCleanActive));
         OnPropertyChanged(nameof(IsLargeFileFinderActive));
         OnPropertyChanged(nameof(IsDuplicateFileFinderActive));
         OnPropertyChanged(nameof(IsStartupManagerActive));
@@ -186,6 +199,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private bool CanSwitchModule() =>
         !IsBusy &&
         !HealthCheck.IsBusy &&
+        !CustomClean.IsBusy &&
         !LargeFileFinder.IsBusy &&
         !DuplicateFileFinder.IsBusy &&
         !StartupManager.IsBusy;
@@ -202,6 +216,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     {
         ShowCleanerCommand.RaiseCanExecuteChanged();
         ShowHealthCheckCommand.RaiseCanExecuteChanged();
+        ShowCustomCleanCommand.RaiseCanExecuteChanged();
         ShowLargeFileFinderCommand.RaiseCanExecuteChanged();
         ShowDuplicateFileFinderCommand.RaiseCanExecuteChanged();
         ShowStartupManagerCommand.RaiseCanExecuteChanged();

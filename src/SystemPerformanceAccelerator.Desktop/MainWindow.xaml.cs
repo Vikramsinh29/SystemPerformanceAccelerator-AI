@@ -10,6 +10,8 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
+        var temporaryFileService = new TemporaryFileService();
+        var customCleanService = new CustomCleanService(temporaryFileService);
         var largeFileCleanupService = new LargeFileCleanupService();
         var startupItemService = new StartupItemService();
         var systemMonitorService = new SystemMonitorService();
@@ -18,7 +20,8 @@ public partial class MainWindow : Window
             startupItemService);
 
         DataContext = new MainWindowViewModel(
-            new TemporaryFileService(),
+            temporaryFileService,
+            customCleanService,
             new LargeFileService(),
             largeFileCleanupService,
             new DuplicateFileService(),

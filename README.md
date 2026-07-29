@@ -45,6 +45,18 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Locked, unavailable, read-only, and inaccessible file handling
 - Deleted, skipped, and reclaimed-space reporting
 
+### Custom Clean
+
+- Completely read-only preview foundation
+- Uses the existing Cleaner temporary-file scanning service
+- Existing Cleaner category selection only; no new cleanup rules
+- Temporary Files selected by default
+- Category, filename, size, modified date, and location display
+- Preview and Cancel controls only
+- Category deselection prevents preview
+- Safe cancellation and honest scan-error reporting
+- No cleanup, delete, registry-writing, or system-changing action
+
 ### Large File Finder
 
 - Folder or drive selection
@@ -125,7 +137,7 @@ All selectable result tables must use the same application-wide behaviour:
 ## Verified state
 
 - Release build succeeds.
-- xUnit suite: 39 passed, 0 failed.
+- xUnit suite: 43 passed, 0 failed.
 - Cleaner scan and safe cleanup manually verified.
 - Large File Finder scan and Recycle Bin cleanup manually verified.
 - Shared one-click checkbox and double-click row selection manually verified in all selectable tables.
@@ -143,6 +155,9 @@ All selectable result tables must use the same application-wide behaviour:
 - Health Check system-drive, CPU, memory, and startup summary results manually verified.
 - Health Check `Good`, `Attention`, and `Unknown` status presentation, cancellation, and read-only scope manually verified.
 - Cleaner, Large File Finder, Duplicate File Finder, Startup Manager, and System Monitor regression opening checks passed after Sprint 9.
+- Custom Clean category selection, read-only preview, cancellation, summaries, and no-delete scope manually verified.
+- Custom Clean preview results were verified against the existing Cleaner temporary-file scan.
+- Cleaner, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Health Check regression opening checks passed after Sprint 10.
 
 ## Canonical commands
 
