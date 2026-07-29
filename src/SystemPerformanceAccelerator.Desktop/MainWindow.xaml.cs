@@ -11,13 +11,20 @@ public partial class MainWindow : Window
         InitializeComponent();
 
         var largeFileCleanupService = new LargeFileCleanupService();
+        var startupItemService = new StartupItemService();
+        var systemMonitorService = new SystemMonitorService();
+        var healthCheckService = new HealthCheckService(
+            systemMonitorService,
+            startupItemService);
+
         DataContext = new MainWindowViewModel(
             new TemporaryFileService(),
             new LargeFileService(),
             largeFileCleanupService,
             new DuplicateFileService(),
             new DuplicateFileCleanupService(largeFileCleanupService),
-            new StartupItemService(),
-            new SystemMonitorService());
+            startupItemService,
+            systemMonitorService,
+            healthCheckService);
     }
 }

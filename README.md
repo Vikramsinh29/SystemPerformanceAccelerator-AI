@@ -101,6 +101,16 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Safe cancellation and Windows API failure handling
 - No process termination, memory optimization, cleanup, disk/network monitoring, or system-setting changes
 
+### Health Check
+
+- Completely read-only on-demand system health summary
+- System-drive free-space assessment
+- Current CPU and physical-memory assessment using the existing monitor service
+- Startup-item summary using the existing startup service
+- Clear `Good`, `Attention`, and `Unknown` statuses
+- Safe cancellation and honest partial-failure reporting
+- No cleanup, repair, optimization, process termination, registry writing, or system-setting changes
+
 ### Shared WPF table interaction
 
 All selectable result tables must use the same application-wide behaviour:
@@ -115,7 +125,7 @@ All selectable result tables must use the same application-wide behaviour:
 ## Verified state
 
 - Release build succeeds.
-- xUnit suite: 35 passed, 0 failed.
+- xUnit suite: 39 passed, 0 failed.
 - Cleaner scan and safe cleanup manually verified.
 - Large File Finder scan and Recycle Bin cleanup manually verified.
 - Shared one-click checkbox and double-click row selection manually verified in all selectable tables.
@@ -130,6 +140,9 @@ All selectable result tables must use the same application-wide behaviour:
 - Large File Finder remained functional after Sprint 7; its pre-existing narrow-window Folder or Drive field compression is deferred to a dedicated responsive-layout sprint.
 - System Monitor live CPU and physical-memory values, Start/Stop controls, automatic stop on tab change, and read-only scope manually verified.
 - Cleaner, Large File Finder, Duplicate File Finder, and Startup Manager regression opening checks passed after Sprint 8.
+- Health Check system-drive, CPU, memory, and startup summary results manually verified.
+- Health Check `Good`, `Attention`, and `Unknown` status presentation, cancellation, and read-only scope manually verified.
+- Cleaner, Large File Finder, Duplicate File Finder, Startup Manager, and System Monitor regression opening checks passed after Sprint 9.
 
 ## Canonical commands
 
