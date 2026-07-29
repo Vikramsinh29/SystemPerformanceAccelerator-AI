@@ -29,14 +29,17 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ITemporaryFileService temporaryFileService,
         ILargeFileService largeFileService,
         ILargeFileCleanupService largeFileCleanupService,
-        IDuplicateFileService duplicateFileService)
+        IDuplicateFileService duplicateFileService,
+        IDuplicateFileCleanupService duplicateFileCleanupService)
     {
         _temporaryFileService = temporaryFileService;
         LargeFileFinder = new LargeFileFinderViewModel(
             largeFileService,
             largeFileCleanupService);
         LargeFileFinder.PropertyChanged += OnChildModulePropertyChanged;
-        DuplicateFileFinder = new DuplicateFileFinderViewModel(duplicateFileService);
+        DuplicateFileFinder = new DuplicateFileFinderViewModel(
+            duplicateFileService,
+            duplicateFileCleanupService);
         DuplicateFileFinder.PropertyChanged += OnChildModulePropertyChanged;
 
         ScanCommand = new AsyncRelayCommand(ScanAsync, () => !IsBusy);
@@ -78,7 +81,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     {
         ApplicationModule.Cleaner => "Safely review and remove temporary files",
         ApplicationModule.LargeFileFinder => "Find and safely move selected large files to the Windows Recycle Bin",
-        ApplicationModule.DuplicateFileFinder => "Find SHA-256 content-confirmed duplicates without changing files",
+        ApplicationModule.DuplicateFileFinder => "Find content-confirmed duplicates and safely recycle selected copies",
         _ => string.Empty
     };
 

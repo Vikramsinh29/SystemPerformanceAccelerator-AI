@@ -686,9 +686,17 @@
                             </Grid>
                         </StackPanel>
 
-                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Bottom">
-                            <Button Command="{Binding ScanCommand}" Content="Scan" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
-                            <Button Command="{Binding CancelCommand}" Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" />
+                        <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
+                            <TextBlock Text="{Binding SelectionSummary}"
+                                       HorizontalAlignment="Right"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       FontSize="11"
+                                       FontWeight="SemiBold" />
+                            <StackPanel Margin="0,6,0,0" Orientation="Horizontal">
+                                <Button Command="{Binding ScanCommand}" Content="Scan" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
+                                <Button Command="{Binding CancelCommand}" Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" />
+                                <Button Command="{Binding RecycleSelectedCommand}" Content="Recycle Selected" Style="{StaticResource CleanButtonStyle}" MinWidth="145" />
+                            </StackPanel>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -696,6 +704,7 @@
                 <Border Grid.Row="2" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
                     <DataGrid x:Name="DuplicateFilesGrid"
                               ItemsSource="{Binding Results}"
+                              behaviors:DataGridSelectionBehavior.IsEnabled="True"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
                               CanUserAddRows="False"
@@ -705,18 +714,30 @@
                               GridLinesVisibility="None"
                               BorderThickness="0"
                               RowHeaderWidth="0"
-                              SelectionMode="Single"
+                              SelectionMode="Extended"
                               SelectionUnit="FullRow"
                               Background="White"
                               EnableRowVirtualization="True"
                               EnableColumnVirtualization="True">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="GROUP" Binding="{Binding GroupDisplay}" IsReadOnly="True" Width="120" />
-                            <DataGridTextColumn Header="FILE NAME" Binding="{Binding Name}" IsReadOnly="True" Width="2*" MinWidth="180" />
-                            <DataGridTextColumn Header="SIZE" Binding="{Binding SizeDisplay}" IsReadOnly="True" Width="100" />
-                            <DataGridTextColumn Header="GROUP POTENTIAL" Binding="{Binding GroupReclaimableDisplay}" IsReadOnly="True" Width="135" />
-                            <DataGridTextColumn Header="SHA-256" Binding="{Binding HashDisplay}" IsReadOnly="True" Width="120" />
-                            <DataGridTextColumn Header="LOCATION" Binding="{Binding Location}" IsReadOnly="True" Width="3*" MinWidth="250" />
+                            <DataGridTemplateColumn Header="SELECT" Width="72">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  Focusable="False"
+                                                  IsTabStop="False"
+                                                  Cursor="Hand" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="GROUP" Binding="{Binding GroupDisplay}" IsReadOnly="True" Width="115" />
+                            <DataGridTextColumn Header="FILE NAME" Binding="{Binding Name}" IsReadOnly="True" Width="2*" MinWidth="170" />
+                            <DataGridTextColumn Header="SIZE" Binding="{Binding SizeDisplay}" IsReadOnly="True" Width="95" />
+                            <DataGridTextColumn Header="GROUP POTENTIAL" Binding="{Binding GroupReclaimableDisplay}" IsReadOnly="True" Width="130" />
+                            <DataGridTextColumn Header="SHA-256" Binding="{Binding HashDisplay}" IsReadOnly="True" Width="115" />
+                            <DataGridTextColumn Header="LOCATION" Binding="{Binding Location}" IsReadOnly="True" Width="3*" MinWidth="230" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Border>

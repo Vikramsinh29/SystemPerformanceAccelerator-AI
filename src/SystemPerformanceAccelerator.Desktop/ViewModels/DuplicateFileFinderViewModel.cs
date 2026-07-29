@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using Microsoft.Win32;
 using SystemPerformanceAccelerator.Core.Interfaces;
 using SystemPerformanceAccelerator.Core.Models;
@@ -12,28 +13,36 @@ namespace SystemPerformanceAccelerator.Desktop.ViewModels;
 public sealed class DuplicateFileFinderViewModel : INotifyPropertyChanged
 {
     private readonly IDuplicateFileService _duplicateFileService;
+    private readonly IDuplicateFileCleanupService _duplicateFileCleanupService;
     private CancellationTokenSource? _cancellationTokenSource;
+    private IReadOnlyList<DuplicateFileGroup> _confirmedGroups = [];
     private bool _isBusy;
+    private bool _isCorrectingSelection;
     private int _progress;
-    private int _groupsFound;
-    private long _potentialReclaimableBytes;
     private string _selectedFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-    private string _status = "Choose a folder or drive and start a read-only duplicate scan.";
+    private string _status = "Choose a folder or drive, scan for duplicates, then manually select copies to recycle.";
     private string _scanStatus = "Not scanned";
     private string _progressText = "0 files checked";
 
-    public DuplicateFileFinderViewModel(IDuplicateFileService duplicateFileService)
+    public DuplicateFileFinderViewModel(
+        IDuplicateFileService duplicateFileService,
+        IDuplicateFileCleanupService duplicateFileCleanupService)
     {
         _duplicateFileService = duplicateFileService;
+        _duplicateFileCleanupService = duplicateFileCleanupService;
 
         BrowseCommand = new RelayCommand(Browse, () => !IsBusy);
         ScanCommand = new AsyncRelayCommand(ScanAsync, () => !IsBusy);
+        RecycleSelectedCommand = new AsyncRelayCommand(
+            RecycleSelectedAsync,
+            () => !IsBusy && Results.Any(result => result.IsSelected));
         CancelCommand = new RelayCommand(Cancel, () => IsBusy);
     }
 
     public ObservableCollection<DuplicateFileCandidateViewModel> Results { get; } = [];
     public RelayCommand BrowseCommand { get; }
     public AsyncRelayCommand ScanCommand { get; }
+    public AsyncRelayCommand RecycleSelectedCommand { get; }
     public RelayCommand CancelCommand { get; }
 
     public bool IsBusy
@@ -48,6 +57,7 @@ public sealed class DuplicateFileFinderViewModel : INotifyPropertyChanged
 
             BrowseCommand.RaiseCanExecuteChanged();
             ScanCommand.RaiseCanExecuteChanged();
+            RecycleSelectedCommand.RaiseCanExecuteChanged();
             CancelCommand.RaiseCanExecuteChanged();
         }
     }
@@ -82,9 +92,20 @@ public sealed class DuplicateFileFinderViewModel : INotifyPropertyChanged
         private set => SetField(ref _progressText, value);
     }
 
-    public string GroupsFound => _groupsFound.ToString("N0");
+    public string GroupsFound => _confirmedGroups.Count.ToString("N0");
     public string DuplicateFiles => Results.Count.ToString("N0");
-    public string PotentialReclaimableSpace => MainWindowViewModel.FormatBytes(_potentialReclaimableBytes);
+    public string PotentialReclaimableSpace => MainWindowViewModel.FormatBytes(
+        _confirmedGroups.Aggregate(
+            0L,
+            static (total, group) => SaturatingAdd(total, group.ReclaimableBytes)));
+    public string SelectedFiles => Results.Count(result => result.IsSelected).ToString("N0");
+    public string SelectedSpace => MainWindowViewModel.FormatBytes(
+        Results
+            .Where(result => result.IsSelected)
+            .Aggregate(
+                0L,
+                static (total, result) => SaturatingAdd(total, result.Model.SizeBytes)));
+    public string SelectionSummary => $"{SelectedFiles} selected - {SelectedSpace}";
 
     private void Browse()
     {
@@ -112,7 +133,10 @@ public sealed class DuplicateFileFinderViewModel : INotifyPropertyChanged
             return;
         }
 
-        BeginOperation();
+        BeginOperation(
+            "Scanning by file size, then verifying matching sizes with SHA-256. No files will be changed.",
+            "Starting scan...",
+            "Scanning...");
         ClearResults();
 
         try
@@ -136,25 +160,9 @@ public sealed class DuplicateFileFinderViewModel : INotifyPropertyChanged
                 progress,
                 _cancellationTokenSource!.Token);
 
-            var groupNumber = 1;
-            foreach (var group in result.Groups)
-            {
-                foreach (var candidate in group.Files)
-                {
-                    Results.Add(new DuplicateFileCandidateViewModel(
-                        candidate,
-                        groupNumber,
-                        group.Files.Count,
-                        group.ReclaimableBytes));
-                }
-
-                groupNumber++;
-            }
-
-            _groupsFound = result.Groups.Count;
-            _potentialReclaimableBytes = result.PotentialReclaimableBytes;
+            _confirmedGroups = result.Groups;
+            PopulateResults(_confirmedGroups);
             Progress = 100;
-            RefreshSummary();
 
             var elapsed = FormatElapsed(result.Elapsed);
             ProgressText = $"{result.FilesScanned:N0} files checked - {result.FilesHashed:N0} files hashed";
@@ -171,7 +179,7 @@ public sealed class DuplicateFileFinderViewModel : INotifyPropertyChanged
             else
             {
                 Status = result.Errors.Count == 0
-                    ? $"Scan complete. Found {result.Groups.Count:N0} duplicate group(s) containing {result.DuplicateFileCount:N0} files. Results are SHA-256 content-confirmed and read-only."
+                    ? $"Scan complete. Found {result.Groups.Count:N0} duplicate group(s). Select copies manually; at least one confirmed copy must remain in every group."
                     : $"Scan complete with {result.Errors.Count:N0} skipped item(s). Found {result.Groups.Count:N0} confirmed duplicate group(s). First issue: {result.Errors[0]}";
             }
         }
@@ -186,14 +194,185 @@ public sealed class DuplicateFileFinderViewModel : INotifyPropertyChanged
         }
     }
 
-    private void BeginOperation()
+    private async Task RecycleSelectedAsync()
+    {
+        var selected = Results.Where(result => result.IsSelected).ToArray();
+        if (selected.Length == 0)
+        {
+            Status = "Select at least one duplicate copy.";
+            return;
+        }
+
+        var selectedBytes = selected.Aggregate(
+            0L,
+            static (total, result) => SaturatingAdd(total, result.Model.SizeBytes));
+        var answer = MessageBox.Show(
+            $"Move {selected.Length:N0} selected duplicate file(s) ({MainWindowViewModel.FormatBytes(selectedBytes)}) to the Windows Recycle Bin?\n\nAt least one unchanged, content-confirmed copy will be retained in every group. Locked, missing, changed, unsafe, or inaccessible files will be skipped. Recycled files can normally be restored from Windows Recycle Bin.",
+            "Confirm duplicate cleanup",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning,
+            MessageBoxResult.No);
+
+        if (answer != MessageBoxResult.Yes)
+        {
+            Status = "Duplicate cleanup not started.";
+            return;
+        }
+
+        BeginOperation(
+            "Revalidating selected duplicates and moving safe copies to the Windows Recycle Bin...",
+            $"0 of {selected.Length:N0} processed",
+            "Cleaning...");
+
+        try
+        {
+            var progress = new Progress<DuplicateFileCleanupProgress>(value =>
+            {
+                Progress = value.TotalCount == 0
+                    ? 100
+                    : (int)Math.Round(value.ProcessedCount * 100d / value.TotalCount);
+                ProgressText = $"{value.ProcessedCount:N0} of {value.TotalCount:N0} processed";
+            });
+
+            var result = await _duplicateFileCleanupService.CleanAsync(
+                SelectedFolder,
+                _confirmedGroups,
+                selected.Select(item => item.Model).ToArray(),
+                progress,
+                _cancellationTokenSource!.Token);
+
+            ApplyCleanupResult(result.RecycledPaths);
+            if (!result.WasCancelled)
+            {
+                Progress = 100;
+            }
+
+            ProgressText = $"{result.RecycledCount + result.SkippedCount:N0} of {selected.Length:N0} processed";
+            var elapsed = FormatElapsed(result.Elapsed);
+
+            if (result.WasCancelled)
+            {
+                ScanStatus = $"Cleanup cancelled - {elapsed}";
+                Status = $"Cleanup cancelled: {result.RecycledCount:N0} file(s) moved to the Recycle Bin, {MainWindowViewModel.FormatBytes(result.ReclaimedBytes)} reclaimed, and remaining files left untouched.";
+            }
+            else if (result.CompletedWithoutErrors)
+            {
+                ScanStatus = $"Cleanup completed - {elapsed}";
+                Status = $"Cleanup complete: {result.RecycledCount:N0} file(s) moved to the Recycle Bin and {MainWindowViewModel.FormatBytes(result.ReclaimedBytes)} reclaimed. Results were refreshed.";
+            }
+            else
+            {
+                ScanStatus = $"Cleanup completed - {elapsed} - {result.SkippedCount:N0} skipped";
+                var firstIssue = result.Errors.Count > 0
+                    ? $" First issue: {result.Errors[0]}"
+                    : string.Empty;
+                Status = $"Cleanup finished: {result.RecycledCount:N0} moved to the Recycle Bin, {result.SkippedCount:N0} skipped, and {MainWindowViewModel.FormatBytes(result.ReclaimedBytes)} reclaimed. Results were refreshed.{firstIssue}";
+            }
+        }
+        finally
+        {
+            EndOperation();
+        }
+    }
+
+    private void OnCandidatePropertyChanged(object? sender, PropertyChangedEventArgs args)
+    {
+        if (args.PropertyName != nameof(DuplicateFileCandidateViewModel.IsSelected) ||
+            sender is not DuplicateFileCandidateViewModel changedItem)
+        {
+            return;
+        }
+
+        if (!_isCorrectingSelection &&
+            changedItem.IsSelected &&
+            Results
+                .Where(item => string.Equals(item.GroupKey, changedItem.GroupKey, StringComparison.Ordinal))
+                .All(item => item.IsSelected))
+        {
+            _isCorrectingSelection = true;
+            changedItem.IsSelected = false;
+            _isCorrectingSelection = false;
+            Status = $"{changedItem.GroupDisplay}: at least one confirmed copy must remain. The final copy was not selected.";
+        }
+
+        RefreshSelectionSummary();
+    }
+
+    private void ApplyCleanupResult(IReadOnlyCollection<string> recycledPaths)
+    {
+        var recycledPathSet = recycledPaths.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        _confirmedGroups = _confirmedGroups
+            .Select(group =>
+            {
+                var remainingFiles = group.Files
+                    .Where(candidate => !recycledPathSet.Contains(candidate.FullPath))
+                    .ToArray();
+
+                return remainingFiles.Length > 1
+                    ? new DuplicateFileGroup(
+                        group.Sha256Hash,
+                        group.SizeBytes,
+                        remainingFiles)
+                    : null;
+            })
+            .Where(group => group is not null)
+            .Cast<DuplicateFileGroup>()
+            .ToArray();
+
+        PopulateResults(_confirmedGroups);
+    }
+
+    private void PopulateResults(IReadOnlyCollection<DuplicateFileGroup> groups)
+    {
+        DetachResultHandlers();
+        Results.Clear();
+
+        var groupNumber = 1;
+        foreach (var group in groups)
+        {
+            foreach (var candidate in group.Files)
+            {
+                var viewModel = new DuplicateFileCandidateViewModel(
+                    candidate,
+                    groupNumber,
+                    group.Files.Count,
+                    group.ReclaimableBytes);
+                viewModel.PropertyChanged += OnCandidatePropertyChanged;
+                Results.Add(viewModel);
+            }
+
+            groupNumber++;
+        }
+
+        RefreshSummary();
+        RefreshSelectionSummary();
+    }
+
+    private void ClearResults()
+    {
+        DetachResultHandlers();
+        Results.Clear();
+        _confirmedGroups = [];
+        RefreshSummary();
+        RefreshSelectionSummary();
+    }
+
+    private void DetachResultHandlers()
+    {
+        foreach (var result in Results)
+        {
+            result.PropertyChanged -= OnCandidatePropertyChanged;
+        }
+    }
+
+    private void BeginOperation(string status, string progressText, string scanStatus)
     {
         _cancellationTokenSource?.Dispose();
         _cancellationTokenSource = new CancellationTokenSource();
         Progress = 0;
-        ProgressText = "Starting scan...";
-        ScanStatus = "Scanning...";
-        Status = "Scanning by file size, then verifying matching sizes with SHA-256. No files will be changed.";
+        ProgressText = progressText;
+        ScanStatus = scanStatus;
+        Status = status;
         IsBusy = true;
     }
 
@@ -204,14 +383,6 @@ public sealed class DuplicateFileFinderViewModel : INotifyPropertyChanged
         _cancellationTokenSource = null;
     }
 
-    private void ClearResults()
-    {
-        Results.Clear();
-        _groupsFound = 0;
-        _potentialReclaimableBytes = 0;
-        RefreshSummary();
-    }
-
     private void Cancel() => _cancellationTokenSource?.Cancel();
 
     private void RefreshSummary()
@@ -220,6 +391,17 @@ public sealed class DuplicateFileFinderViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(DuplicateFiles));
         OnPropertyChanged(nameof(PotentialReclaimableSpace));
     }
+
+    private void RefreshSelectionSummary()
+    {
+        OnPropertyChanged(nameof(SelectedFiles));
+        OnPropertyChanged(nameof(SelectedSpace));
+        OnPropertyChanged(nameof(SelectionSummary));
+        RecycleSelectedCommand.RaiseCanExecuteChanged();
+    }
+
+    private static long SaturatingAdd(long left, long right) =>
+        right > long.MaxValue - left ? long.MaxValue : left + right;
 
     private static string FormatElapsed(TimeSpan elapsed)
     {

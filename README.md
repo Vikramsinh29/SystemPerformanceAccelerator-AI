@@ -60,14 +60,21 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 ### Duplicate File Finder
 
 - Folder or drive selection
-- Recursive, completely read-only scanning
+- Recursive read-only scanning
 - Files grouped by size before hashing
 - SHA-256 hashing only for same-sized candidate files
 - Duplicate groups confirmed by matching file content, never by filename
 - Progress, cancellation, and honest skipped-item reporting
 - Safe handling of inaccessible folders, locked files, reparse points, scan errors, and files changed during scanning
-- Duplicate-group, confirmed-file, and potential-reclaimable-space summaries
-- No selection, deletion, Recycle Bin, or cleanup operation
+- Duplicate-group, confirmed-file, potential-reclaimable-space, selected-file, and selected-size summaries
+- Manual selection only; nothing is selected automatically
+- At least one verified copy must remain in every duplicate group
+- Confirmation before cleanup
+- Selected duplicate copies move to the Windows Recycle Bin
+- Size, SHA-256 hash, modified time, scan scope, and path safety are revalidated before cleanup
+- Locked, missing, changed, inaccessible, unsafe, outside-scope, and reparse-point files are skipped and reported
+- Deleted, skipped, and reclaimed-space totals
+- Results refresh after cleanup
 - Structured completion statistics with truncated status text and a full-message tooltip
 
 ### Shared WPF table interaction
@@ -78,20 +85,21 @@ All selectable result tables must use the same application-wide behaviour:
 - One click on a row highlights it.
 - Double-clicking a row toggles its checkbox.
 - Interactive controls inside a row must not cause accidental row toggling.
-- Cleaner and Large File Finder must behave identically.
+- Cleaner, Large File Finder, and Duplicate File Finder must behave identically.
 - Shared behaviour belongs in a reusable WPF behaviour/style, not duplicated per grid.
 
 ## Verified state
 
 - Release build succeeds.
-- xUnit suite: 17 passed, 0 failed.
+- xUnit suite: 23 passed, 0 failed.
 - Cleaner scan and safe cleanup manually verified.
 - Large File Finder scan and Recycle Bin cleanup manually verified.
-- Shared one-click checkbox and double-click row selection manually verified in both selectable tables.
-- Duplicate File Finder content-confirmed, read-only scanning manually verified.
-- Locked/in-use files are skipped and reported without stopping the scan.
+- Shared one-click checkbox and double-click row selection manually verified in all selectable tables.
+- Duplicate File Finder content-confirmed scanning manually verified.
+- Duplicate cleanup manual selection, confirmation, final-copy protection, Recycle Bin movement, reclaimed-space reporting, and result refresh manually verified.
+- Locked/in-use duplicate files are skipped without crashing or removing the remaining copy.
 - Duplicate Finder status layout, full-message tooltip, and maximize/restore behaviour manually verified.
-- Cleaner and Large File Finder regression opening checks passed after Sprint 5.
+- Cleaner and Large File Finder regression opening checks passed after Sprint 6.
 
 ## Canonical commands
 
@@ -242,17 +250,18 @@ dotnet run --project `
 
 For shared table-selection changes, verify every row below before commit:
 
-| Behaviour | Cleaner | Large File Finder |
-|---|---:|---:|
-| Single click highlights row | Required | Required |
-| First checkbox click toggles | Required | Required |
-| Double-click row toggles selection | Required | Required |
-| Double-click again unchecks | Required | Required |
-| Action button updates immediately | Required | Required |
-| Scan still works | Required | Required |
-| Cleanup still works safely | Required | Required |
+| Behaviour | Cleaner | Large File Finder | Duplicate File Finder |
+|---|---:|---:|---:|
+| Single click highlights row | Required | Required | Required |
+| First checkbox click toggles | Required | Required | Required |
+| Double-click row toggles selection | Required | Required | Required |
+| Double-click again unchecks | Required | Required | Required |
+| Action button updates immediately | Required | Required | Required |
+| Scan still works | Required | Required | Required |
+| Cleanup still works safely | Required | Required | Required |
+| Final copy remains protected | N/A | N/A | Required |
 
-A fix is incomplete when it works in only one table.
+A fix is incomplete when it works in only one affected table.
 
 ### 7. Packaging and repository safety
 
@@ -282,7 +291,10 @@ This rule is mandatory. Repeated blind patches are not acceptable.
 - Large-file cleanup only acts on files returned from the selected scan scope.
 - Reparse points and protected paths are rejected.
 - Large files are moved to the Windows Recycle Bin instead of permanently deleted.
-- Missing, locked, inaccessible, read-only, and protected files are skipped and reported.
+- Duplicate cleanup only acts on manually selected, content-confirmed files returned from the selected scan scope.
+- Duplicate cleanup independently revalidates size, SHA-256 hash, modified time, scope, and path safety before recycling.
+- At least one verified copy must remain in every duplicate group.
+- Missing, locked, changed, inaccessible, read-only, unsafe, and protected files are skipped and reported.
 - No cloud services or telemetry are used.
 
 ## Development rules for future AI sessions
@@ -299,11 +311,11 @@ This rule is mandatory. Repeated blind patches are not acceptable.
 
 ## Current milestone
 
-Sprint 4 — Safe Large File Cleanup and unified application-wide WPF table selection.
+Sprint 6 — Safe Duplicate Cleanup.
 
 ## Next milestone
 
-Select one narrow functional module or reliability improvement only after Sprint 4 is committed and the working tree is clean.
+Select one narrow functional module or reliability improvement only after Sprint 6 is committed and the working tree is clean.
 
 ## Compact AI handoff
 

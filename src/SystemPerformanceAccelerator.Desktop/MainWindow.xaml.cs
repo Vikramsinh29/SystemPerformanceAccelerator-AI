@@ -9,10 +9,13 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+
+        var largeFileCleanupService = new LargeFileCleanupService();
         DataContext = new MainWindowViewModel(
             new TemporaryFileService(),
             new LargeFileService(),
-            new LargeFileCleanupService(),
-            new DuplicateFileService());
+            largeFileCleanupService,
+            new DuplicateFileService(),
+            new DuplicateFileCleanupService(largeFileCleanupService));
     }
 }
