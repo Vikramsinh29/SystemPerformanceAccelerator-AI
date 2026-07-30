@@ -43,6 +43,26 @@ public sealed class TemporaryFileServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task CleanAsync_SkipsFileChangedAfterScan()
+    {
+        var file = Path.Combine(_root, "changed-after-scan.tmp");
+        await File.WriteAllTextAsync(file, "original temporary content");
+        var info = new FileInfo(file);
+        var candidate = new CleanupCandidate(file, info.Length, info.LastWriteTimeUtc);
+        var service = new TemporaryFileService(_root);
+
+        await File.AppendAllTextAsync(file, " changed");
+
+        var result = await service.CleanAsync([candidate]);
+
+        Assert.True(File.Exists(file));
+        Assert.Equal(0, result.DeletedCount);
+        Assert.Equal(0, result.ReclaimedBytes);
+        var error = Assert.Single(result.Errors);
+        Assert.Contains("changed after the scan", error.ToLowerInvariant());
+    }
+
+    [Fact]
     public async Task CleanAsync_BlocksFileOutsideApprovedRoot()
     {
         var outside = Path.Combine(Path.GetTempPath(), $"outside-{Guid.NewGuid():N}.tmp");

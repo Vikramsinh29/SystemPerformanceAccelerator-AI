@@ -29,15 +29,24 @@ public sealed class LargeFileCleanupService : ILargeFileCleanupService
         StringComparer.OrdinalIgnoreCase);
 
     private readonly Action<string> _moveToRecycleBin;
+    private readonly Func<string, FileAttributes> _getAttributes;
 
     public LargeFileCleanupService()
-        : this(MoveToRecycleBin)
+        : this(MoveToRecycleBin, File.GetAttributes)
     {
     }
 
     public LargeFileCleanupService(Action<string> moveToRecycleBin)
+        : this(moveToRecycleBin, File.GetAttributes)
+    {
+    }
+
+    public LargeFileCleanupService(
+        Action<string> moveToRecycleBin,
+        Func<string, FileAttributes> getAttributes)
     {
         _moveToRecycleBin = moveToRecycleBin ?? throw new ArgumentNullException(nameof(moveToRecycleBin));
+        _getAttributes = getAttributes ?? throw new ArgumentNullException(nameof(getAttributes));
     }
 
     public Task<LargeFileCleanupResult> CleanAsync(
@@ -95,26 +104,41 @@ public sealed class LargeFileCleanupService : ILargeFileCleanupService
                     continue;
                 }
 
+                if (PathContainsReparsePoint(fullPath, approvedRoot))
+                {
+                    errors.Add($"Skipped '{candidate.Name}': the file path contains a reparse point. Run the scan again.");
+                    continue;
+                }
+
                 var fileInfo = new FileInfo(fullPath);
-                if ((fileInfo.Attributes & FileAttributes.ReparsePoint) != 0)
+                var attributes = _getAttributes(fullPath);
+                if ((attributes & FileAttributes.ReparsePoint) != 0)
                 {
                     errors.Add($"Skipped '{candidate.Name}': reparse-point files are protected.");
                     continue;
                 }
 
-                if ((fileInfo.Attributes & FileAttributes.System) != 0)
+                if ((attributes & FileAttributes.System) != 0)
                 {
                     errors.Add($"Skipped '{candidate.Name}': system files are protected.");
                     continue;
                 }
 
-                if ((fileInfo.Attributes & FileAttributes.ReadOnly) != 0)
+                if ((attributes & FileAttributes.ReadOnly) != 0)
                 {
                     errors.Add($"Skipped '{candidate.Name}': the file is read-only.");
                     continue;
                 }
 
                 var currentSize = fileInfo.Length;
+                var currentLastWriteTimeUtc = fileInfo.LastWriteTimeUtc;
+                if (currentSize != candidate.SizeBytes ||
+                    currentLastWriteTimeUtc != candidate.LastWriteTimeUtc)
+                {
+                    errors.Add($"Skipped '{candidate.Name}': the file changed after the scan. Run the scan again.");
+                    continue;
+                }
+
                 _moveToRecycleBin(fullPath);
 
                 if (File.Exists(fullPath))
@@ -149,7 +173,7 @@ public sealed class LargeFileCleanupService : ILargeFileCleanupService
             stopwatch.Elapsed);
     }
 
-    private static bool TryNormalizeDirectory(
+    private bool TryNormalizeDirectory(
         string path,
         out string normalizedPath,
         out string error)
@@ -176,6 +200,20 @@ public sealed class LargeFileCleanupService : ILargeFileCleanupService
         if (!Directory.Exists(normalizedPath))
         {
             error = $"The scanned location no longer exists: {normalizedPath}";
+            return false;
+        }
+
+        try
+        {
+            if ((_getAttributes(normalizedPath) & FileAttributes.ReparsePoint) != 0)
+            {
+                error = "The scanned location is now a reparse point. Run the scan again before cleanup.";
+                return false;
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException)
+        {
+            error = $"The scanned location could not be verified: {ex.Message}";
             return false;
         }
 
@@ -221,6 +259,37 @@ public sealed class LargeFileCleanupService : ILargeFileCleanupService
 
         reason = string.Empty;
         return false;
+    }
+
+    private bool PathContainsReparsePoint(string fullPath, string approvedRoot)
+    {
+        var currentDirectory = Path.GetDirectoryName(fullPath);
+        var normalizedRoot = Path.TrimEndingDirectorySeparator(approvedRoot);
+
+        while (!string.IsNullOrWhiteSpace(currentDirectory))
+        {
+            if ((_getAttributes(currentDirectory) & FileAttributes.ReparsePoint) != 0)
+            {
+                return true;
+            }
+
+            var normalizedCurrent = Path.TrimEndingDirectorySeparator(currentDirectory);
+            if (string.Equals(normalizedCurrent, normalizedRoot, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            var parent = Path.GetDirectoryName(currentDirectory);
+            if (string.IsNullOrWhiteSpace(parent) ||
+                string.Equals(parent, currentDirectory, StringComparison.OrdinalIgnoreCase))
+            {
+                break;
+            }
+
+            currentDirectory = parent;
+        }
+
+        return true;
     }
 
     private static bool IsPathInsideDirectory(string fullPath, string directoryPath)

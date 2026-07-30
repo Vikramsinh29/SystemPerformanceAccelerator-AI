@@ -28,6 +28,71 @@ public sealed class LargeFileCleanupServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task CleanAsync_SkipsFileChangedAfterScan()
+    {
+        var filePath = Path.Combine(_root, "changed-after-scan.bin");
+        await File.WriteAllBytesAsync(filePath, new byte[512]);
+        var candidate = CreateCandidate(filePath);
+        var recycleCalled = false;
+        var service = new LargeFileCleanupService(_ => recycleCalled = true);
+
+        await File.AppendAllTextAsync(filePath, "changed");
+
+        var result = await service.CleanAsync(_root, [candidate]);
+
+        Assert.False(recycleCalled);
+        Assert.True(File.Exists(filePath));
+        Assert.Empty(result.RecycledPaths);
+        Assert.Equal(0, result.ReclaimedBytes);
+        var error = Assert.Single(result.Errors);
+        Assert.Contains("changed after the scan", error.ToLowerInvariant());
+    }
+
+    [Fact]
+    public async Task CleanAsync_BlocksApprovedRootThatBecameReparsePoint()
+    {
+        var filePath = Path.Combine(_root, "root-reparse.bin");
+        await File.WriteAllBytesAsync(filePath, new byte[256]);
+        var recycleCalled = false;
+        var service = new LargeFileCleanupService(
+            _ => recycleCalled = true,
+            path => PathsEqual(path, _root)
+                ? File.GetAttributes(path) | FileAttributes.ReparsePoint
+                : File.GetAttributes(path));
+
+        var result = await service.CleanAsync(_root, [CreateCandidate(filePath)]);
+
+        Assert.False(recycleCalled);
+        Assert.True(File.Exists(filePath));
+        Assert.Empty(result.RecycledPaths);
+        var error = Assert.Single(result.Errors);
+        Assert.Contains("scanned location is now a reparse point", error.ToLowerInvariant());
+    }
+
+    [Fact]
+    public async Task CleanAsync_BlocksPathContainingParentReparsePoint()
+    {
+        var reparseParent = Directory.CreateDirectory(
+            Path.Combine(_root, "parent-reparse")).FullName;
+        var filePath = Path.Combine(reparseParent, "protected.bin");
+        await File.WriteAllBytesAsync(filePath, new byte[256]);
+        var recycleCalled = false;
+        var service = new LargeFileCleanupService(
+            _ => recycleCalled = true,
+            path => PathsEqual(path, reparseParent)
+                ? File.GetAttributes(path) | FileAttributes.ReparsePoint
+                : File.GetAttributes(path));
+
+        var result = await service.CleanAsync(_root, [CreateCandidate(filePath)]);
+
+        Assert.False(recycleCalled);
+        Assert.True(File.Exists(filePath));
+        Assert.Empty(result.RecycledPaths);
+        var error = Assert.Single(result.Errors);
+        Assert.Contains("path contains a reparse point", error.ToLowerInvariant());
+    }
+
+    [Fact]
     public async Task CleanAsync_BlocksFilesOutsideApprovedScanRoot()
     {
         var outsideRoot = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), $"spa-outside-{Guid.NewGuid():N}")).FullName;
@@ -85,6 +150,12 @@ public sealed class LargeFileCleanupServiceTests : IDisposable
         var error = Assert.Single(result.Errors);
         Assert.Contains("in use", error.ToLowerInvariant());
     }
+
+    private static bool PathsEqual(string left, string right) =>
+        string.Equals(
+            Path.TrimEndingDirectorySeparator(Path.GetFullPath(left)),
+            Path.TrimEndingDirectorySeparator(Path.GetFullPath(right)),
+            StringComparison.OrdinalIgnoreCase);
 
     private static LargeFileCandidate CreateCandidate(string path)
     {

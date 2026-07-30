@@ -118,6 +118,14 @@ public sealed class TemporaryFileService : ITemporaryFileService
                 }
 
                 var actualLength = info.Length;
+                var actualLastWriteTimeUtc = info.LastWriteTimeUtc;
+                if (actualLength != candidate.SizeBytes ||
+                    actualLastWriteTimeUtc != candidate.LastWriteTimeUtc)
+                {
+                    errors.Add($"Skipped '{candidate.FullPath}': the file changed after the scan. Run the scan again.");
+                    continue;
+                }
+
                 DeleteWithSingleRetry(fullPath, cancellationToken);
 
                 if (File.Exists(fullPath))

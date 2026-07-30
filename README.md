@@ -280,6 +280,20 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Existing commands, view-model bindings, converters, table schemas, services, safety rules, and module behaviour are unchanged
 - No new feature, cleanup rule, scan rule, scheduling rule, monitoring rule, settings rule, licensing rule, or system-changing behaviour was added
 
+### Functional regression and cleanup safety audit
+
+- Cleaner revalidates current file size and last-modified time against the reviewed scan result immediately before permanent deletion
+- Cleaner skips files changed after scanning and requires a fresh scan before deletion
+- Large File Finder revalidates current file size and last-modified time against the reviewed scan result immediately before Recycle Bin cleanup
+- Large File Finder skips files changed after scanning and requires a fresh scan before recycling
+- Large File Finder rejects a scanned root that becomes a reparse point before cleanup
+- Large File Finder rejects candidate paths containing parent-directory reparse points
+- Shared DataGrid row and cell backgrounds remain theme-aware, preventing light table bodies with unreadable light text in Dark mode
+- Cleaner and Large File Finder stale-result protection were manually verified with controlled files, including successful processing only after a fresh scan
+- Custom Clean, Duplicate File Finder, Health Check, Auto Clean Schedule, Startup Manager, System Monitor, Settings, feature access, confirmation, cancellation, persistence, and read-only boundaries were regression verified
+- Auto Clean Schedule remains planning-only; Startup Manager and System Monitor remain read-only
+- No background service, automatic cleanup, registry writing, startup modification, process termination, payment, subscription, cloud service, or unrelated system-changing behaviour was added
+
 ### Responsive layout
 
 - Large File Finder Folder or Drive field remains usable at restored and narrow widths
@@ -406,8 +420,20 @@ All selectable result tables must use the same application-wide behaviour:
 - Action-button icons, text spacing, disabled states, dropdowns, tables, status panels, and module navigation were verified at normal, maximized, and resized window sizes.
 - Auto Clean overview/editor actions, large-file scan and safe deletion, duplicate scan/grouping/recycling, Startup Manager read-only scope, System Monitor Start/Stop, and Settings Restore Defaults/Save remained functional.
 - All 47 existing command bindings and all 336 existing view-model bindings were preserved; three ElementName bindings were added only for visual empty-state presentation.
-- The verified test baseline entering Sprint 25 is 103 passed, 0 failed; the final Sprint 25 Release build and full xUnit gate must pass before commit.
+- Release build succeeded and the xUnit suite remained at 103 passed, 0 failed after Sprint 25.
 - No command, binding, converter, service, safety rule, cleanup rule, scan rule, scheduling rule, monitoring rule, settings rule, licensing rule, or system-modification behaviour changed.
+- Sprint 26 completed a full functional regression and safety audit across Cleaner, Health Check, Custom Clean, Auto Clean Schedule, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, Settings, and feature-access behaviour.
+- Cleaner and Large File Finder now skip stale scan results when current size or last-modified time differs from the reviewed candidate and require a fresh scan before cleanup.
+- Controlled manual tests verified that changed Cleaner and Large File Finder files remained untouched, reported the stale-result condition honestly, and were processed only after a fresh scan.
+- Large File Finder scanned-root and parent-directory reparse-point protections are covered by focused automated regression tests.
+- The shared DataGrid style now sets a theme-aware row background and transparent cell background; Cleaner and Large File Finder table bodies were manually verified readable in both Dark and Light modes.
+- Confirmation-No, confirmation-Yes, cancellation, empty, success, warning, failure, and partial-result paths were regression checked where applicable.
+- Duplicate Finder retained its content verification, confirmation, Recycle Bin cleanup, and at-least-one-copy protection.
+- Auto Clean Schedule remained planning-only with no unattended execution, Windows Task Scheduler integration, or background service.
+- Startup Manager and System Monitor remained strictly read-only with no startup modification, registry writing, process termination, or optimization action.
+- Settings theme switching, Save, Restore Defaults, restart persistence, mandatory cleanup confirmation, and local-only storage remained functional.
+- Release build succeeded and the xUnit suite increased to 107 passed, 0 failed after Sprint 26.
+- Sprint 26 changed only the two cleanup services, their focused tests, the shared Fluent DataGrid style, and this README.
 - System Monitor live CPU and physical-memory values, Start/Stop controls, automatic stop on tab change, and read-only scope manually verified.
 - Cleaner, Large File Finder, Duplicate File Finder, and Startup Manager regression opening checks passed after Sprint 8.
 - Health Check system-drive, CPU, memory, and startup summary results manually verified.
@@ -636,11 +662,15 @@ This rule is mandatory. Repeated blind patches are not acceptable.
 
 ## Current milestone
 
-Sprint 25 — Full Application Visual Consistency Audit.
+Sprint 26 — Full Functional Regression and Safety Audit.
 
 ## Next milestone
 
-Sprint 26 — Full Functional Regression and Safety Audit, only after Sprint 25 is committed, pushed, and the working tree is clean.
+Sprint 27 — Bulk Selection Toggle, only after Sprint 26 is committed, pushed, and the working tree is clean.
+
+- Add one reusable tri-state Select All / Deselect All control to Cleaner, Custom Clean, Large File Finder, and Duplicate File Finder.
+- Preserve manual review, confirmation, current safety boundaries, and Duplicate Finder's at-least-one-confirmed-copy rule.
+- Windows Release Readiness follows after this requested usability sprint.
 
 ## Compact AI handoff
 
