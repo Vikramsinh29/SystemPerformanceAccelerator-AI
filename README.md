@@ -268,6 +268,18 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Existing commands, bindings, table schemas, scheduling plans, scan rules, cleanup safeguards, monitoring behaviour, settings persistence, and feature-access rules are unchanged
 - No automatic cleanup execution, Windows Task Scheduler integration, background service, startup-item modification, process termination, registry modification, or new system-changing behaviour was added
 
+### Full application visual consistency
+
+- Shared module hero styles standardize 52 × 52 hero icons, title typography, description typography, padding, and spacing
+- Shared summary-metric styles standardize 40 × 40 icon containers, glyph alignment, and 24 px primary metric values
+- Auto Clean Schedule card geometry is aligned with the shared premium card radius
+- Large File Finder, Duplicate File Finder, and Startup Manager use the shared Fluent DataGrid presentation
+- Premium visual-only empty states appear before those three result tables contain data
+- Schedule, scan, cleanup, monitoring, Restore Defaults, Save Settings, and related actions use consistent existing MDL2 icons
+- Button icon placement, disabled-state readability, table presentation, status-panel geometry, and summary-card hierarchy were checked across the application
+- Existing commands, view-model bindings, converters, table schemas, services, safety rules, and module behaviour are unchanged
+- No new feature, cleanup rule, scan rule, scheduling rule, monitoring rule, settings rule, licensing rule, or system-changing behaviour was added
+
 ### Responsive layout
 
 - Large File Finder Folder or Drive field remains usable at restored and narrow widths
@@ -385,8 +397,17 @@ All selectable result tables must use the same application-wide behaviour:
 - Settings theme selection, immediate Light/Dark updates, Large File Finder default, monitor refresh interval, mandatory confirmation, Restore Defaults, Save Settings, persistence, and local settings path remained functional.
 - All six modules were manually verified in Light and Dark themes and at normal, maximized, and resized window sizes, including shared status-panel dimensions, icon alignment, dropdowns, disabled controls, tables, and action layouts.
 - Exact pre-existing command and binding sets were preserved for every migrated module, and the Large File Finder, Duplicate File Finder, and Startup Manager table schemas remained unchanged.
-- The verified test baseline entering Sprint 24 is 103 passed, 0 failed; the final Sprint 24 Release build and full xUnit gate must pass before commit.
+- Release build succeeded and the xUnit suite remained at 103 passed, 0 failed after Sprint 24.
 - No feature, service, command, scheduling rule, scan rule, cleanup rule, monitoring rule, settings-persistence rule, licensing rule, or system-modification behaviour changed.
+- The complete Sprint 25 visual-consistency matrix was manually verified across Cleaner, Health Check, Custom Clean, Auto Clean Schedule, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Settings.
+- Module hero icon dimensions, title typography, description typography, padding, and alignment were verified in Light and Dark themes.
+- Summary-card icon dimensions, glyph alignment, primary metric typography, card geometry, and colour semantics were verified across modules.
+- Large File Finder, Duplicate File Finder, and Startup Manager shared DataGrid presentation, five-column schemas, empty states, and populated result states were manually verified.
+- Action-button icons, text spacing, disabled states, dropdowns, tables, status panels, and module navigation were verified at normal, maximized, and resized window sizes.
+- Auto Clean overview/editor actions, large-file scan and safe deletion, duplicate scan/grouping/recycling, Startup Manager read-only scope, System Monitor Start/Stop, and Settings Restore Defaults/Save remained functional.
+- All 47 existing command bindings and all 336 existing view-model bindings were preserved; three ElementName bindings were added only for visual empty-state presentation.
+- The verified test baseline entering Sprint 25 is 103 passed, 0 failed; the final Sprint 25 Release build and full xUnit gate must pass before commit.
+- No command, binding, converter, service, safety rule, cleanup rule, scan rule, scheduling rule, monitoring rule, settings rule, licensing rule, or system-modification behaviour changed.
 - System Monitor live CPU and physical-memory values, Start/Stop controls, automatic stop on tab change, and read-only scope manually verified.
 - Cleaner, Large File Finder, Duplicate File Finder, and Startup Manager regression opening checks passed after Sprint 8.
 - Health Check system-drive, CPU, memory, and startup summary results manually verified.
@@ -615,11 +636,11 @@ This rule is mandatory. Repeated blind patches are not acceptable.
 
 ## Current milestone
 
-Sprint 24 — Remaining Modules Premium UI Migration.
+Sprint 25 — Full Application Visual Consistency Audit.
 
 ## Next milestone
 
-Sprint 25 — Full Application Visual Consistency Audit, only after Sprint 24 is committed, pushed, and the working tree is clean.
+Sprint 26 — Full Functional Regression and Safety Audit, only after Sprint 25 is committed, pushed, and the working tree is clean.
 
 ## Compact AI handoff
 
