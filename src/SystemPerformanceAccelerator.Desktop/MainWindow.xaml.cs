@@ -1,4 +1,6 @@
 using System.Windows;
+using System.Windows.Input;
+
 using SystemPerformanceAccelerator.Desktop.Services;
 using SystemPerformanceAccelerator.Desktop.ViewModels;
 using SystemPerformanceAccelerator.Infrastructure.Configuration;
@@ -15,6 +17,7 @@ public partial class MainWindow : Window
         ThemeManager.Apply(settingsLoadResult.Settings.Theme);
 
         InitializeComponent();
+        UpdateMaximizeRestoreButton();
 
         var temporaryFileService = new TemporaryFileService();
         var customCleanService = new CustomCleanService(temporaryFileService);
@@ -55,5 +58,52 @@ public partial class MainWindow : Window
             applicationSettingsService,
             settingsLoadResult,
             featureAccessGuard);
+    }
+
+    private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+    {
+        SystemCommands.MinimizeWindow(this);
+    }
+
+    private void MaximizeRestoreButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (WindowState == WindowState.Maximized)
+        {
+            SystemCommands.RestoreWindow(this);
+        }
+        else
+        {
+            SystemCommands.MaximizeWindow(this);
+        }
+    }
+
+    private void CloseButton_Click(object sender, RoutedEventArgs e)
+    {
+        SystemCommands.CloseWindow(this);
+    }
+
+    private void Window_StateChanged(object? sender, EventArgs e)
+    {
+        UpdateMaximizeRestoreButton();
+    }
+
+    private void TitleBar_MouseRightButtonUp(
+        object sender,
+        MouseButtonEventArgs e)
+    {
+        var screenPoint = PointToScreen(e.GetPosition(this));
+        SystemCommands.ShowSystemMenu(this, screenPoint);
+    }
+
+    private void UpdateMaximizeRestoreButton()
+    {
+        if (!IsInitialized || MaximizeRestoreButton is null)
+        {
+            return;
+        }
+
+        var isMaximized = WindowState == WindowState.Maximized;
+        MaximizeRestoreButton.Content = isMaximized ? "\uE923" : "\uE922";
+        MaximizeRestoreButton.ToolTip = isMaximized ? "Restore down" : "Maximize";
     }
 }

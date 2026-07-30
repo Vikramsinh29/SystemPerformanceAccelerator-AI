@@ -23,6 +23,15 @@
     <SolidColorBrush x:Key="ProgressTrackBrush" presentationOptions:Freeze="False" Color="#EAECF0" />
     <SolidColorBrush x:Key="MetaTextBrush" presentationOptions:Freeze="False" Color="#475467" />
 
+    <SolidColorBrush x:Key="TitleBarBrush" presentationOptions:Freeze="False" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="TitleBarForegroundBrush" presentationOptions:Freeze="False" Color="#1B1F2A" />
+    <SolidColorBrush x:Key="TitleBarMutedTextBrush" presentationOptions:Freeze="False" Color="#667085" />
+    <SolidColorBrush x:Key="TitleBarBorderBrush" presentationOptions:Freeze="False" Color="#E3E7ED" />
+    <SolidColorBrush x:Key="CaptionButtonHoverBrush" presentationOptions:Freeze="False" Color="#F1F3F5" />
+    <SolidColorBrush x:Key="CaptionButtonPressedBrush" presentationOptions:Freeze="False" Color="#E4E7EB" />
+    <SolidColorBrush x:Key="CaptionCloseHoverBrush" presentationOptions:Freeze="False" Color="#C42B1C" />
+    <SolidColorBrush x:Key="CaptionClosePressedBrush" presentationOptions:Freeze="False" Color="#A4262C" />
+
     <SolidColorBrush x:Key="AccentBrush" presentationOptions:Freeze="False" Color="#0F6CBD" />
     <SolidColorBrush x:Key="AccentHoverBrush" presentationOptions:Freeze="False" Color="#115EA3" />
     <SolidColorBrush x:Key="AccentPressedBrush" presentationOptions:Freeze="False" Color="#0C3B5E" />
@@ -35,13 +44,13 @@
     <SolidColorBrush x:Key="DangerBrush" presentationOptions:Freeze="False" Color="#C42B1C" />
     <SolidColorBrush x:Key="DangerSoftBrush" presentationOptions:Freeze="False" Color="#FDECEC" />
 
-    <SolidColorBrush x:Key="SidebarBrush" presentationOptions:Freeze="False" Color="#111827" />
-    <SolidColorBrush x:Key="SidebarHoverBrush" presentationOptions:Freeze="False" Color="#1F2937" />
+    <SolidColorBrush x:Key="SidebarBrush" presentationOptions:Freeze="False" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="SidebarHoverBrush" presentationOptions:Freeze="False" Color="#F2F4F7" />
     <SolidColorBrush x:Key="SidebarSelectedBrush" presentationOptions:Freeze="False" Color="#0F6CBD" />
-    <SolidColorBrush x:Key="SidebarTextBrush" presentationOptions:Freeze="False" Color="#E5E7EB" />
-    <SolidColorBrush x:Key="SidebarMutedTextBrush" presentationOptions:Freeze="False" Color="#9CA3AF" />
-    <SolidColorBrush x:Key="SidebarDividerBrush" presentationOptions:Freeze="False" Color="#2A3443" />
-    <SolidColorBrush x:Key="SidebarPanelBrush" presentationOptions:Freeze="False" Color="#0C1420" />
+    <SolidColorBrush x:Key="SidebarTextBrush" presentationOptions:Freeze="False" Color="#1B1F2A" />
+    <SolidColorBrush x:Key="SidebarMutedTextBrush" presentationOptions:Freeze="False" Color="#667085" />
+    <SolidColorBrush x:Key="SidebarDividerBrush" presentationOptions:Freeze="False" Color="#E3E7ED" />
+    <SolidColorBrush x:Key="SidebarPanelBrush" presentationOptions:Freeze="False" Color="#F7F8FA" />
 
     <DropShadowEffect x:Key="CardShadowEffect"
                       BlurRadius="18"

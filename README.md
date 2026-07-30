@@ -221,6 +221,22 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Existing Cleaner commands, cleanup categories, confirmation flow, and safety behaviour are unchanged
 - No new cleanup rules, automatic cleaning, scheduling behaviour, or deletion logic was added
 
+### Premium window chrome and shell polish
+
+- Custom theme-aware title bar replaces the disconnected native light strip
+- Premium minimize, maximize/restore, and close caption controls
+- Native window dragging, double-click maximize/restore, resize borders, Windows Snap, and system menu remain available
+- Maximized windows respect the Windows taskbar and restore correctly
+- Duplicate title-bar branding was removed; the primary brand remains in the sidebar
+- Title-bar, sidebar, and page-header junctions use aligned shell measurements
+- Light and dark themes update the title bar, sidebar, branding, navigation, footer, cards, tables, controls, and module surfaces immediately
+- Light mode uses a fully light, readable sidebar palette instead of retaining the dark sidebar
+- Shared module margins improve right-panel alignment across all screens
+- All principal bottom status panels use one shared minimum height, spacing, badge placement, and icon geometry
+- Shared status icon containers use consistent 36 × 36 dimensions; colour varies only by information, success, warning, or danger meaning
+- Settings ComboBox and dropdown use the shared Fluent control template in both themes
+- No feature, service, command, cleanup, scheduling, licensing, or system-modification behaviour changed
+
 ### Responsive layout
 
 - Large File Finder Folder or Drive field remains usable at restored and narrow widths
@@ -299,6 +315,17 @@ All selectable result tables must use the same application-wide behaviour:
 - Health Check, Custom Clean, Auto Clean Schedule, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Settings remained functional and theme-aware in their current phased-migration layouts.
 - No Cleaner service, view-model, command, cleanup category, confirmation rule, scheduling behaviour, or deletion logic changed.
 - Release build succeeded and the xUnit suite remained at 103 passed, 0 failed after Sprint 20.
+- Custom title bar, minimize, maximize/restore, close, dragging, double-click maximize/restore, resizing, Windows Snap, system menu, and taskbar-safe maximized behaviour were manually verified after Sprint 21.
+- Duplicate title-bar branding and the unnecessary empty title-bar divider were removed.
+- Sidebar branding and the page-header separator were aligned to the same 80 px shell measurement.
+- Light and dark title bar, sidebar, branding, navigation, footer, module surfaces, cards, tables, controls, disabled states, and status areas were manually verified.
+- Switching themes while the application remained open updated every current screen without retaining stale theme colours.
+- Cleaner, Health Check, Custom Clean, Auto Clean Schedule, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Settings use standardized right-panel margins and bottom status-panel geometry.
+- Shared bottom status panels and 36 × 36 status icon containers were visually verified for consistent size, spacing, colour semantics, and alignment.
+- Settings theme selection and dropdown presentation were verified in Light and Dark modes.
+- All existing module navigation, commands, scans, previews, monitoring, cleanup safeguards, schedules, settings, and recommendation navigation remained functional.
+- Release build succeeded and the xUnit suite remained at 103 passed, 0 failed after Sprint 21.
+- No feature, service, command, cleanup, scheduling, licensing, or system-modification behaviour changed.
 - System Monitor live CPU and physical-memory values, Start/Stop controls, automatic stop on tab change, and read-only scope manually verified.
 - Cleaner, Large File Finder, Duplicate File Finder, and Startup Manager regression opening checks passed after Sprint 8.
 - Health Check system-drive, CPU, memory, and startup summary results manually verified.
@@ -527,11 +554,11 @@ This rule is mandatory. Repeated blind patches are not acceptable.
 
 ## Current milestone
 
-Sprint 20 — Cleaner Premium UI Migration.
+Sprint 21 — Premium Window Chrome and Shell Polish.
 
 ## Next milestone
 
-Sprint 21 — Premium Window Chrome and Shell Polish, only after Sprint 20 is committed, pushed, and the working tree is clean.
+Sprint 22 — Health Check Premium UI Migration, only after Sprint 21 is committed, pushed, and the working tree is clean.
 
 ## Compact AI handoff
 

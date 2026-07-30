@@ -28,6 +28,14 @@ public static class ThemeManager
         Color SecondaryButtonHover,
         Color ProgressTrack,
         Color MetaText,
+        Color TitleBar,
+        Color TitleBarForeground,
+        Color TitleBarMutedText,
+        Color TitleBarBorder,
+        Color CaptionButtonHover,
+        Color CaptionButtonPressed,
+        Color CaptionCloseHover,
+        Color CaptionClosePressed,
         Color Accent,
         Color AccentHover,
         Color AccentPressed,
@@ -67,6 +75,14 @@ public static class ThemeManager
         Color.FromRgb(0xF9, 0xFA, 0xFB),
         Color.FromRgb(0xEA, 0xEC, 0xF0),
         Color.FromRgb(0x47, 0x54, 0x67),
+        Colors.White,
+        Color.FromRgb(0x1B, 0x1F, 0x2A),
+        Color.FromRgb(0x66, 0x70, 0x85),
+        Color.FromRgb(0xE3, 0xE7, 0xED),
+        Color.FromRgb(0xF1, 0xF3, 0xF5),
+        Color.FromRgb(0xE4, 0xE7, 0xEB),
+        Color.FromRgb(0xC4, 0x2B, 0x1C),
+        Color.FromRgb(0xA4, 0x26, 0x2C),
         Color.FromRgb(0x0F, 0x6C, 0xBD),
         Color.FromRgb(0x11, 0x5E, 0xA3),
         Color.FromRgb(0x0C, 0x3B, 0x5E),
@@ -78,13 +94,13 @@ public static class ThemeManager
         Color.FromRgb(0xFF, 0xF4, 0xE5),
         Color.FromRgb(0xC4, 0x2B, 0x1C),
         Color.FromRgb(0xFD, 0xEC, 0xEC),
-        Color.FromRgb(0x11, 0x18, 0x27),
-        Color.FromRgb(0x1F, 0x29, 0x37),
+        Colors.White,
+        Color.FromRgb(0xF2, 0xF4, 0xF7),
         Color.FromRgb(0x0F, 0x6C, 0xBD),
-        Color.FromRgb(0xE5, 0xE7, 0xEB),
-        Color.FromRgb(0x9C, 0xA3, 0xAF),
-        Color.FromRgb(0x2A, 0x34, 0x43),
-        Color.FromRgb(0x0C, 0x14, 0x20));
+        Color.FromRgb(0x1B, 0x1F, 0x2A),
+        Color.FromRgb(0x66, 0x70, 0x85),
+        Color.FromRgb(0xE3, 0xE7, 0xED),
+        Color.FromRgb(0xF7, 0xF8, 0xFA));
 
     private static readonly ThemePalette DarkPalette = new(
         Color.FromRgb(0x0F, 0x14, 0x1A),
@@ -106,6 +122,14 @@ public static class ThemeManager
         Color.FromRgb(0x23, 0x2B, 0x35),
         Color.FromRgb(0x31, 0x3A, 0x45),
         Color.FromRgb(0xC8, 0xD0, 0xDB),
+        Color.FromRgb(0x11, 0x16, 0x1C),
+        Color.FromRgb(0xF2, 0xF4, 0xF7),
+        Color.FromRgb(0xB3, 0xBC, 0xC8),
+        Color.FromRgb(0x32, 0x3B, 0x47),
+        Color.FromRgb(0x23, 0x2B, 0x35),
+        Color.FromRgb(0x30, 0x3A, 0x46),
+        Color.FromRgb(0xC4, 0x2B, 0x1C),
+        Color.FromRgb(0xA4, 0x26, 0x2C),
         Color.FromRgb(0x28, 0x8E, 0xD8),
         Color.FromRgb(0x36, 0x9E, 0xE8),
         Color.FromRgb(0x17, 0x70, 0xAF),
@@ -154,6 +178,14 @@ public static class ThemeManager
         SetBrush("SecondaryButtonHoverBrush", palette.SecondaryButtonHover);
         SetBrush("ProgressTrackBrush", palette.ProgressTrack);
         SetBrush("MetaTextBrush", palette.MetaText);
+        SetBrush("TitleBarBrush", palette.TitleBar);
+        SetBrush("TitleBarForegroundBrush", palette.TitleBarForeground);
+        SetBrush("TitleBarMutedTextBrush", palette.TitleBarMutedText);
+        SetBrush("TitleBarBorderBrush", palette.TitleBarBorder);
+        SetBrush("CaptionButtonHoverBrush", palette.CaptionButtonHover);
+        SetBrush("CaptionButtonPressedBrush", palette.CaptionButtonPressed);
+        SetBrush("CaptionCloseHoverBrush", palette.CaptionCloseHover);
+        SetBrush("CaptionClosePressedBrush", palette.CaptionClosePressed);
         SetBrush("AccentBrush", palette.Accent);
         SetBrush("AccentHoverBrush", palette.AccentHover);
         SetBrush("AccentPressedBrush", palette.AccentPressed);
