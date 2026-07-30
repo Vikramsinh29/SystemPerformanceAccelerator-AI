@@ -9,9 +9,9 @@ namespace SystemPerformanceAccelerator.Desktop.ViewModels;
 public sealed class SystemMonitorViewModel : INotifyPropertyChanged
 {
     private static readonly TimeSpan CpuSampleDuration = TimeSpan.FromMilliseconds(500);
-    private static readonly TimeSpan RefreshDelay = TimeSpan.FromMilliseconds(500);
 
     private readonly ISystemMonitorService _systemMonitorService;
+    private TimeSpan _refreshInterval;
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _isMonitoring;
     private double _cpuUsagePercent;
@@ -22,9 +22,12 @@ public sealed class SystemMonitorViewModel : INotifyPropertyChanged
     private string _status = "Start monitoring to view live total CPU and physical-memory usage.";
     private string _lastUpdated = "Not started";
 
-    public SystemMonitorViewModel(ISystemMonitorService systemMonitorService)
+    public SystemMonitorViewModel(
+        ISystemMonitorService systemMonitorService,
+        int refreshIntervalSeconds = 1)
     {
         _systemMonitorService = systemMonitorService;
+        _refreshInterval = TimeSpan.FromSeconds(Math.Clamp(refreshIntervalSeconds, 1, 10));
         StartCommand = new AsyncRelayCommand(MonitorAsync, () => !IsMonitoring);
         StopCommand = new RelayCommand(StopMonitoring, () => IsMonitoring);
     }
@@ -127,6 +130,13 @@ public sealed class SystemMonitorViewModel : INotifyPropertyChanged
     public string TotalMemoryText => FormatBytes(TotalMemoryBytes);
     public string MonitoringState => IsMonitoring ? "Monitoring" : "Stopped";
 
+    public void ApplyRefreshInterval(int refreshIntervalSeconds)
+    {
+        _refreshInterval = TimeSpan.FromSeconds(
+            Math.Clamp(refreshIntervalSeconds, 1, 10));
+        Status = $"Refresh interval set to {_refreshInterval.TotalSeconds:0} second(s). Start monitoring when ready.";
+    }
+
     public void StopMonitoring()
     {
         _cancellationTokenSource?.Cancel();
@@ -147,9 +157,13 @@ public sealed class SystemMonitorViewModel : INotifyPropertyChanged
                 ApplySnapshot(snapshot);
                 Status = "Live read-only monitoring is active. No system settings are being changed.";
 
-                await Task.Delay(
-                    RefreshDelay,
-                    _cancellationTokenSource.Token);
+                var remainingDelay = _refreshInterval - CpuSampleDuration;
+                if (remainingDelay > TimeSpan.Zero)
+                {
+                    await Task.Delay(
+                        remainingDelay,
+                        _cancellationTokenSource.Token);
+                }
             }
         }
         catch (OperationCanceledException)

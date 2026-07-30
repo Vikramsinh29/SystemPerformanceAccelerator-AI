@@ -18,7 +18,7 @@ public sealed class LargeFileFinderViewModel : INotifyPropertyChanged
     private bool _isBusy;
     private int _progress;
     private string _selectedFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-    private string _minimumSizeText = "100";
+    private string _minimumSizeText;
     private string _status = "Choose a folder or drive, set the minimum size, and start a scan.";
     private string _scanStatus = "Not scanned";
     private string _progressText = "0 files checked";
@@ -26,10 +26,12 @@ public sealed class LargeFileFinderViewModel : INotifyPropertyChanged
 
     public LargeFileFinderViewModel(
         ILargeFileService largeFileService,
-        ILargeFileCleanupService largeFileCleanupService)
+        ILargeFileCleanupService largeFileCleanupService,
+        int defaultMinimumSizeMb = 100)
     {
         _largeFileService = largeFileService;
         _largeFileCleanupService = largeFileCleanupService;
+        _minimumSizeText = Math.Max(1, defaultMinimumSizeMb).ToString();
 
         BrowseCommand = new RelayCommand(Browse, () => !IsBusy);
         ScanCommand = new AsyncRelayCommand(ScanAsync, () => !IsBusy);
@@ -106,6 +108,17 @@ public sealed class LargeFileFinderViewModel : INotifyPropertyChanged
 
     public string FilesFound => Results.Count.ToString("N0");
     public string TotalSize => MainWindowViewModel.FormatBytes(Results.Sum(result => result.Model.SizeBytes));
+
+    public void ApplyDefaultMinimumSize(int minimumSizeMb)
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        MinimumSizeText = Math.Max(1, minimumSizeMb).ToString();
+        Status = "The saved default minimum size has been applied.";
+    }
 
     private void Browse()
     {

@@ -4,7 +4,9 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using SystemPerformanceAccelerator.Core.Interfaces;
+using SystemPerformanceAccelerator.Core.Models;
 using SystemPerformanceAccelerator.Desktop.Commands;
+using SystemPerformanceAccelerator.Desktop.Services;
 
 namespace SystemPerformanceAccelerator.Desktop.ViewModels;
 
@@ -18,7 +20,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         LargeFileFinder,
         DuplicateFileFinder,
         StartupManager,
-        SystemMonitor
+        SystemMonitor,
+        Settings
     }
 
     private readonly ITemporaryFileService _temporaryFileService;
@@ -39,7 +42,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         IDuplicateFileCleanupService duplicateFileCleanupService,
         IStartupItemService startupItemService,
         ISystemMonitorService systemMonitorService,
-        IHealthCheckService healthCheckService)
+        IHealthCheckService healthCheckService,
+        IApplicationSettingsService applicationSettingsService,
+        ApplicationSettingsLoadResult settingsLoadResult)
     {
         _temporaryFileService = temporaryFileService;
         HealthCheck = new HealthCheckViewModel(healthCheckService);
@@ -48,7 +53,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         CustomClean.PropertyChanged += OnChildModulePropertyChanged;
         LargeFileFinder = new LargeFileFinderViewModel(
             largeFileService,
-            largeFileCleanupService);
+            largeFileCleanupService,
+            settingsLoadResult.Settings.LargeFileMinimumSizeMb);
         LargeFileFinder.PropertyChanged += OnChildModulePropertyChanged;
         DuplicateFileFinder = new DuplicateFileFinderViewModel(
             duplicateFileService,
@@ -56,7 +62,13 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         DuplicateFileFinder.PropertyChanged += OnChildModulePropertyChanged;
         StartupManager = new StartupManagerViewModel(startupItemService);
         StartupManager.PropertyChanged += OnChildModulePropertyChanged;
-        SystemMonitor = new SystemMonitorViewModel(systemMonitorService);
+        SystemMonitor = new SystemMonitorViewModel(
+            systemMonitorService,
+            settingsLoadResult.Settings.SystemMonitorRefreshIntervalSeconds);
+        Settings = new SettingsViewModel(
+            applicationSettingsService,
+            settingsLoadResult,
+            ApplySettings);
 
         ScanCommand = new AsyncRelayCommand(ScanAsync, () => !IsBusy);
         CleanCommand = new AsyncRelayCommand(CleanAsync, () => !IsBusy && Candidates.Any(x => x.IsSelected));
@@ -82,6 +94,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ShowSystemMonitorCommand = new RelayCommand(
             () => SwitchModule(ApplicationModule.SystemMonitor),
             CanSwitchModule);
+        ShowSettingsCommand = new RelayCommand(
+            () => SwitchModule(ApplicationModule.Settings),
+            CanSwitchModule);
     }
 
     public ObservableCollection<CleanupCandidateViewModel> Candidates { get; } = [];
@@ -91,6 +106,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public DuplicateFileFinderViewModel DuplicateFileFinder { get; }
     public StartupManagerViewModel StartupManager { get; }
     public SystemMonitorViewModel SystemMonitor { get; }
+    public SettingsViewModel Settings { get; }
     public AsyncRelayCommand ScanCommand { get; }
     public AsyncRelayCommand CleanCommand { get; }
     public RelayCommand CancelCommand { get; }
@@ -101,6 +117,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public RelayCommand ShowDuplicateFileFinderCommand { get; }
     public RelayCommand ShowStartupManagerCommand { get; }
     public RelayCommand ShowSystemMonitorCommand { get; }
+    public RelayCommand ShowSettingsCommand { get; }
 
     public bool IsCleanerActive => _currentModule == ApplicationModule.Cleaner;
     public bool IsHealthCheckActive => _currentModule == ApplicationModule.HealthCheck;
@@ -109,6 +126,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public bool IsDuplicateFileFinderActive => _currentModule == ApplicationModule.DuplicateFileFinder;
     public bool IsStartupManagerActive => _currentModule == ApplicationModule.StartupManager;
     public bool IsSystemMonitorActive => _currentModule == ApplicationModule.SystemMonitor;
+    public bool IsSettingsActive => _currentModule == ApplicationModule.Settings;
     public string ModuleTitle => _currentModule switch
     {
         ApplicationModule.Cleaner => "Cleaner",
@@ -118,6 +136,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ApplicationModule.DuplicateFileFinder => "Duplicate File Finder",
         ApplicationModule.StartupManager => "Startup Manager",
         ApplicationModule.SystemMonitor => "System Monitor",
+        ApplicationModule.Settings => "Settings",
         _ => "System Performance Accelerator"
     };
 
@@ -130,6 +149,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ApplicationModule.DuplicateFileFinder => "Find content-confirmed duplicates and safely recycle selected copies",
         ApplicationModule.StartupManager => "Review Windows startup entries without changing them",
         ApplicationModule.SystemMonitor => "View live total CPU and physical-memory usage without changing the system",
+        ApplicationModule.Settings => "Manage local appearance and safe operating defaults",
         _ => string.Empty
     };
 
@@ -199,6 +219,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(IsDuplicateFileFinderActive));
         OnPropertyChanged(nameof(IsStartupManagerActive));
         OnPropertyChanged(nameof(IsSystemMonitorActive));
+        OnPropertyChanged(nameof(IsSettingsActive));
         OnPropertyChanged(nameof(ModuleTitle));
         OnPropertyChanged(nameof(ModuleSubtitle));
     }
@@ -228,6 +249,15 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ShowDuplicateFileFinderCommand.RaiseCanExecuteChanged();
         ShowStartupManagerCommand.RaiseCanExecuteChanged();
         ShowSystemMonitorCommand.RaiseCanExecuteChanged();
+        ShowSettingsCommand.RaiseCanExecuteChanged();
+    }
+
+    private void ApplySettings(ApplicationSettings settings)
+    {
+        ThemeManager.Apply(settings.Theme);
+        LargeFileFinder.ApplyDefaultMinimumSize(settings.LargeFileMinimumSizeMb);
+        SystemMonitor.ApplyRefreshInterval(
+            settings.SystemMonitorRefreshIntervalSeconds);
     }
 
     private async Task ScanAsync()

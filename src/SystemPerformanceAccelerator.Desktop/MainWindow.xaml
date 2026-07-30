@@ -8,16 +8,13 @@
         MinWidth="1000"
         MinHeight="650"
         WindowStartupLocation="CenterScreen"
-        Background="#EEF2F6"
+        Background="{StaticResource AppBackgroundBrush}"
         FontFamily="Segoe UI">
     <Window.Resources>
         <SolidColorBrush x:Key="SidebarBrush" Color="#18212F" />
         <SolidColorBrush x:Key="SidebarHoverBrush" Color="#243145" />
         <SolidColorBrush x:Key="AccentBrush" Color="#2583E9" />
         <SolidColorBrush x:Key="SuccessBrush" Color="#22A765" />
-        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#172033" />
-        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#687386" />
-        <SolidColorBrush x:Key="BorderBrush" Color="#DDE3EA" />
 
         <Style x:Key="NavigationButtonStyle" TargetType="Button">
             <Setter Property="Height" Value="44" />
@@ -97,9 +94,9 @@
             <Setter Property="Height" Value="38" />
             <Setter Property="MinWidth" Value="96" />
             <Setter Property="Padding" Value="18,0" />
-            <Setter Property="Background" Value="White" />
-            <Setter Property="Foreground" Value="#485568" />
-            <Setter Property="BorderBrush" Value="#CBD3DD" />
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource SecondaryButtonForegroundBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource SecondaryButtonBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Cursor" Value="Hand" />
@@ -116,7 +113,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ButtonBorder" Property="Background" Value="#F1F4F7" />
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource SecondaryButtonHoverBrush}" />
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.48" />
@@ -129,7 +126,7 @@
         </Style>
 
         <Style x:Key="SummaryCardStyle" TargetType="Border">
-            <Setter Property="Background" Value="White" />
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
             <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="8" />
@@ -140,19 +137,29 @@
             <Setter Property="Height" Value="36" />
             <Setter Property="Padding" Value="10,0" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Background" Value="White" />
+            <Setter Property="Background" Value="{StaticResource InputBackgroundBrush}" />
             <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
-            <Setter Property="BorderBrush" Value="#C8D1DC" />
+            <Setter Property="BorderBrush" Value="{StaticResource InputBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <Style x:Key="InputComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Background" Value="{StaticResource InputBackgroundBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource InputBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
         </Style>
 
         <Style TargetType="DataGridColumnHeader">
             <Setter Property="Height" Value="36" />
-            <Setter Property="Background" Value="#F4F6F8" />
-            <Setter Property="Foreground" Value="#4E5B6D" />
+            <Setter Property="Background" Value="{StaticResource DataGridHeaderBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Padding" Value="10,0" />
-            <Setter Property="BorderBrush" Value="#E0E5EB" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
             <Setter Property="BorderThickness" Value="0,0,0,1" />
         </Style>
 
@@ -160,7 +167,7 @@
             <Setter Property="Padding" Value="10,0" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Foreground" Value="#263244" />
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
         </Style>
 
         <Style x:Key="ResponsiveDataGridTextStyle" TargetType="TextBlock">
@@ -172,22 +179,22 @@
 
         <Style TargetType="DataGridRow">
             <Setter Property="Height" Value="34" />
-            <Setter Property="Background" Value="White" />
-            <Setter Property="BorderBrush" Value="#EEF1F4" />
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
             <Setter Property="BorderThickness" Value="0,0,0,1" />
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#F5F9FD" />
+                    <Setter Property="Background" Value="{StaticResource DataGridRowHoverBrush}" />
                 </Trigger>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#E8F2FC" />
-                    <Setter Property="Foreground" Value="#172033" />
+                    <Setter Property="Background" Value="{StaticResource DataGridRowSelectedBrush}" />
+                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
                 </Trigger>
             </Style.Triggers>
         </Style>
         <Style x:Key="OperationStatusPanelStyle" TargetType="Border">
             <Setter Property="Padding" Value="16,12" />
-            <Setter Property="Background" Value="White" />
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
             <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="8" />
@@ -200,7 +207,7 @@
         </Style>
 
         <Style x:Key="OperationStatusMessageStyle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#344256" />
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
             <Setter Property="FontSize" Value="12" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="TextWrapping" Value="Wrap" />
@@ -208,8 +215,8 @@
 
         <Style x:Key="OperationMetaChipStyle" TargetType="Border">
             <Setter Property="Padding" Value="10,5" />
-            <Setter Property="Background" Value="#F2F5F8" />
-            <Setter Property="BorderBrush" Value="#DCE3EA" />
+            <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="12" />
             <Setter Property="VerticalAlignment" Value="Center" />
@@ -217,14 +224,14 @@
 
         <Style x:Key="ResultMetricCardStyle" TargetType="Border">
             <Setter Property="Padding" Value="10,8" />
-            <Setter Property="Background" Value="#F7F9FB" />
-            <Setter Property="BorderBrush" Value="#E2E7ED" />
+            <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="6" />
         </Style>
 
         <Style x:Key="ResultMetricLabelStyle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#788597" />
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
             <Setter Property="FontSize" Value="9" />
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
@@ -353,7 +360,7 @@
                 </Border>
 
                 <StackPanel Grid.Row="1" Margin="0,16,0,0">
-                    <TextBlock Margin="22,0,0,7" Text="TOOLS" Foreground="#718096" FontSize="10" FontWeight="Bold" />
+                    <TextBlock Margin="22,0,0,7" Text="TOOLS" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
 
                     <Button Command="{Binding ShowCleanerCommand}">
                         <Button.Style>
@@ -488,7 +495,19 @@
                         </StackPanel>
                     </Button>
 
-                    <Button Style="{StaticResource NavigationButtonStyle}" IsEnabled="False">
+                    <Button Command="{Binding ShowSettingsCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource NavigationButtonStyle}">
+                                <Setter Property="Cursor" Value="Hand" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsSettingsActive}" Value="True">
+                                        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+                                        <Setter Property="Foreground" Value="White" />
+                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Width="28" Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
                             <TextBlock Text="Settings" VerticalAlignment="Center" />
@@ -515,15 +534,15 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="0" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+            <Border Grid.Row="0" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
                 <Grid Margin="24,0">
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="{Binding ModuleTitle}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="22" FontWeight="SemiBold" />
                         <TextBlock Text="{Binding ModuleSubtitle}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" />
                     </StackPanel>
                     <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
-                        <TextBlock Text="Windows 10/11" Foreground="#506074" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Right" />
-                        <TextBlock Text="Local system utility" Foreground="#8A95A5" FontSize="11" HorizontalAlignment="Right" />
+                        <TextBlock Text="Windows 10/11" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Right" />
+                        <TextBlock Text="Local system utility" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" HorizontalAlignment="Right" />
                     </StackPanel>
                 </Grid>
             </Border>
@@ -574,12 +593,12 @@
                     <Border Grid.Column="6" Style="{StaticResource SummaryCardStyle}">
                         <StackPanel>
                             <TextBlock Text="UNKNOWN" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Margin="0,4,0,0" Text="{Binding UnknownCount}" Foreground="#69778A" FontSize="23" FontWeight="SemiBold" />
+                            <TextBlock Margin="0,4,0,0" Text="{Binding UnknownCount}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="23" FontWeight="SemiBold" />
                         </StackPanel>
                     </Border>
                 </Grid>
 
-                <Border Grid.Row="1" Margin="0,16,0,12" Padding="16,14" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+                <Border Grid.Row="1" Margin="0,16,0,12" Padding="16,14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -602,7 +621,7 @@
                     </Grid>
                 </Border>
 
-                <Border Grid.Row="2" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
+                <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
                     <DataGrid ItemsSource="{Binding Results}"
                               behaviors:DataGridSelectionBehavior.IsEnabled="False"
                               AutoGenerateColumns="False"
@@ -616,7 +635,7 @@
                               RowHeaderWidth="0"
                               SelectionMode="Single"
                               SelectionUnit="FullRow"
-                              Background="White"
+                              Background="{StaticResource SurfaceBrush}"
                               ScrollViewer.HorizontalScrollBarVisibility="Auto"
                               ScrollViewer.VerticalScrollBarVisibility="Auto">
                         <DataGrid.Columns>
@@ -660,7 +679,7 @@
                                      Value="0"
                                      IsIndeterminate="{Binding IsBusy}"
                                      Foreground="{StaticResource AccentBrush}"
-                                     Background="#E7ECF2" />
+                                     Background="{StaticResource ProgressTrackBrush}" />
 
                         <Grid Grid.Row="1" Margin="0,10,0,0">
                             <Grid.ColumnDefinitions>
@@ -682,13 +701,13 @@
                             </StackPanel>
 
                             <Border Grid.Column="2" Style="{StaticResource OperationMetaChipStyle}">
-                                <TextBlock Text="{Binding CheckState}" Foreground="#4D5B6E" FontSize="11" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding CheckState}" Foreground="{StaticResource MetaTextBrush}" FontSize="11" FontWeight="SemiBold" />
                             </Border>
                         </Grid>
 
                         <StackPanel Grid.Row="2" Margin="45,7,0,0" Orientation="Horizontal">
-                            <TextBlock Text="{Binding LastChecked, StringFormat='Checked: {0}'}" Foreground="#7A8798" FontSize="11" Margin="0,0,16,0" />
-                            <TextBlock Text="{Binding WarningText}" Foreground="#7A8798" FontSize="11" />
+                            <TextBlock Text="{Binding LastChecked, StringFormat='Checked: {0}'}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,16,0" />
+                            <TextBlock Text="{Binding WarningText}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" />
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -774,7 +793,7 @@
                     </StackPanel>
                 </Grid>
 
-                <Border Grid.Row="2" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
+                <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
                     <DataGrid ItemsSource="{Binding Candidates}"
                               behaviors:DataGridSelectionBehavior.IsEnabled="True"
                               AutoGenerateColumns="False"
@@ -788,7 +807,7 @@
                               RowHeaderWidth="0"
                               SelectionMode="Extended"
                               SelectionUnit="FullRow"
-                              Background="White"
+                              Background="{StaticResource SurfaceBrush}"
                               AlternationCount="2"
                               EnableRowVirtualization="True"
                               EnableColumnVirtualization="True">
@@ -829,7 +848,7 @@
                                      Maximum="100"
                                      Value="{Binding Progress, Mode=OneWay}"
                                      Foreground="{StaticResource AccentBrush}"
-                                     Background="#E7ECF2" />
+                                     Background="{StaticResource ProgressTrackBrush}" />
 
                         <Grid Grid.Row="1" Margin="0,10,0,0">
                             <Grid.ColumnDefinitions>
@@ -851,7 +870,7 @@
                             </StackPanel>
 
                             <Border Grid.Column="2" Style="{StaticResource OperationMetaChipStyle}">
-                                <TextBlock Text="{Binding ScanStatus}" Foreground="#4D5B6E" FontSize="11" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding ScanStatus}" Foreground="{StaticResource MetaTextBrush}" FontSize="11" FontWeight="SemiBold" />
                             </Border>
                         </Grid>
 
@@ -863,7 +882,7 @@
                         <TextBlock Grid.Row="3"
                                    Margin="45,7,0,0"
                                    Text="{Binding Progress, StringFormat='Progress: {0}%'}"
-                                   Foreground="#7A8798"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
                                    FontSize="11" />
                     </Grid>
                 </Border>
@@ -914,7 +933,7 @@
                 <Border Grid.Row="1"
                         Margin="0,16,0,12"
                         Padding="16,14"
-                        Background="White"
+                        Background="{StaticResource SurfaceBrush}"
                         BorderBrush="{StaticResource BorderBrush}"
                         BorderThickness="1"
                         CornerRadius="8">
@@ -963,7 +982,7 @@
                 </Border>
 
                 <Border Grid.Row="2"
-                        Background="White"
+                        Background="{StaticResource SurfaceBrush}"
                         BorderBrush="{StaticResource BorderBrush}"
                         BorderThickness="1"
                         CornerRadius="8"
@@ -981,7 +1000,7 @@
                               RowHeaderWidth="0"
                               SelectionMode="Single"
                               SelectionUnit="FullRow"
-                              Background="White"
+                              Background="{StaticResource SurfaceBrush}"
                               ScrollViewer.HorizontalScrollBarVisibility="Auto"
                               ScrollViewer.VerticalScrollBarVisibility="Auto"
                               EnableRowVirtualization="True"
@@ -1035,7 +1054,7 @@
                                      Maximum="100"
                                      Value="{Binding Progress, Mode=OneWay}"
                                      Foreground="{StaticResource AccentBrush}"
-                                     Background="#E7ECF2" />
+                                     Background="{StaticResource ProgressTrackBrush}" />
 
                         <Grid Grid.Row="1" Margin="0,10,0,0">
                             <Grid.ColumnDefinitions>
@@ -1057,7 +1076,7 @@
                             </StackPanel>
 
                             <Border Grid.Column="2" Style="{StaticResource OperationMetaChipStyle}">
-                                <TextBlock Text="{Binding PreviewStatus}" Foreground="#4D5B6E" FontSize="11" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding PreviewStatus}" Foreground="{StaticResource MetaTextBrush}" FontSize="11" FontWeight="SemiBold" />
                             </Border>
                         </Grid>
 
@@ -1069,7 +1088,7 @@
                         <TextBlock Grid.Row="3"
                                    Margin="45,7,0,0"
                                    Text="{Binding Progress, StringFormat='Progress: {0}%'}"
-                                   Foreground="#7A8798"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
                                    FontSize="11" />
                     </Grid>
                 </Border>
@@ -1117,7 +1136,7 @@
                     </Border>
                 </Grid>
 
-                <Border Grid.Row="1" Margin="0,16,0,12" Padding="16,14" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+                <Border Grid.Row="1" Margin="0,16,0,12" Padding="16,14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -1156,7 +1175,7 @@
                     </Grid>
                 </Border>
 
-                <Border Grid.Row="2" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
+                <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
                     <DataGrid x:Name="LargeFilesGrid"
                               ItemsSource="{Binding Results}"
                               behaviors:DataGridSelectionBehavior.IsEnabled="True"
@@ -1171,7 +1190,7 @@
                               RowHeaderWidth="0"
                               SelectionMode="Extended"
                               SelectionUnit="FullRow"
-                              Background="White"
+                              Background="{StaticResource SurfaceBrush}"
                               EnableRowVirtualization="True"
                               EnableColumnVirtualization="True">
                         <DataGrid.Columns>
@@ -1212,7 +1231,7 @@
                                      Value="{Binding Progress, Mode=OneWay}"
                                      IsIndeterminate="{Binding IsBusy}"
                                      Foreground="{StaticResource AccentBrush}"
-                                     Background="#E7ECF2" />
+                                     Background="{StaticResource ProgressTrackBrush}" />
 
                         <Grid Grid.Row="1" Margin="0,10,0,0">
                             <Grid.ColumnDefinitions>
@@ -1234,7 +1253,7 @@
                             </StackPanel>
 
                             <Border Grid.Column="2" Style="{StaticResource OperationMetaChipStyle}">
-                                <TextBlock Text="{Binding ScanStatus}" Foreground="#4D5B6E" FontSize="11" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding ScanStatus}" Foreground="{StaticResource MetaTextBrush}" FontSize="11" FontWeight="SemiBold" />
                             </Border>
                         </Grid>
 
@@ -1246,7 +1265,7 @@
                         <TextBlock Grid.Row="3"
                                    Margin="45,7,0,0"
                                    Text="{Binding ProgressText}"
-                                   Foreground="#7A8798"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
                                    FontSize="11" />
                     </Grid>
                 </Border>
@@ -1294,7 +1313,7 @@
                     </Border>
                 </Grid>
 
-                <Border Grid.Row="1" Margin="0,16,0,12" Padding="16,14" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+                <Border Grid.Row="1" Margin="0,16,0,12" Padding="16,14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -1330,7 +1349,7 @@
                     </Grid>
                 </Border>
 
-                <Border Grid.Row="2" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
+                <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
                     <DataGrid x:Name="DuplicateFilesGrid"
                               ItemsSource="{Binding Results}"
                               behaviors:DataGridSelectionBehavior.IsEnabled="True"
@@ -1345,7 +1364,7 @@
                               RowHeaderWidth="0"
                               SelectionMode="Extended"
                               SelectionUnit="FullRow"
-                              Background="White"
+                              Background="{StaticResource SurfaceBrush}"
                               EnableRowVirtualization="True"
                               EnableColumnVirtualization="True">
                         <DataGrid.Columns>
@@ -1388,7 +1407,7 @@
                                      Value="{Binding Progress, Mode=OneWay}"
                                      IsIndeterminate="{Binding IsBusy}"
                                      Foreground="{StaticResource AccentBrush}"
-                                     Background="#E7ECF2" />
+                                     Background="{StaticResource ProgressTrackBrush}" />
 
                         <Grid Grid.Row="1" Margin="0,10,0,0">
                             <Grid.ColumnDefinitions>
@@ -1410,7 +1429,7 @@
                             </StackPanel>
 
                             <Border Grid.Column="2" Style="{StaticResource OperationMetaChipStyle}">
-                                <TextBlock Text="{Binding ScanStatus}" Foreground="#4D5B6E" FontSize="11" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding ScanStatus}" Foreground="{StaticResource MetaTextBrush}" FontSize="11" FontWeight="SemiBold" />
                             </Border>
                         </Grid>
 
@@ -1422,7 +1441,7 @@
                         <TextBlock Grid.Row="3"
                                    Margin="45,7,0,0"
                                    Text="{Binding ProgressText}"
-                                   Foreground="#7A8798"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
                                    FontSize="11" />
                     </Grid>
                 </Border>
@@ -1470,7 +1489,7 @@
                     </Border>
                 </Grid>
 
-                <Border Grid.Row="1" Margin="0,16,0,12" Padding="16,14" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+                <Border Grid.Row="1" Margin="0,16,0,12" Padding="16,14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -1493,7 +1512,7 @@
                     </Grid>
                 </Border>
 
-                <Border Grid.Row="2" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
+                <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
                     <DataGrid ItemsSource="{Binding Results}"
                               behaviors:DataGridSelectionBehavior.IsEnabled="False"
                               AutoGenerateColumns="False"
@@ -1507,7 +1526,7 @@
                               RowHeaderWidth="0"
                               SelectionMode="Single"
                               SelectionUnit="FullRow"
-                              Background="White"
+                              Background="{StaticResource SurfaceBrush}"
                               ScrollViewer.HorizontalScrollBarVisibility="Auto"
                               ScrollViewer.VerticalScrollBarVisibility="Auto"
                               EnableRowVirtualization="True"
@@ -1563,7 +1582,7 @@
                                      Value="{Binding Progress, Mode=OneWay}"
                                      IsIndeterminate="{Binding IsBusy}"
                                      Foreground="{StaticResource AccentBrush}"
-                                     Background="#E7ECF2" />
+                                     Background="{StaticResource ProgressTrackBrush}" />
 
                         <Grid Grid.Row="1" Margin="0,10,0,0">
                             <Grid.ColumnDefinitions>
@@ -1585,14 +1604,14 @@
                             </StackPanel>
 
                             <Border Grid.Column="2" Style="{StaticResource OperationMetaChipStyle}">
-                                <TextBlock Text="{Binding ScanStatus}" Foreground="#4D5B6E" FontSize="11" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding ScanStatus}" Foreground="{StaticResource MetaTextBrush}" FontSize="11" FontWeight="SemiBold" />
                             </Border>
                         </Grid>
 
                         <TextBlock Grid.Row="2"
                                    Margin="45,7,0,0"
                                    Text="{Binding ProgressText}"
-                                   Foreground="#7A8798"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
                                    FontSize="11" />
                     </Grid>
                 </Border>
@@ -1643,7 +1662,7 @@
                 <Border Grid.Row="1"
                         Margin="0,16,0,12"
                         Padding="16,14"
-                        Background="White"
+                        Background="{StaticResource SurfaceBrush}"
                         BorderBrush="{StaticResource BorderBrush}"
                         BorderThickness="1"
                         CornerRadius="8">
@@ -1681,7 +1700,7 @@
 
                     <Border Grid.Column="0"
                             Padding="20"
-                            Background="White"
+                            Background="{StaticResource SurfaceBrush}"
                             BorderBrush="{StaticResource BorderBrush}"
                             BorderThickness="1"
                             CornerRadius="8">
@@ -1706,7 +1725,7 @@
                                          Maximum="100"
                                          Value="{Binding CpuUsagePercent, Mode=OneWay}"
                                          Foreground="{StaticResource AccentBrush}"
-                                         Background="#E7ECF2" />
+                                         Background="{StaticResource ProgressTrackBrush}" />
                             <TextBlock Grid.Row="3"
                                        Margin="0,14,0,0"
                                        Text="Overall processor activity across Windows"
@@ -1718,7 +1737,7 @@
 
                     <Border Grid.Column="2"
                             Padding="20"
-                            Background="White"
+                            Background="{StaticResource SurfaceBrush}"
                             BorderBrush="{StaticResource BorderBrush}"
                             BorderThickness="1"
                             CornerRadius="8">
@@ -1743,7 +1762,7 @@
                                          Maximum="100"
                                          Value="{Binding MemoryUsagePercent, Mode=OneWay}"
                                          Foreground="{StaticResource AccentBrush}"
-                                         Background="#E7ECF2" />
+                                         Background="{StaticResource ProgressTrackBrush}" />
 
                             <Grid Grid.Row="3" Margin="0,18,0,0">
                                 <Grid.ColumnDefinitions>
@@ -1800,15 +1819,279 @@
                             </StackPanel>
 
                             <Border Grid.Column="2" Style="{StaticResource OperationMetaChipStyle}">
-                                <TextBlock Text="{Binding MonitoringState}" Foreground="#4D5B6E" FontSize="11" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding MonitoringState}" Foreground="{StaticResource MetaTextBrush}" FontSize="11" FontWeight="SemiBold" />
                             </Border>
                         </Grid>
 
                         <TextBlock Grid.Row="1"
                                    Margin="45,7,0,0"
                                    Text="{Binding LastUpdated, StringFormat='Last updated: {0}'}"
-                                   Foreground="#7A8798"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
                                    FontSize="11" />
+                    </Grid>
+                </Border>
+            </Grid>
+
+
+            <Grid Grid.Row="1"
+                  Margin="22,18,22,20"
+                  DataContext="{Binding Settings}"
+                  Visibility="{Binding DataContext.IsSettingsActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <ScrollViewer Grid.Row="0"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel MaxWidth="860" HorizontalAlignment="Left">
+                        <Border Padding="18"
+                                Background="{StaticResource SurfaceBrush}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="220" />
+                                    <ColumnDefinition Width="24" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="APPEARANCE"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontSize="10"
+                                               FontWeight="Bold" />
+                                    <TextBlock Margin="0,5,0,0"
+                                               Text="Theme"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               FontSize="15"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Margin="0,4,0,0"
+                                               Text="System follows the current Windows app theme. Changes apply immediately."
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontSize="11"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+
+                                <ComboBox Grid.Column="2"
+                                          Width="220"
+                                          HorizontalAlignment="Left"
+                                          VerticalAlignment="Center"
+                                          ItemsSource="{Binding ThemeOptions}"
+                                          SelectedItem="{Binding SelectedTheme, Mode=TwoWay}"
+                                          Style="{StaticResource InputComboBoxStyle}" />
+                            </Grid>
+                        </Border>
+
+                        <Border Margin="0,14,0,0"
+                                Padding="18"
+                                Background="{StaticResource SurfaceBrush}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="OPERATING DEFAULTS"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="10"
+                                           FontWeight="Bold" />
+
+                                <Grid Margin="0,14,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="220" />
+                                        <ColumnDefinition Width="24" />
+                                        <ColumnDefinition Width="220" />
+                                        <ColumnDefinition Width="24" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Large File Finder default"
+                                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                                   FontSize="13"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Margin="0,4,0,0"
+                                                   Text="Minimum file size in MB used when the app starts."
+                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   FontSize="11"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <Grid Grid.Column="2" VerticalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="140" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Text="{Binding LargeFileMinimumSizeText, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource InputTextBoxStyle}" />
+                                        <TextBlock Grid.Column="1"
+                                                   Margin="8,0,0,0"
+                                                   Text="MB"
+                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   VerticalAlignment="Center" />
+                                    </Grid>
+
+                                    <TextBlock Grid.Column="4"
+                                               Text="Allowed range: 1 MB to 1,048,576 MB."
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontSize="11"
+                                               VerticalAlignment="Center"
+                                               TextWrapping="Wrap" />
+                                </Grid>
+
+                                <Border Margin="0,14,0,14"
+                                        Height="1"
+                                        Background="{StaticResource BorderBrush}" />
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="220" />
+                                        <ColumnDefinition Width="24" />
+                                        <ColumnDefinition Width="220" />
+                                        <ColumnDefinition Width="24" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="System Monitor refresh"
+                                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                                   FontSize="13"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Margin="0,4,0,0"
+                                                   Text="Time between live CPU and memory updates."
+                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   FontSize="11"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <Grid Grid.Column="2" VerticalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="140" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Text="{Binding SystemMonitorRefreshIntervalText, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource InputTextBoxStyle}" />
+                                        <TextBlock Grid.Column="1"
+                                                   Margin="8,0,0,0"
+                                                   Text="seconds"
+                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   VerticalAlignment="Center" />
+                                    </Grid>
+
+                                    <TextBlock Grid.Column="4"
+                                               Text="Allowed range: 1 to 10 seconds."
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontSize="11"
+                                               VerticalAlignment="Center"
+                                               TextWrapping="Wrap" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Margin="0,14,0,0"
+                                Padding="18"
+                                Background="{StaticResource SurfaceBrush}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="220" />
+                                    <ColumnDefinition Width="24" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="SAFETY POLICY"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontSize="10"
+                                               FontWeight="Bold" />
+                                    <TextBlock Margin="0,5,0,0"
+                                               Text="Cleanup confirmation"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               FontSize="15"
+                                               FontWeight="SemiBold" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <CheckBox IsChecked="{Binding ConfirmBeforeCleanup, Mode=OneWay}"
+                                              IsEnabled="False"
+                                              Content="Always require confirmation before cleanup"
+                                              Foreground="{StaticResource TextPrimaryBrush}"
+                                              FontWeight="SemiBold" />
+                                    <TextBlock Margin="0,7,0,0"
+                                               Text="This safety setting is mandatory and cannot be disabled. System Performance Accelerator never deletes or recycles files without explicit confirmation."
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontSize="11"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Margin="0,14,0,0"
+                                Padding="18"
+                                Background="{StaticResource SurfaceMutedBrush}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="LOCAL STORAGE"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="10"
+                                           FontWeight="Bold" />
+                                <TextBlock Margin="0,5,0,0"
+                                           Text="Settings are saved as a local JSON file. No cloud account, telemetry, or registry writing is used."
+                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                           FontSize="12"
+                                           TextWrapping="Wrap" />
+                                <TextBlock Margin="0,7,0,0"
+                                           Text="{Binding SettingsPath}"
+                                           ToolTip="{Binding SettingsPath}"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="11"
+                                           TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <Border Grid.Row="1"
+                        Margin="0,14,0,0"
+                        Style="{StaticResource OperationStatusPanelStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Width="34" Height="34" Background="#E8F2FC" CornerRadius="17">
+                            <TextBlock Text="&#xE713;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       Foreground="{StaticResource AccentBrush}"
+                                       FontSize="15"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+
+                        <StackPanel Grid.Column="1" Margin="11,0,18,0" VerticalAlignment="Center">
+                            <TextBlock Text="SETTINGS STATUS" Style="{StaticResource OperationStatusLabelStyle}" />
+                            <TextBlock Margin="0,3,0,0"
+                                       Text="{Binding Status}"
+                                       ToolTip="{Binding Status}"
+                                       Style="{StaticResource OperationStatusMessageStyle}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Command="{Binding RestoreDefaultsCommand}"
+                                    Content="Restore defaults"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Margin="0,0,8,0" />
+                            <Button Command="{Binding SaveCommand}"
+                                    Content="Save settings"
+                                    Style="{StaticResource PrimaryButtonStyle}" />
+                        </StackPanel>
                     </Grid>
                 </Border>
             </Grid>

@@ -1,4 +1,5 @@
 using System.Windows;
+using SystemPerformanceAccelerator.Desktop.Services;
 using SystemPerformanceAccelerator.Desktop.ViewModels;
 using SystemPerformanceAccelerator.Infrastructure.Services;
 
@@ -8,6 +9,10 @@ public partial class MainWindow : Window
 {
     public MainWindow()
     {
+        var applicationSettingsService = new ApplicationSettingsService();
+        var settingsLoadResult = applicationSettingsService.Load();
+        ThemeManager.Apply(settingsLoadResult.Settings.Theme);
+
         InitializeComponent();
 
         var temporaryFileService = new TemporaryFileService();
@@ -28,6 +33,8 @@ public partial class MainWindow : Window
             new DuplicateFileCleanupService(largeFileCleanupService),
             startupItemService,
             systemMonitorService,
-            healthCheckService);
+            healthCheckService,
+            applicationSettingsService,
+            settingsLoadResult);
     }
 }

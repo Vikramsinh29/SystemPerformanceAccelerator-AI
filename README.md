@@ -136,6 +136,18 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Long completion and error messages wrap cleanly
 - Presentation-only implementation with no scanning, cleanup, safety-rule, or business-logic changes
 
+### Settings
+
+- Local-only settings stored as JSON under `%LOCALAPPDATA%\SystemPerformanceAccelerator\settings.json`
+- System, Light, and Dark appearance choices
+- Default Large File Finder minimum size
+- Configurable System Monitor refresh interval from 1 to 10 seconds
+- Save Settings and Restore Defaults actions
+- Values persist safely across application restarts
+- Invalid, missing, or malformed settings fall back safely to defaults
+- Cleanup confirmation remains permanently enabled as a non-disableable safety rule
+- No cloud account, telemetry, registry writing, startup modification, or automatic optimization
+
 ### Shared WPF table interaction
 
 All selectable result tables must use the same application-wide behaviour:
@@ -150,7 +162,7 @@ All selectable result tables must use the same application-wide behaviour:
 ## Verified state
 
 - Release build succeeds.
-- xUnit suite: 48 passed, 0 failed.
+- xUnit suite: 52 passed, 0 failed.
 - Cleaner scan and safe cleanup manually verified.
 - Large File Finder scan and Recycle Bin cleanup manually verified.
 - Shared one-click checkbox and double-click row selection manually verified in all selectable tables.
@@ -176,6 +188,10 @@ All selectable result tables must use the same application-wide behaviour:
 - Cleaner, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Health Check regression checks passed after Sprint 11.
 - Cross-tool structured result panels, summary values, first-issue presentation, message wrapping, and consistent status styling manually verified after Sprint 12.
 - Cleaner, Custom Clean, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Health Check remained functionally unchanged during Sprint 12 regression verification.
+- Settings System, Light, and Dark appearance choices manually verified.
+- Settings persistence across restart, Save Settings, Restore Defaults, invalid-value handling, Large File Finder default size, and System Monitor refresh interval manually verified.
+- Cleanup confirmation was verified to remain permanently enabled.
+- Cleaner, Custom Clean, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Health Check regression checks passed after Sprint 13.
 
 ## Canonical commands
 
