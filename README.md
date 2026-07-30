@@ -208,6 +208,19 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Existing module layouts remain functional and responsive
 - No feature logic, cleanup behaviour, licensing rule, or system-modification behaviour changed
 
+### Cleaner premium UI migration
+
+- Cleaner uses the shared premium Fluent-inspired design system
+- Premium action hero explains manual review and confirmation requirements
+- Clear `Scan now`, `Clean selected`, and `Cancel current operation` actions
+- Summary cards show files found, reclaimable space, and current activity
+- Cleanup candidates remain individually reviewable before confirmation
+- Improved results table, empty state, progress, and operation-result presentation
+- Responsive layout works at normal and maximized window sizes
+- Light and dark themes remain fully supported
+- Existing Cleaner commands, cleanup categories, confirmation flow, and safety behaviour are unchanged
+- No new cleanup rules, automatic cleaning, scheduling behaviour, or deletion logic was added
+
 ### Responsive layout
 
 - Large File Finder Folder or Drive field remains usable at restored and narrow widths
@@ -280,6 +293,12 @@ All selectable result tables must use the same application-wide behaviour:
 - Shared controls were verified without clipping, overlap, broken commands, or responsiveness regressions.
 - Release build succeeded and the xUnit suite remained at 103 passed, 0 failed after Sprint 19.
 - No feature logic, cleanup behaviour, licensing rule, automatic execution, or system-modification behaviour changed.
+- Cleaner premium action hero, safety messaging, summary cards, cleanup-candidate table, empty state, progress, and result presentation were manually verified after Sprint 20.
+- Cleaner `Scan now`, `Clean selected`, `Cancel current operation`, confirmation, and result-summary behaviour were regression verified.
+- Cleaner was manually verified in light and dark themes and at normal and maximized window sizes.
+- Health Check, Custom Clean, Auto Clean Schedule, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Settings remained functional and theme-aware in their current phased-migration layouts.
+- No Cleaner service, view-model, command, cleanup category, confirmation rule, scheduling behaviour, or deletion logic changed.
+- Release build succeeded and the xUnit suite remained at 103 passed, 0 failed after Sprint 20.
 - System Monitor live CPU and physical-memory values, Start/Stop controls, automatic stop on tab change, and read-only scope manually verified.
 - Cleaner, Large File Finder, Duplicate File Finder, and Startup Manager regression opening checks passed after Sprint 8.
 - Health Check system-drive, CPU, memory, and startup summary results manually verified.
@@ -508,11 +527,11 @@ This rule is mandatory. Repeated blind patches are not acceptable.
 
 ## Current milestone
 
-Sprint 19 — Premium Visual Design System Foundation.
+Sprint 20 — Cleaner Premium UI Migration.
 
 ## Next milestone
 
-Sprint 20 — Cleaner Premium UI Migration, only after Sprint 19 is committed, pushed, and the working tree is clean.
+Sprint 21 — Premium Window Chrome and Shell Polish, only after Sprint 20 is committed, pushed, and the working tree is clean.
 
 ## Compact AI handoff
 
