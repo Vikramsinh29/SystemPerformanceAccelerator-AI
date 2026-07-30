@@ -2460,7 +2460,7 @@
                 <Grid.Resources>
                     <Style x:Key="ScheduleSurfaceCardStyle"
                            TargetType="Border"
-                           BasedOn="{StaticResource FluentCardStyle}">
+                           BasedOn="{StaticResource FluentElevatedCardStyle}">
                         <Setter Property="CornerRadius" Value="12" />
                     </Style>
                     <Style x:Key="ScheduleSectionTitleStyle"
@@ -2660,7 +2660,7 @@
                                 <Button Grid.Column="1"
                                         Command="{Binding NewScheduleCommand}"
                                         Content="Create schedule"
-                                        Style="{StaticResource PrimaryButtonStyle}" />
+                                        Style="{StaticResource FluentPrimaryButtonStyle}" />
                             </Grid>
 
                             <Grid Grid.Row="1" Margin="22,0,22,0">
@@ -2782,7 +2782,7 @@
                                         <Button Margin="0,18,0,0"
                                                 Command="{Binding NewScheduleCommand}"
                                                 Content="Create first schedule"
-                                                Style="{StaticResource PrimaryButtonStyle}"
+                                                Style="{StaticResource FluentPrimaryButtonStyle}"
                                                 HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
@@ -2806,11 +2806,11 @@
                                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                                         <Button Command="{Binding EditSelectedScheduleCommand}"
                                                 Content="Edit selected"
-                                                Style="{StaticResource SecondaryButtonStyle}"
+                                                Style="{StaticResource FluentSecondaryButtonStyle}"
                                                 Margin="0,0,8,0" />
                                         <Button Command="{Binding RemoveScheduleCommand}"
                                                 Content="Remove"
-                                                Style="{StaticResource SecondaryButtonStyle}" />
+                                                Style="{StaticResource FluentSecondaryButtonStyle}" />
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -2854,7 +2854,7 @@
                         </Grid.ColumnDefinitions>
                         <Button Command="{Binding BackToSchedulesCommand}"
                                 Content="←  Back to schedules"
-                                Style="{StaticResource SecondaryButtonStyle}" />
+                                Style="{StaticResource FluentSecondaryButtonStyle}" />
                         <StackPanel Grid.Column="2" VerticalAlignment="Center">
                             <TextBlock Text="{Binding EditorTitle}"
                                        Foreground="{DynamicResource TextPrimaryBrush}"
@@ -2901,7 +2901,7 @@
                                 <TextBox Height="42"
                                          Text="{Binding ScheduleName, UpdateSourceTrigger=PropertyChanged}"
                                          MaxLength="80"
-                                         Style="{StaticResource InputTextBoxStyle}" />
+                                         Style="{StaticResource FluentTextBoxStyle}" />
 
                                 <Grid Margin="0,18,0,0">
                                     <Grid.ColumnDefinitions>
@@ -2914,13 +2914,13 @@
                                         <ComboBox Height="42"
                                                   ItemsSource="{Binding Frequencies}"
                                                   SelectedItem="{Binding Frequency, Mode=TwoWay}"
-                                                  Style="{StaticResource InputComboBoxStyle}" />
+                                                  Style="{StaticResource FluentComboBoxStyle}" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="2">
                                         <TextBlock Text="Local time (HH:mm)" Style="{StaticResource ScheduleFieldLabelStyle}" />
                                         <TextBox Height="42"
                                                  Text="{Binding RunAtLocalTimeText, UpdateSourceTrigger=PropertyChanged}"
-                                                 Style="{StaticResource InputTextBoxStyle}" />
+                                                 Style="{StaticResource FluentTextBoxStyle}" />
                                     </StackPanel>
                                 </Grid>
 
@@ -2930,13 +2930,13 @@
                                         <ComboBox Height="42"
                                                   ItemsSource="{Binding WeekDays}"
                                                   SelectedItem="{Binding WeeklyDay, Mode=TwoWay}"
-                                                  Style="{StaticResource InputComboBoxStyle}" />
+                                                  Style="{StaticResource FluentComboBoxStyle}" />
                                     </StackPanel>
                                     <StackPanel Visibility="{Binding IsMonthlyFrequency, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <TextBlock Text="Day of month (1–31)" Style="{StaticResource ScheduleFieldLabelStyle}" />
                                         <TextBox Height="42"
                                                  Text="{Binding MonthlyDayText, UpdateSourceTrigger=PropertyChanged}"
-                                                 Style="{StaticResource InputTextBoxStyle}" />
+                                                 Style="{StaticResource FluentTextBoxStyle}" />
                                     </StackPanel>
                                 </Grid>
 
@@ -3018,11 +3018,11 @@
                                             <StackPanel Grid.Column="1" Orientation="Horizontal">
                                                 <Button Command="{Binding PreviewNowCommand}"
                                                         Content="Preview now"
-                                                        Style="{StaticResource SecondaryButtonStyle}"
+                                                        Style="{StaticResource FluentSecondaryButtonStyle}"
                                                         Margin="0,0,8,0" />
                                                 <Button Command="{Binding CancelPreviewCommand}"
                                                         Content="Cancel"
-                                                        Style="{StaticResource SecondaryButtonStyle}" />
+                                                        Style="{StaticResource FluentSecondaryButtonStyle}" />
                                             </StackPanel>
                                         </Grid>
 
@@ -3098,11 +3098,11 @@
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="16,0,0,0">
                                 <Button Command="{Binding BackToSchedulesCommand}"
                                         Content="Cancel"
-                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Style="{StaticResource FluentSecondaryButtonStyle}"
                                         Margin="0,0,8,0" />
                                 <Button Command="{Binding SaveScheduleCommand}"
                                         Content="{Binding SaveButtonText}"
-                                        Style="{StaticResource PrimaryButtonStyle}" />
+                                        Style="{StaticResource FluentPrimaryButtonStyle}" />
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -3116,11 +3116,34 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <Grid>
+                <Border Grid.Row="0"
+                        Padding="18,16"
+                        Style="{StaticResource FluentElevatedCardStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="48" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Border Width="40" Height="40" CornerRadius="11" Background="{DynamicResource AccentSoftBrush}" VerticalAlignment="Center">
+                            <TextBlock Text="&#xE7C3;" FontFamily="Segoe MDL2 Assets" FontSize="17" Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="12,0,20,0" VerticalAlignment="Center">
+                            <TextBlock Text="Large file review" Style="{StaticResource FluentSectionTitleStyle}" />
+                            <TextBlock Margin="0,4,0,0" Text="Scan a folder or drive, review every result, then explicitly confirm any deletion." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11.5" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Border Grid.Column="2" Padding="10,6" Background="{DynamicResource WarningSoftBrush}" CornerRadius="12" VerticalAlignment="Center">
+                            <TextBlock Text="Preview first • confirmation required" Foreground="{DynamicResource WarningBrush}" FontSize="10.5" FontWeight="SemiBold" />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="1" Margin="0,12,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="12" />
@@ -3129,75 +3152,77 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Column="0" Style="{StaticResource SummaryCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="FILES FOUND" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Margin="0,4,0,0" Text="{Binding FilesFound}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" />
-                        </StackPanel>
+                    <Border Grid.Column="0" Padding="18,14" Style="{StaticResource FluentCardStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource ScheduleMetricIconStyle}" Background="{DynamicResource AccentSoftBrush}">
+                                <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="FILES FOUND" Style="{StaticResource FluentCaptionStyle}" />
+                                <TextBlock Margin="0,3,0,0" Text="{Binding FilesFound}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Grid>
                     </Border>
 
-                    <Border Grid.Column="2" Style="{StaticResource SummaryCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="TOTAL MATCHED SIZE" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Margin="0,4,0,0" Text="{Binding TotalSize}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" />
-                        </StackPanel>
+                    <Border Grid.Column="2" Padding="18,14" Style="{StaticResource FluentCardStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource ScheduleMetricIconStyle}" Background="{DynamicResource SuccessSoftBrush}">
+                                <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="{DynamicResource SuccessBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="TOTAL MATCHED SIZE" Style="{StaticResource FluentCaptionStyle}" />
+                                <TextBlock Margin="0,3,0,0" Text="{Binding TotalSize}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Grid>
                     </Border>
 
-                    <Border Grid.Column="4" Style="{StaticResource SummaryCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="SCAN STATUS / TIME" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Margin="0,7,0,0" Text="{Binding ScanStatus}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="15" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                        </StackPanel>
+                    <Border Grid.Column="4" Padding="18,14" Style="{StaticResource FluentCardStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource ScheduleMetricIconStyle}" Background="{DynamicResource SurfaceMutedBrush}">
+                                <TextBlock Text="&#xE823;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="SCAN STATUS / TIME" Style="{StaticResource FluentCaptionStyle}" />
+                                <TextBlock Margin="0,5,0,0" Text="{Binding ScanStatus}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </Grid>
                     </Border>
                 </Grid>
 
-                <Border Grid.Row="1" Margin="0,16,0,12" Padding="16,14" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+                <Border Grid.Row="2" Margin="0,12,0,12" Padding="18,15" Style="{StaticResource FluentCardStyle}">
                     <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-
+                        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="3*" MinWidth="300" />
                                 <ColumnDefinition Width="12" />
                                 <ColumnDefinition Width="1*" MinWidth="130" />
                             </Grid.ColumnDefinitions>
-
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="FOLDER OR DRIVE" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                                <Grid Margin="0,6,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="8" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBox Text="{Binding SelectedFolder, UpdateSourceTrigger=PropertyChanged}"
-                                             ToolTip="{Binding SelectedFolder}"
-                                             Style="{StaticResource InputTextBoxStyle}" />
-                                    <Button Grid.Column="2" Command="{Binding BrowseCommand}" Content="Browse" Style="{StaticResource SecondaryButtonStyle}" MinWidth="90" />
+                                <TextBlock Text="FOLDER OR DRIVE" Style="{StaticResource FluentCaptionStyle}" />
+                                <Grid Margin="0,7,0,0">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="8" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <TextBox Text="{Binding SelectedFolder, UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding SelectedFolder}" Style="{StaticResource FluentTextBoxStyle}" />
+                                    <Button Grid.Column="2" Command="{Binding BrowseCommand}" Content="Browse" Style="{StaticResource FluentSecondaryButtonStyle}" MinWidth="90" />
                                 </Grid>
                             </StackPanel>
-
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="MINIMUM SIZE (MB)" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                                <TextBox Margin="0,6,0,0"
-                                         Text="{Binding MinimumSizeText, UpdateSourceTrigger=PropertyChanged}"
-                                         Style="{StaticResource InputTextBoxStyle}"
-                                         HorizontalContentAlignment="Right" />
+                                <TextBlock Text="MINIMUM SIZE (MB)" Style="{StaticResource FluentCaptionStyle}" />
+                                <TextBox Margin="0,7,0,0" Text="{Binding MinimumSizeText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FluentTextBoxStyle}" HorizontalContentAlignment="Right" />
                             </StackPanel>
                         </Grid>
-
-                        <StackPanel Grid.Row="1" Margin="0,10,0,0" Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Command="{Binding ScanCommand}" Content="Scan" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
-                            <Button Command="{Binding DeleteSelectedCommand}" Content="Delete selected" Style="{StaticResource CleanButtonStyle}" Margin="0,0,8,0" />
-                            <Button Command="{Binding CancelCommand}" Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" />
+                        <StackPanel Grid.Row="1" Margin="0,11,0,0" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Command="{Binding ScanCommand}" Content="Scan files" Style="{StaticResource FluentPrimaryButtonStyle}" Margin="0,0,8,0" />
+                            <Button Command="{Binding DeleteSelectedCommand}" Content="Delete selected" Style="{StaticResource FluentDangerButtonStyle}" Margin="0,0,8,0" />
+                            <Button Command="{Binding CancelCommand}" Content="Cancel" Style="{StaticResource FluentSecondaryButtonStyle}" />
                         </StackPanel>
                     </Grid>
                 </Border>
 
-                <Border Grid.Row="2" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
+                <Border Grid.Row="3" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
                     <DataGrid x:Name="LargeFilesGrid"
                               ItemsSource="{Binding Results}"
                               behaviors:DataGridSelectionBehavior.IsEnabled="True"
@@ -3238,7 +3263,7 @@
                     </DataGrid>
                 </Border>
 
-                <Border Grid.Row="3"
+                <Border Grid.Row="4"
                         Margin="0,14,0,0"
                         Style="{StaticResource OperationStatusPanelStyle}">
                     <Grid>
@@ -3302,88 +3327,71 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="12" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="12" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-
-                    <Border Grid.Column="0" Style="{StaticResource SummaryCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="DUPLICATE GROUPS" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Margin="0,4,0,0" Text="{Binding GroupsFound}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" />
+                <Border Grid.Row="0" Padding="18,16" Style="{StaticResource FluentElevatedCardStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="48" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <Border Width="40" Height="40" CornerRadius="11" Background="{DynamicResource AccentSoftBrush}" VerticalAlignment="Center">
+                            <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="17" Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="12,0,20,0" VerticalAlignment="Center">
+                            <TextBlock Text="Duplicate file review" Style="{StaticResource FluentSectionTitleStyle}" />
+                            <TextBlock Margin="0,4,0,0" Text="Confirm identical-content groups, select only extra copies, then explicitly approve Recycle Bin cleanup." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11.5" TextWrapping="Wrap" />
                         </StackPanel>
+                        <Border Grid.Column="2" Padding="10,6" Background="{DynamicResource WarningSoftBrush}" CornerRadius="12" VerticalAlignment="Center">
+                            <TextBlock Text="Hash-confirmed • recycle only" Foreground="{DynamicResource WarningBrush}" FontSize="10.5" FontWeight="SemiBold" />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="1" Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="12" /><ColumnDefinition Width="*" /><ColumnDefinition Width="12" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Padding="18,14" Style="{StaticResource FluentCardStyle}">
+                        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource ScheduleMetricIconStyle}" Background="{DynamicResource AccentSoftBrush}"><TextBlock Text="&#xE8FD;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="DUPLICATE GROUPS" Style="{StaticResource FluentCaptionStyle}" /><TextBlock Margin="0,3,0,0" Text="{Binding GroupsFound}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" /></StackPanel>
+                        </Grid>
                     </Border>
-
-                    <Border Grid.Column="2" Style="{StaticResource SummaryCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="CONFIRMED FILES" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Margin="0,4,0,0" Text="{Binding DuplicateFiles}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" />
-                        </StackPanel>
+                    <Border Grid.Column="2" Padding="18,14" Style="{StaticResource FluentCardStyle}">
+                        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource ScheduleMetricIconStyle}" Background="{DynamicResource SuccessSoftBrush}"><TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="{DynamicResource SuccessBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="CONFIRMED FILES" Style="{StaticResource FluentCaptionStyle}" /><TextBlock Margin="0,3,0,0" Text="{Binding DuplicateFiles}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" /></StackPanel>
+                        </Grid>
                     </Border>
-
-                    <Border Grid.Column="4" Style="{StaticResource SummaryCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="POTENTIAL RECLAIMABLE" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Margin="0,4,0,0" Text="{Binding PotentialReclaimableSpace}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" />
-                        </StackPanel>
+                    <Border Grid.Column="4" Padding="18,14" Style="{StaticResource FluentCardStyle}">
+                        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource ScheduleMetricIconStyle}" Background="{DynamicResource WarningSoftBrush}"><TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="{DynamicResource WarningBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="POTENTIAL RECLAIMABLE" Style="{StaticResource FluentCaptionStyle}" /><TextBlock Margin="0,3,0,0" Text="{Binding PotentialReclaimableSpace}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" /></StackPanel>
+                        </Grid>
                     </Border>
                 </Grid>
 
-                <Border Grid.Row="1" Margin="0,16,0,12" Padding="16,14" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+                <Border Grid.Row="2" Margin="0,12,0,12" Padding="18,15" Style="{StaticResource FluentCardStyle}">
                     <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-
+                        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                         <StackPanel>
-                            <TextBlock Text="FOLDER OR DRIVE" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <Grid Margin="0,6,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="8" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBox Text="{Binding SelectedFolder, UpdateSourceTrigger=PropertyChanged}"
-                                         ToolTip="{Binding SelectedFolder}"
-                                         Style="{StaticResource InputTextBoxStyle}" />
-                                <Button Grid.Column="2" Command="{Binding BrowseCommand}" Content="Browse" Style="{StaticResource SecondaryButtonStyle}" MinWidth="90" />
+                            <TextBlock Text="FOLDER OR DRIVE" Style="{StaticResource FluentCaptionStyle}" />
+                            <Grid Margin="0,7,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="8" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding SelectedFolder, UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding SelectedFolder}" Style="{StaticResource FluentTextBoxStyle}" />
+                                <Button Grid.Column="2" Command="{Binding BrowseCommand}" Content="Browse" Style="{StaticResource FluentSecondaryButtonStyle}" MinWidth="90" />
                             </Grid>
                         </StackPanel>
-
-                        <Grid Grid.Row="1" Margin="0,10,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="12" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-
-                            <TextBlock Text="{Binding SelectionSummary}"
-                                       ToolTip="{Binding SelectionSummary}"
-                                       VerticalAlignment="Center"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"
-                                       FontSize="11"
-                                       FontWeight="SemiBold"
-                                       TextTrimming="CharacterEllipsis" />
-
+                        <Grid Grid.Row="1" Margin="0,11,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="12" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding SelectionSummary}" ToolTip="{Binding SelectionSummary}" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                             <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                <Button Command="{Binding ScanCommand}" Content="Scan" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
-                                <Button Command="{Binding CancelCommand}" Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" />
-                                <Button Command="{Binding RecycleSelectedCommand}" Content="Recycle Selected" Style="{StaticResource CleanButtonStyle}" MinWidth="145" />
+                                <Button Command="{Binding ScanCommand}" Content="Scan duplicates" Style="{StaticResource FluentPrimaryButtonStyle}" Margin="0,0,8,0" />
+                                <Button Command="{Binding CancelCommand}" Content="Cancel" Style="{StaticResource FluentSecondaryButtonStyle}" Margin="0,0,8,0" />
+                                <Button Command="{Binding RecycleSelectedCommand}" Content="Recycle selected" Style="{StaticResource FluentDangerButtonStyle}" MinWidth="145" />
                             </StackPanel>
                         </Grid>
                     </Grid>
                 </Border>
 
-                <Border Grid.Row="2" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
+                <Border Grid.Row="3" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
                     <DataGrid x:Name="DuplicateFilesGrid"
                               ItemsSource="{Binding GroupedResults}"
                               behaviors:DataGridSelectionBehavior.IsEnabled="True"
@@ -3600,7 +3608,7 @@
                     </DataGrid>
                 </Border>
 
-                <Border Grid.Row="3"
+                <Border Grid.Row="4"
                         Margin="0,14,0,0"
                         Style="{StaticResource OperationStatusPanelStyle}">
                     <Grid>
@@ -3668,59 +3676,27 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="12" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="12" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-
-                    <Border Grid.Column="0" Style="{StaticResource SummaryCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="STARTUP ITEMS" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Margin="0,4,0,0" Text="{Binding ItemsFound}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" />
-                        </StackPanel>
-                    </Border>
-
-                    <Border Grid.Column="2" Style="{StaticResource SummaryCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="ENABLED" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Margin="0,4,0,0" Text="{Binding EnabledItems}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" />
-                        </StackPanel>
-                    </Border>
-
-                    <Border Grid.Column="4" Style="{StaticResource SummaryCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="DISABLED" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Margin="0,4,0,0" Text="{Binding DisabledItems}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" />
-                        </StackPanel>
-                    </Border>
-                </Grid>
-
-                <Border Grid.Row="1" Margin="0,16,0,12" Padding="16,14" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+                <Border Grid.Row="0" Padding="18,16" Style="{StaticResource FluentElevatedCardStyle}">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="READ-ONLY STARTUP INVENTORY" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Margin="0,5,0,0"
-                                       Text="Registry Run entries and current-user/all-users Startup folders. Nothing can be enabled, disabled, edited, or removed here."
-                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                       FontSize="12"
-                                       TextWrapping="Wrap" />
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="48" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <Border Width="40" Height="40" CornerRadius="11" Background="{DynamicResource AccentSoftBrush}" VerticalAlignment="Center"><TextBlock Text="&#xE768;" FontFamily="Segoe MDL2 Assets" FontSize="17" Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+                        <StackPanel Grid.Column="1" Margin="12,0,20,0" VerticalAlignment="Center">
+                            <TextBlock Text="Startup inventory" Style="{StaticResource FluentSectionTitleStyle}" />
+                            <TextBlock Margin="0,4,0,0" Text="Read startup entries from supported Windows locations without disabling, deleting, or changing them." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11.5" TextWrapping="Wrap" />
                         </StackPanel>
-
-                        <StackPanel Grid.Column="1" Margin="18,0,0,0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Button Command="{Binding ScanCommand}" Content="Scan" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
-                            <Button Command="{Binding CancelCommand}" Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" />
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Command="{Binding ScanCommand}" Content="Scan startup items" Style="{StaticResource FluentPrimaryButtonStyle}" Margin="0,0,8,0" />
+                            <Button Command="{Binding CancelCommand}" Content="Cancel" Style="{StaticResource FluentSecondaryButtonStyle}" />
                         </StackPanel>
                     </Grid>
                 </Border>
+
+                <Grid Grid.Row="1" Margin="0,12,0,12">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="12" /><ColumnDefinition Width="*" /><ColumnDefinition Width="12" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Padding="18,14" Style="{StaticResource FluentCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource ScheduleMetricIconStyle}" Background="{DynamicResource AccentSoftBrush}"><TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border><StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="STARTUP ITEMS" Style="{StaticResource FluentCaptionStyle}" /><TextBlock Margin="0,3,0,0" Text="{Binding ItemsFound}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" /></StackPanel></Grid></Border>
+                    <Border Grid.Column="2" Padding="18,14" Style="{StaticResource FluentCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource ScheduleMetricIconStyle}" Background="{DynamicResource SuccessSoftBrush}"><TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="{DynamicResource SuccessBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border><StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="ENABLED" Style="{StaticResource FluentCaptionStyle}" /><TextBlock Margin="0,3,0,0" Text="{Binding EnabledItems}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" /></StackPanel></Grid></Border>
+                    <Border Grid.Column="4" Padding="18,14" Style="{StaticResource FluentCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource ScheduleMetricIconStyle}" Background="{DynamicResource SurfaceMutedBrush}"><TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border><StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="DISABLED" Style="{StaticResource FluentCaptionStyle}" /><TextBlock Margin="0,3,0,0" Text="{Binding DisabledItems}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" /></StackPanel></Grid></Border>
+                </Grid>
 
                 <Border Grid.Row="2" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
                     <DataGrid ItemsSource="{Binding Results}"
@@ -3838,68 +3814,21 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="12" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="12" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-
-                    <Border Grid.Column="0" Style="{StaticResource SummaryCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="CPU USAGE" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Margin="0,4,0,0" Text="{Binding CpuUsageText}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" />
-                        </StackPanel>
-                    </Border>
-
-                    <Border Grid.Column="2" Style="{StaticResource SummaryCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="MEMORY USAGE" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Margin="0,4,0,0" Text="{Binding MemoryUsageText}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" />
-                        </StackPanel>
-                    </Border>
-
-                    <Border Grid.Column="4" Style="{StaticResource SummaryCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="MEMORY USED" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Margin="0,4,0,0" Text="{Binding UsedMemoryText}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" />
-                        </StackPanel>
-                    </Border>
-                </Grid>
-
-                <Border Grid.Row="1"
-                        Margin="0,16,0,12"
-                        Padding="16,14"
-                        Background="{DynamicResource SurfaceBrush}"
-                        BorderBrush="{DynamicResource BorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8">
+                <Border Grid.Row="0" Padding="18,16" Style="{StaticResource FluentElevatedCardStyle}">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="READ-ONLY LIVE MONITOR" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Margin="0,5,0,0"
-                                       Text="Samples total system CPU usage and physical memory approximately once per second. It does not stop processes, optimize memory, or change Windows settings."
-                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                       FontSize="12"
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="1"
-                                    Margin="18,0,0,0"
-                                    Orientation="Horizontal"
-                                    VerticalAlignment="Center">
-                            <Button Command="{Binding StartCommand}" Content="Start" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
-                            <Button Command="{Binding StopCommand}" Content="Stop" Style="{StaticResource SecondaryButtonStyle}" />
-                        </StackPanel>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="48" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <Border Width="40" Height="40" CornerRadius="11" Background="{DynamicResource AccentSoftBrush}" VerticalAlignment="Center"><TextBlock Text="&#xE9D2;" FontFamily="Segoe MDL2 Assets" FontSize="17" Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+                        <StackPanel Grid.Column="1" Margin="12,0,20,0" VerticalAlignment="Center"><TextBlock Text="Live system telemetry" Style="{StaticResource FluentSectionTitleStyle}" /><TextBlock Margin="0,4,0,0" Text="Read total CPU and physical-memory activity without stopping processes, optimizing memory, or changing Windows." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11.5" TextWrapping="Wrap" /></StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"><Button Command="{Binding StartCommand}" Content="Start monitoring" Style="{StaticResource FluentPrimaryButtonStyle}" Margin="0,0,8,0" /><Button Command="{Binding StopCommand}" Content="Stop" Style="{StaticResource FluentSecondaryButtonStyle}" /></StackPanel>
                     </Grid>
                 </Border>
+
+                <Grid Grid.Row="1" Margin="0,12,0,12">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="12" /><ColumnDefinition Width="*" /><ColumnDefinition Width="12" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Padding="18,14" Style="{StaticResource FluentCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource ScheduleMetricIconStyle}" Background="{DynamicResource AccentSoftBrush}"><TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border><StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="CPU USAGE" Style="{StaticResource FluentCaptionStyle}" /><TextBlock Margin="0,3,0,0" Text="{Binding CpuUsageText}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" /></StackPanel></Grid></Border>
+                    <Border Grid.Column="2" Padding="18,14" Style="{StaticResource FluentCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource ScheduleMetricIconStyle}" Background="{DynamicResource SuccessSoftBrush}"><TextBlock Text="&#xE950;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="{DynamicResource SuccessBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border><StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="MEMORY USAGE" Style="{StaticResource FluentCaptionStyle}" /><TextBlock Margin="0,3,0,0" Text="{Binding MemoryUsageText}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" /></StackPanel></Grid></Border>
+                    <Border Grid.Column="4" Padding="18,14" Style="{StaticResource FluentCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource ScheduleMetricIconStyle}" Background="{DynamicResource WarningSoftBrush}"><TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="15" Foreground="{DynamicResource WarningBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border><StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="MEMORY USED" Style="{StaticResource FluentCaptionStyle}" /><TextBlock Margin="0,3,0,0" Text="{Binding UsedMemoryText}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" /></StackPanel></Grid></Border>
+                </Grid>
 
                 <Grid Grid.Row="2">
                     <Grid.ColumnDefinitions>
@@ -3910,10 +3839,7 @@
 
                     <Border Grid.Column="0"
                             Padding="20"
-                            Background="{DynamicResource SurfaceBrush}"
-                            BorderBrush="{DynamicResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="8">
+                            Style="{StaticResource FluentElevatedCardStyle}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -3947,10 +3873,7 @@
 
                     <Border Grid.Column="2"
                             Padding="20"
-                            Background="{DynamicResource SurfaceBrush}"
-                            BorderBrush="{DynamicResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="8">
+                            Style="{StaticResource FluentElevatedCardStyle}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -4056,11 +3979,17 @@
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
                     <StackPanel HorizontalAlignment="Stretch">
+                        <Border Margin="0,0,0,14" Padding="18,16" Style="{StaticResource FluentElevatedCardStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="48" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <Border Width="40" Height="40" CornerRadius="11" Background="{DynamicResource AccentSoftBrush}" VerticalAlignment="Center"><TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="17" Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+                                <StackPanel Grid.Column="1" Margin="12,0,20,0" VerticalAlignment="Center"><TextBlock Text="Local application settings" Style="{StaticResource FluentSectionTitleStyle}" /><TextBlock Margin="0,4,0,0" Text="Choose appearance and safe operating defaults. Settings remain local and cleanup confirmation stays mandatory." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11.5" TextWrapping="Wrap" /></StackPanel>
+                                <Border Grid.Column="2" Padding="10,6" Background="{DynamicResource AccentSoftBrush}" CornerRadius="12" VerticalAlignment="Center"><TextBlock Text="Local only • immediate theme preview" Foreground="{DynamicResource AccentBrush}" FontSize="10.5" FontWeight="SemiBold" /></Border>
+                            </Grid>
+                        </Border>
+
                         <Border Padding="18"
-                                Background="{DynamicResource SurfaceBrush}"
-                                BorderBrush="{DynamicResource BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="8">
+                                Style="{StaticResource FluentCardStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="1.25*" MinWidth="180" />
@@ -4092,16 +4021,13 @@
                                           VerticalAlignment="Center"
                                           ItemsSource="{Binding ThemeOptions}"
                                           SelectedItem="{Binding SelectedTheme, Mode=TwoWay}"
-                                          Style="{StaticResource InputComboBoxStyle}" />
+                                          Style="{StaticResource FluentComboBoxStyle}" />
                             </Grid>
                         </Border>
 
                         <Border Margin="0,14,0,0"
                                 Padding="18"
-                                Background="{DynamicResource SurfaceBrush}"
-                                BorderBrush="{DynamicResource BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="8">
+                                Style="{StaticResource FluentCardStyle}">
                             <StackPanel>
                                 <TextBlock Text="OPERATING DEFAULTS"
                                            Foreground="{DynamicResource TextSecondaryBrush}"
@@ -4135,7 +4061,7 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <TextBox Text="{Binding LargeFileMinimumSizeText, UpdateSourceTrigger=PropertyChanged}"
-                                                 Style="{StaticResource InputTextBoxStyle}" />
+                                                 Style="{StaticResource FluentTextBoxStyle}" />
                                         <TextBlock Grid.Column="1"
                                                    Margin="8,0,0,0"
                                                    Text="MB"
@@ -4182,7 +4108,7 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <TextBox Text="{Binding SystemMonitorRefreshIntervalText, UpdateSourceTrigger=PropertyChanged}"
-                                                 Style="{StaticResource InputTextBoxStyle}" />
+                                                 Style="{StaticResource FluentTextBoxStyle}" />
                                         <TextBlock Grid.Column="1"
                                                    Margin="8,0,0,0"
                                                    Text="seconds"
@@ -4202,10 +4128,7 @@
 
                         <Border Margin="0,14,0,0"
                                 Padding="18"
-                                Background="{DynamicResource SurfaceBrush}"
-                                BorderBrush="{DynamicResource BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="8">
+                                Style="{StaticResource FluentCardStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="1.1*" MinWidth="170" />
@@ -4292,11 +4215,11 @@
                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                             <Button Command="{Binding RestoreDefaultsCommand}"
                                     Content="Restore defaults"
-                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Style="{StaticResource FluentSecondaryButtonStyle}"
                                     Margin="0,0,8,0" />
                             <Button Command="{Binding SaveCommand}"
                                     Content="Save settings"
-                                    Style="{StaticResource PrimaryButtonStyle}" />
+                                    Style="{StaticResource FluentPrimaryButtonStyle}" />
                         </StackPanel>
                     </Grid>
                 </Border>
