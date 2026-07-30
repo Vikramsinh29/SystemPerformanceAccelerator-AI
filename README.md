@@ -61,6 +61,15 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Deleted, skipped, failed, reclaimed-space, and duration reporting
 - No registry cleanup or unrelated system-changing action
 
+- Premium overview hero explains category selection, read-only preview, and explicit confirmation
+- Premium `Preview selected`, `Clean previewed`, and `Cancel current operation` actions use the shared design system
+- Cleanup Category, Categories Selected, Files Found, and Reclaimable Space cards use consistent hierarchy, spacing, icons, and status colours
+- Premium empty state appears when the current preview has no results
+- Preview table uses the shared Fluent table design while preserving category, filename, size, modified date, and location
+- Preview state, progress, status, operation result, and shared bottom status-panel presentation remain visible and consistent
+- Light and dark themes and normal, maximized, and resized layouts are supported
+- Existing Custom Clean categories, services, commands, confirmation flow, cancellation, safety checks, and cleanup scope are unchanged
+
 ### Large File Finder
 
 - Folder or drive selection
@@ -345,6 +354,16 @@ All selectable result tables must use the same application-wide behaviour:
 - Cleaner, Custom Clean, Auto Clean Schedule, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Settings remained functionally unchanged.
 - Release build succeeded and the xUnit suite remained at 103 passed, 0 failed after Sprint 22.
 - No Health Check service, view-model, command, threshold, recommendation rule, system-modification, or automatic-fix behaviour changed.
+- Custom Clean premium overview hero, preview-first safety message, `Preview selected`, `Clean previewed`, and `Cancel current operation` actions were manually verified after Sprint 23.
+- Cleanup category selection and busy-state disabling remained functional.
+- Categories Selected, Files Found, Reclaimable Space, preview state, progress, status, and operation-result values were regression verified.
+- Premium empty state and preview-results table were manually verified with category, filename, size, modified date, and location intact.
+- Existing confirmation-No, confirmation-Yes, cancellation, supported-category scope, and safe cleanup behaviour remained unchanged.
+- Shared bottom status-panel size, icon geometry, colour semantics, and alignment matched the other premium modules.
+- Custom Clean was manually verified in Light and Dark themes and at normal, maximized, and resized window sizes without clipping, overlap, or misalignment.
+- Cleaner, Health Check, Auto Clean Schedule, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Settings remained functionally unchanged.
+- Release build succeeded and the xUnit suite remained at 103 passed, 0 failed after Sprint 23.
+- No Custom Clean service, view-model, command, cleanup category, cleanup rule, confirmation, safety, or system-modification behaviour changed.
 - System Monitor live CPU and physical-memory values, Start/Stop controls, automatic stop on tab change, and read-only scope manually verified.
 - Cleaner, Large File Finder, Duplicate File Finder, and Startup Manager regression opening checks passed after Sprint 8.
 - Health Check system-drive, CPU, memory, and startup summary results manually verified.
@@ -573,11 +592,11 @@ This rule is mandatory. Repeated blind patches are not acceptable.
 
 ## Current milestone
 
-Sprint 22 — Health Check Premium UI Migration.
+Sprint 23 — Custom Clean Premium UI Migration.
 
 ## Next milestone
 
-Sprint 23 — Custom Clean Premium UI Migration, only after Sprint 22 is committed, pushed, and the working tree is clean.
+Sprint 24 — Auto Clean Schedule Premium UI Migration, only after Sprint 23 is committed, pushed, and the working tree is clean.
 
 ## Compact AI handoff
 
