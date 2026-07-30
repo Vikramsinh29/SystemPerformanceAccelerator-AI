@@ -177,6 +177,24 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Trial, Locked, and Hidden behaviour is exercised without adding billing or real licensing
 - No payment gateway, subscription, account, product key, hardware fingerprint, licence server, or permanent commercial assignment
 
+### Auto Clean Schedule foundation
+
+- Local schedule plans are stored under `%LOCALAPPDATA%\SystemPerformanceAccelerator\auto-clean-schedules.json`
+- Create separate Daily, Weekly, and Monthly schedule plans
+- Configure local run time, weekday, or monthly day as appropriate
+- Include only existing safety-reviewed Cleaner categories
+- Enable and disable individual schedule plans
+- Calculate and display the next planned local run
+- Dedicated Fluent-inspired schedule overview and create/edit pages
+- Existing schedules remain visible and are not replaced when a new schedule is created
+- Editing updates only the explicitly selected schedule
+- Multiple distinct schedules persist safely across application restarts
+- Manual `Preview now` scans selected categories and reports files, reclaimable space, and issues
+- Preview remains read-only and does not delete or modify files
+- Maximum schedule count and malformed local-data handling fail safely
+- Integrated with the central Sprint 17 feature-access system
+- Planning foundation only: no automatic execution, Windows Task Scheduler, background service, registry change, or unattended cleanup
+
 ### Responsive layout
 
 - Large File Finder Folder or Drive field remains usable at restored and narrow widths
@@ -203,7 +221,7 @@ All selectable result tables must use the same application-wide behaviour:
 ## Verified state
 
 - Release build succeeds.
-- xUnit suite: 89 passed, 0 failed.
+- xUnit suite: 103 passed, 0 failed.
 - Cleaner scan and safe cleanup manually verified.
 - Large File Finder scan and Recycle Bin cleanup manually verified.
 - Shared one-click checkbox and double-click row selection manually verified in all selectable tables.
@@ -235,6 +253,14 @@ All selectable result tables must use the same application-wide behaviour:
 - Health Check recommendation navigation continued to open the correct feature-access-guarded target modules.
 - Release build succeeded and the xUnit suite increased to 89 passed, 0 failed after Sprint 17.
 - No payment, subscription, online licensing, account, product-key, hardware-fingerprint, or permanent commercial-tier implementation was added.
+- Auto Clean Schedule launch, sidebar navigation, summary cards, overview page, dedicated create/edit page, and Back navigation manually verified after Sprint 18.
+- Daily, Weekly, and Monthly schedule creation, next-run calculation, enable/disable, explicit selected-schedule editing, and local persistence across restart manually verified.
+- Creating additional schedules was verified to preserve every previously saved schedule instead of replacing one.
+- Manual Preview now was verified to report files, reclaimable space, and issues without deleting or modifying files.
+- Cleaner and Custom Clean regression checks passed after Sprint 18.
+- The read-only PreviewProgress binding was explicitly constrained to OneWay, preventing the verified WPF startup crash.
+- Release build succeeded and the xUnit suite increased to 103 passed, 0 failed after Sprint 18.
+- No automatic cleanup execution, Windows Task Scheduler integration, background service, registry modification, or unattended deletion was added.
 - System Monitor live CPU and physical-memory values, Start/Stop controls, automatic stop on tab change, and read-only scope manually verified.
 - Cleaner, Large File Finder, Duplicate File Finder, and Startup Manager regression opening checks passed after Sprint 8.
 - Health Check system-drive, CPU, memory, and startup summary results manually verified.
@@ -463,11 +489,11 @@ This rule is mandatory. Repeated blind patches are not acceptable.
 
 ## Current milestone
 
-Sprint 17 — Edition and Feature Access Foundation.
+Sprint 18 — Auto Clean Schedule Foundation.
 
 ## Next milestone
 
-Select one narrow functional module or reliability improvement only after Sprint 17 is committed, pushed, and the working tree is clean.
+Sprint 19 — Premium Visual Design System, only after Sprint 18 is committed, pushed, and the working tree is clean.
 
 ## Compact AI handoff
 

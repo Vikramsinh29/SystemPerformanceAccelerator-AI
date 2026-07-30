@@ -17,6 +17,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         Cleaner,
         HealthCheck,
         CustomClean,
+        AutoCleanSchedule,
         LargeFileFinder,
         DuplicateFileFinder,
         StartupManager,
@@ -37,6 +38,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public MainWindowViewModel(
         ITemporaryFileService temporaryFileService,
         ICustomCleanService customCleanService,
+        IAutoCleanScheduleService autoCleanScheduleService,
         ILargeFileService largeFileService,
         ILargeFileCleanupService largeFileCleanupService,
         IDuplicateFileService duplicateFileService,
@@ -55,6 +57,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         CleanerAccess = CreateAccess(ApplicationFeature.Cleaner);
         HealthCheckAccess = CreateAccess(ApplicationFeature.HealthCheck);
         CustomCleanAccess = CreateAccess(ApplicationFeature.CustomClean);
+        AutoCleanScheduleAccess = CreateAccess(ApplicationFeature.AutoCleanSchedule);
         LargeFileFinderAccess = CreateAccess(ApplicationFeature.LargeFileFinder);
         DuplicateFileFinderAccess = CreateAccess(ApplicationFeature.DuplicateFileFinder);
         StartupManagerAccess = CreateAccess(ApplicationFeature.StartupManager);
@@ -71,6 +74,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             customCleanService,
             featureAccessGuard);
         CustomClean.PropertyChanged += OnChildModulePropertyChanged;
+        AutoCleanSchedule = new AutoCleanScheduleViewModel(
+            autoCleanScheduleService,
+            customCleanService,
+            featureAccessGuard);
+        AutoCleanSchedule.PropertyChanged += OnChildModulePropertyChanged;
         LargeFileFinder = new LargeFileFinderViewModel(
             largeFileService,
             largeFileCleanupService,
@@ -112,6 +120,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ShowCleanerCommand = CreateNavigationCommand(ApplicationModule.Cleaner);
         ShowHealthCheckCommand = CreateNavigationCommand(ApplicationModule.HealthCheck);
         ShowCustomCleanCommand = CreateNavigationCommand(ApplicationModule.CustomClean);
+        ShowAutoCleanScheduleCommand = CreateNavigationCommand(ApplicationModule.AutoCleanSchedule);
         ShowLargeFileFinderCommand = CreateNavigationCommand(ApplicationModule.LargeFileFinder);
         ShowDuplicateFileFinderCommand = CreateNavigationCommand(ApplicationModule.DuplicateFileFinder);
         ShowStartupManagerCommand = CreateNavigationCommand(ApplicationModule.StartupManager);
@@ -122,6 +131,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public ObservableCollection<CleanupCandidateViewModel> Candidates { get; } = [];
     public HealthCheckViewModel HealthCheck { get; }
     public CustomCleanViewModel CustomClean { get; }
+    public AutoCleanScheduleViewModel AutoCleanSchedule { get; }
     public LargeFileFinderViewModel LargeFileFinder { get; }
     public DuplicateFileFinderViewModel DuplicateFileFinder { get; }
     public StartupManagerViewModel StartupManager { get; }
@@ -130,6 +140,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public FeatureAccessPresentation CleanerAccess { get; }
     public FeatureAccessPresentation HealthCheckAccess { get; }
     public FeatureAccessPresentation CustomCleanAccess { get; }
+    public FeatureAccessPresentation AutoCleanScheduleAccess { get; }
     public FeatureAccessPresentation LargeFileFinderAccess { get; }
     public FeatureAccessPresentation DuplicateFileFinderAccess { get; }
     public FeatureAccessPresentation StartupManagerAccess { get; }
@@ -141,6 +152,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public RelayCommand ShowCleanerCommand { get; }
     public RelayCommand ShowHealthCheckCommand { get; }
     public RelayCommand ShowCustomCleanCommand { get; }
+    public RelayCommand ShowAutoCleanScheduleCommand { get; }
     public RelayCommand ShowLargeFileFinderCommand { get; }
     public RelayCommand ShowDuplicateFileFinderCommand { get; }
     public RelayCommand ShowStartupManagerCommand { get; }
@@ -150,6 +162,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public bool IsCleanerActive => _currentModule == ApplicationModule.Cleaner;
     public bool IsHealthCheckActive => _currentModule == ApplicationModule.HealthCheck;
     public bool IsCustomCleanActive => _currentModule == ApplicationModule.CustomClean;
+    public bool IsAutoCleanScheduleActive => _currentModule == ApplicationModule.AutoCleanSchedule;
     public bool IsLargeFileFinderActive => _currentModule == ApplicationModule.LargeFileFinder;
     public bool IsDuplicateFileFinderActive => _currentModule == ApplicationModule.DuplicateFileFinder;
     public bool IsStartupManagerActive => _currentModule == ApplicationModule.StartupManager;
@@ -159,6 +172,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public bool IsCleanerContentVisible => IsCleanerActive && CleanerAccess.IsAvailable;
     public bool IsHealthCheckContentVisible => IsHealthCheckActive && HealthCheckAccess.IsAvailable;
     public bool IsCustomCleanContentVisible => IsCustomCleanActive && CustomCleanAccess.IsAvailable;
+    public bool IsAutoCleanScheduleContentVisible => IsAutoCleanScheduleActive && AutoCleanScheduleAccess.IsAvailable;
     public bool IsLargeFileFinderContentVisible => IsLargeFileFinderActive && LargeFileFinderAccess.IsAvailable;
     public bool IsDuplicateFileFinderContentVisible => IsDuplicateFileFinderActive && DuplicateFileFinderAccess.IsAvailable;
     public bool IsStartupManagerContentVisible => IsStartupManagerActive && StartupManagerAccess.IsAvailable;
@@ -188,6 +202,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ApplicationModule.Cleaner => "Cleaner",
         ApplicationModule.HealthCheck => "Health Check",
         ApplicationModule.CustomClean => "Custom Clean",
+        ApplicationModule.AutoCleanSchedule => "Auto Clean Schedule",
         ApplicationModule.LargeFileFinder => "Large File Finder",
         ApplicationModule.DuplicateFileFinder => "Duplicate File Finder",
         ApplicationModule.StartupManager => "Startup Manager",
@@ -201,6 +216,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ApplicationModule.Cleaner => "Safely review and remove temporary files",
         ApplicationModule.HealthCheck => "Review key system conditions without changing Windows",
         ApplicationModule.CustomClean => "Preview and safely clean selected existing Cleaner categories",
+        ApplicationModule.AutoCleanSchedule => "Plan local cleanup schedules and preview them without automatic execution",
         ApplicationModule.LargeFileFinder => "Find and safely move selected large files to the Windows Recycle Bin",
         ApplicationModule.DuplicateFileFinder => "Find content-confirmed duplicates and safely recycle selected copies",
         ApplicationModule.StartupManager => "Review Windows startup entries without changing them",
@@ -293,6 +309,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             ApplicationModule.Cleaner => CleanerAccess,
             ApplicationModule.HealthCheck => HealthCheckAccess,
             ApplicationModule.CustomClean => CustomCleanAccess,
+            ApplicationModule.AutoCleanSchedule => AutoCleanScheduleAccess,
             ApplicationModule.LargeFileFinder => LargeFileFinderAccess,
             ApplicationModule.DuplicateFileFinder => DuplicateFileFinderAccess,
             ApplicationModule.StartupManager => StartupManagerAccess,
@@ -320,6 +337,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             ApplicationModule.Cleaner => ApplicationFeature.Cleaner,
             ApplicationModule.HealthCheck => ApplicationFeature.HealthCheck,
             ApplicationModule.CustomClean => ApplicationFeature.CustomClean,
+            ApplicationModule.AutoCleanSchedule => ApplicationFeature.AutoCleanSchedule,
             ApplicationModule.LargeFileFinder => ApplicationFeature.LargeFileFinder,
             ApplicationModule.DuplicateFileFinder => ApplicationFeature.DuplicateFileFinder,
             ApplicationModule.StartupManager => ApplicationFeature.StartupManager,
@@ -333,6 +351,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(IsCleanerActive));
         OnPropertyChanged(nameof(IsHealthCheckActive));
         OnPropertyChanged(nameof(IsCustomCleanActive));
+        OnPropertyChanged(nameof(IsAutoCleanScheduleActive));
         OnPropertyChanged(nameof(IsLargeFileFinderActive));
         OnPropertyChanged(nameof(IsDuplicateFileFinderActive));
         OnPropertyChanged(nameof(IsStartupManagerActive));
@@ -341,6 +360,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(IsCleanerContentVisible));
         OnPropertyChanged(nameof(IsHealthCheckContentVisible));
         OnPropertyChanged(nameof(IsCustomCleanContentVisible));
+        OnPropertyChanged(nameof(IsAutoCleanScheduleContentVisible));
         OnPropertyChanged(nameof(IsLargeFileFinderContentVisible));
         OnPropertyChanged(nameof(IsDuplicateFileFinderContentVisible));
         OnPropertyChanged(nameof(IsStartupManagerContentVisible));
@@ -371,6 +391,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         !IsBusy &&
         !HealthCheck.IsBusy &&
         !CustomClean.IsBusy &&
+        !AutoCleanSchedule.IsBusy &&
         !LargeFileFinder.IsBusy &&
         !DuplicateFileFinder.IsBusy &&
         !StartupManager.IsBusy;
@@ -388,6 +409,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ShowCleanerCommand.RaiseCanExecuteChanged();
         ShowHealthCheckCommand.RaiseCanExecuteChanged();
         ShowCustomCleanCommand.RaiseCanExecuteChanged();
+        ShowAutoCleanScheduleCommand.RaiseCanExecuteChanged();
         ShowLargeFileFinderCommand.RaiseCanExecuteChanged();
         ShowDuplicateFileFinderCommand.RaiseCanExecuteChanged();
         ShowStartupManagerCommand.RaiseCanExecuteChanged();

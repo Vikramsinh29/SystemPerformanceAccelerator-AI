@@ -475,6 +475,41 @@
                         </Grid>
                     </Button>
 
+                    <Button Command="{Binding ShowAutoCleanScheduleCommand}"
+                            Visibility="{Binding AutoCleanScheduleAccess.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            ToolTip="{Binding AutoCleanScheduleAccess.Message}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource NavigationButtonStyle}">
+                                <Setter Property="Cursor" Value="Hand" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsAutoCleanScheduleActive}" Value="True">
+                                        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+                                        <Setter Property="Foreground" Value="White" />
+                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="28" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="&#xE823;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
+                            <TextBlock Grid.Column="1" Text="Auto Clean Schedule" VerticalAlignment="Center" />
+                            <Border Grid.Column="2"
+                                    Style="{StaticResource FeatureAccessBadgeStyle}"
+                                    Visibility="{Binding AutoCleanScheduleAccess.IsBadgeVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    ToolTip="{Binding AutoCleanScheduleAccess.Message}">
+                                <TextBlock Text="{Binding AutoCleanScheduleAccess.BadgeText}"
+                                           Foreground="White"
+                                           FontSize="8"
+                                           FontWeight="Bold" />
+                            </Border>
+                        </Grid>
+                    </Button>
+
                     <Button Command="{Binding ShowLargeFileFinderCommand}"
                             Visibility="{Binding LargeFileFinderAccess.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
                             ToolTip="{Binding LargeFileFinderAccess.Message}">
@@ -1638,6 +1673,661 @@
                                    FontSize="11" />
                     </Grid>
                 </Border>
+            </Grid>
+
+            <Grid Grid.Row="1"
+                  Margin="20,16,20,18"
+                  DataContext="{Binding AutoCleanSchedule}"
+                  Visibility="{Binding DataContext.IsAutoCleanScheduleContentVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid.Resources>
+                    <Style x:Key="ScheduleSurfaceCardStyle" TargetType="Border">
+                        <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+                        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+                        <Setter Property="BorderThickness" Value="1" />
+                        <Setter Property="CornerRadius" Value="12" />
+                    </Style>
+                    <Style x:Key="ScheduleSectionTitleStyle" TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+                        <Setter Property="FontSize" Value="15" />
+                        <Setter Property="FontWeight" Value="SemiBold" />
+                    </Style>
+                    <Style x:Key="ScheduleFieldLabelStyle" TargetType="TextBlock">
+                        <Setter Property="Margin" Value="0,0,0,6" />
+                        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+                        <Setter Property="FontSize" Value="11" />
+                        <Setter Property="FontWeight" Value="SemiBold" />
+                    </Style>
+                    <Style x:Key="ScheduleListItemStyle" TargetType="ListBoxItem">
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Margin" Value="0,0,0,10" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <Border x:Name="ScheduleCard"
+                                            Padding="18,15"
+                                            Background="{StaticResource SurfaceBrush}"
+                                            BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="10"
+                                            Cursor="Hand">
+                                        <ContentPresenter />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="ScheduleCard" Property="Background" Value="{StaticResource SurfaceMutedBrush}" />
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="ScheduleCard" Property="Background" Value="#EEF6FF" />
+                                            <Setter TargetName="ScheduleCard" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                            <Setter TargetName="ScheduleCard" Property="BorderThickness" Value="2" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Grid.Resources>
+
+                <!-- Premium schedule overview -->
+                <Grid Visibility="{Binding IsOverviewVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="1.45*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Padding="20,16" Style="{StaticResource ScheduleSurfaceCardStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="44" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="36" Height="36" Background="#EAF3FE" CornerRadius="10">
+                                    <TextBlock Text="&#xE787;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               Foreground="{StaticResource AccentBrush}"
+                                               FontSize="16"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="Saved schedules" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" />
+                                    <TextBlock Margin="0,3,0,0" Text="{Binding ScheduleCountText}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="24" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Column="2" Padding="20,16" Style="{StaticResource ScheduleSurfaceCardStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="44" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="36" Height="36" Background="#EAF7F1" CornerRadius="10">
+                                    <TextBlock Text="&#xE73E;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               Foreground="{StaticResource SuccessBrush}"
+                                               FontSize="16"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="Enabled" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" />
+                                    <TextBlock Margin="0,3,0,0" Text="{Binding EnabledScheduleCountText}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="24" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Column="4" Padding="20,16" Style="{StaticResource ScheduleSurfaceCardStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="44" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="36" Height="36" Background="#F2EEFF" CornerRadius="10">
+                                    <TextBlock Text="&#xE823;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               Foreground="#7257C7"
+                                               FontSize="16"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="Next planned run" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" />
+                                    <TextBlock Margin="0,5,0,0"
+                                               Text="{Binding NextPlannedRunText}"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               FontSize="14"
+                                               FontWeight="SemiBold"
+                                               TextTrimming="CharacterEllipsis"
+                                               ToolTip="{Binding NextPlannedRunText}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <Border Grid.Row="1"
+                            Margin="0,14,0,12"
+                            Padding="16,12"
+                            Background="#F5F9FE"
+                            BorderBrush="#D9E9FA"
+                            BorderThickness="1"
+                            CornerRadius="10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Width="30" Height="30" Background="#E6F1FD" CornerRadius="15">
+                                <TextBlock Text="&#xE946;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           FontSize="14"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel Grid.Column="1" Margin="11,0,0,0">
+                                <TextBlock Text="Planning only — you remain in control"
+                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Margin="0,3,0,0"
+                                           Text="Schedules are stored locally. They calculate future run times and support manual previews only; nothing runs or deletes files automatically."
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="11"
+                                           TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Row="2" Style="{StaticResource ScheduleSurfaceCardStyle}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Grid Margin="22,18,22,14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Your schedules" Style="{StaticResource ScheduleSectionTitleStyle}" />
+                                    <TextBlock Margin="0,4,0,0"
+                                               Text="Create separate plans for daily, weekly, or monthly maintenance."
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontSize="11" />
+                                </StackPanel>
+                                <Button Grid.Column="1"
+                                        Command="{Binding NewScheduleCommand}"
+                                        Content="Create schedule"
+                                        Style="{StaticResource PrimaryButtonStyle}" />
+                            </Grid>
+
+                            <Grid Grid.Row="1" Margin="22,0,22,0">
+                                <ListBox ItemsSource="{Binding Schedules}"
+                                         SelectedItem="{Binding SelectedSchedule, Mode=TwoWay}"
+                                         ItemContainerStyle="{StaticResource ScheduleListItemStyle}"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                         Visibility="{Binding HasSchedules, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="44" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="22" />
+                                                    <ColumnDefinition Width="190" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <Border Width="36" Height="36" Background="#EAF3FE" CornerRadius="10" VerticalAlignment="Top">
+                                                    <TextBlock Text="&#xE823;"
+                                                               FontFamily="Segoe MDL2 Assets"
+                                                               Foreground="{StaticResource AccentBrush}"
+                                                               FontSize="16"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center" />
+                                                </Border>
+
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Text="{Binding Name}"
+                                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Margin="0,4,0,0"
+                                                               Text="{Binding FrequencyText}"
+                                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                                               FontSize="11" />
+                                                    <TextBlock Margin="0,3,0,0"
+                                                               Text="{Binding CategoriesText}"
+                                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                                               FontSize="11" />
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Column="3" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding NextRunCaption}"
+                                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                                               FontSize="10" />
+                                                    <TextBlock Margin="0,4,0,0"
+                                                               Text="{Binding NextRunText}"
+                                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                                               FontSize="12"
+                                                               FontWeight="SemiBold"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                </StackPanel>
+
+                                                <Border Grid.Column="4"
+                                                        Margin="16,0,0,0"
+                                                        Padding="11,5"
+                                                        CornerRadius="12"
+                                                        VerticalAlignment="Center">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsEnabled}" Value="True">
+                                                                    <Setter Property="Background" Value="#EAF7F1" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <TextBlock Text="{Binding StateText}" FontSize="10" FontWeight="SemiBold">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsEnabled}" Value="True">
+                                                                        <Setter Property="Foreground" Value="#167A4B" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Border>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+
+                                <Border Padding="34"
+                                        Background="Transparent"
+                                        Visibility="{Binding IsEmptyStateVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="430">
+                                        <Border Width="62" Height="62" Background="#EAF3FE" CornerRadius="18" HorizontalAlignment="Center">
+                                            <TextBlock Text="&#xE787;"
+                                                       FontFamily="Segoe MDL2 Assets"
+                                                       Foreground="{StaticResource AccentBrush}"
+                                                       FontSize="25"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center" />
+                                        </Border>
+                                        <TextBlock Margin="0,18,0,0"
+                                                   Text="No schedules yet"
+                                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                                   FontSize="18"
+                                                   FontWeight="SemiBold"
+                                                   HorizontalAlignment="Center" />
+                                        <TextBlock Margin="0,7,0,0"
+                                                   Text="Create your first local maintenance plan. Each new schedule is saved separately and can be edited later."
+                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   FontSize="12"
+                                                   TextAlignment="Center"
+                                                   TextWrapping="Wrap" />
+                                        <Button Margin="0,18,0,0"
+                                                Command="{Binding NewScheduleCommand}"
+                                                Content="Create first schedule"
+                                                Style="{StaticResource PrimaryButtonStyle}"
+                                                HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <Border Grid.Row="2"
+                                    Padding="22,12"
+                                    Background="{StaticResource SurfaceMutedBrush}"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="0,1,0,0"
+                                    CornerRadius="0,0,12,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding SelectedScheduleSummary}"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontSize="11"
+                                               VerticalAlignment="Center" />
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <Button Command="{Binding EditSelectedScheduleCommand}"
+                                                Content="Edit selected"
+                                                Style="{StaticResource SecondaryButtonStyle}"
+                                                Margin="0,0,8,0" />
+                                        <Button Command="{Binding RemoveScheduleCommand}"
+                                                Content="Remove"
+                                                Style="{StaticResource SecondaryButtonStyle}" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Row="3"
+                            Margin="0,12,0,0"
+                            Padding="16,11"
+                            Background="{StaticResource SurfaceBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Width="30" Height="30" Background="#EAF3FE" CornerRadius="15">
+                                <TextBlock Text="&#xE946;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           FontSize="13"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="Schedule status" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="SemiBold" />
+                                <TextBlock Margin="0,2,0,0" Text="{Binding Status}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="11" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- Dedicated create/edit page -->
+                <Grid Visibility="{Binding IsEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="14" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Command="{Binding BackToSchedulesCommand}"
+                                Content="←  Back to schedules"
+                                Style="{StaticResource SecondaryButtonStyle}" />
+                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding EditorTitle}"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       FontSize="20"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Margin="0,3,0,0"
+                                       Text="{Binding EditorSubtitle}"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       FontSize="11" />
+                        </StackPanel>
+                    </Grid>
+
+                    <ScrollViewer Grid.Row="1"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <Border MaxWidth="850"
+                                Padding="28,24"
+                                HorizontalAlignment="Center"
+                                Style="{StaticResource ScheduleSurfaceCardStyle}">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="52" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="42" Height="42" Background="#EAF3FE" CornerRadius="12">
+                                        <TextBlock Text="&#xE787;"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   Foreground="{StaticResource AccentBrush}"
+                                                   FontSize="18"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="Schedule details" Style="{StaticResource ScheduleSectionTitleStyle}" />
+                                        <TextBlock Margin="0,3,0,0"
+                                                   Text="Choose when this local maintenance plan should be considered due."
+                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   FontSize="11" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <TextBlock Margin="0,22,0,0" Text="Schedule name" Style="{StaticResource ScheduleFieldLabelStyle}" />
+                                <TextBox Height="42"
+                                         Text="{Binding ScheduleName, UpdateSourceTrigger=PropertyChanged}"
+                                         MaxLength="80"
+                                         Style="{StaticResource InputTextBoxStyle}" />
+
+                                <Grid Margin="0,18,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="16" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Frequency" Style="{StaticResource ScheduleFieldLabelStyle}" />
+                                        <ComboBox Height="42"
+                                                  ItemsSource="{Binding Frequencies}"
+                                                  SelectedItem="{Binding Frequency, Mode=TwoWay}"
+                                                  Style="{StaticResource InputComboBoxStyle}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Local time (HH:mm)" Style="{StaticResource ScheduleFieldLabelStyle}" />
+                                        <TextBox Height="42"
+                                                 Text="{Binding RunAtLocalTimeText, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource InputTextBoxStyle}" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid Margin="0,14,0,0">
+                                    <StackPanel Visibility="{Binding IsWeeklyFrequency, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Text="Day of week" Style="{StaticResource ScheduleFieldLabelStyle}" />
+                                        <ComboBox Height="42"
+                                                  ItemsSource="{Binding WeekDays}"
+                                                  SelectedItem="{Binding WeeklyDay, Mode=TwoWay}"
+                                                  Style="{StaticResource InputComboBoxStyle}" />
+                                    </StackPanel>
+                                    <StackPanel Visibility="{Binding IsMonthlyFrequency, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Text="Day of month (1–31)" Style="{StaticResource ScheduleFieldLabelStyle}" />
+                                        <TextBox Height="42"
+                                                 Text="{Binding MonthlyDayText, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource InputTextBoxStyle}" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <Border Margin="0,24,0,0"
+                                        Padding="18,16"
+                                        Background="{StaticResource SurfaceMutedBrush}"
+                                        BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="10">
+                                    <StackPanel>
+                                        <TextBlock Text="Cleaner categories" Style="{StaticResource ScheduleSectionTitleStyle}" />
+                                        <TextBlock Margin="0,4,0,0"
+                                                   Text="Only existing, safety-reviewed Cleaner categories can be included."
+                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   FontSize="11" />
+                                        <CheckBox Margin="0,14,0,0"
+                                                  IsChecked="{Binding IncludeTemporaryFiles, Mode=TwoWay}"
+                                                  Content="Current-user temporary files"
+                                                  Foreground="{StaticResource TextPrimaryBrush}"
+                                                  FontSize="12"
+                                                  FontWeight="SemiBold"
+                                                  Cursor="Hand" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Margin="0,16,0,0"
+                                        Padding="18,16"
+                                        Background="#F5F9FE"
+                                        BorderBrush="#D9E9FA"
+                                        BorderThickness="1"
+                                        CornerRadius="10">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="Next planned run" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="SemiBold" />
+                                            <TextBlock Margin="0,5,0,0"
+                                                       Text="{Binding EditorNextRunText}"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                                       FontSize="15"
+                                                       FontWeight="SemiBold" />
+                                        </StackPanel>
+                                        <CheckBox Grid.Column="1"
+                                                  IsChecked="{Binding IsScheduleEnabled, Mode=TwoWay}"
+                                                  Content="Enable schedule"
+                                                  Foreground="{StaticResource TextPrimaryBrush}"
+                                                  FontWeight="SemiBold"
+                                                  VerticalAlignment="Center"
+                                                  Cursor="Hand" />
+                                    </Grid>
+                                </Border>
+
+                                <Border Margin="0,16,0,0"
+                                        Padding="18,16"
+                                        Background="{StaticResource SurfaceBrush}"
+                                        BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="10">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="Preview this plan" Style="{StaticResource ScheduleSectionTitleStyle}" />
+                                                <TextBlock Margin="0,4,0,0"
+                                                           Text="Scan the selected categories without deleting or changing files."
+                                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                                           FontSize="11" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                                <Button Command="{Binding PreviewNowCommand}"
+                                                        Content="Preview now"
+                                                        Style="{StaticResource SecondaryButtonStyle}"
+                                                        Margin="0,0,8,0" />
+                                                <Button Command="{Binding CancelPreviewCommand}"
+                                                        Content="Cancel"
+                                                        Style="{StaticResource SecondaryButtonStyle}" />
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <ProgressBar Grid.Row="1"
+                                                     Margin="0,14,0,0"
+                                                     Height="5"
+                                                     Minimum="0"
+                                                     Maximum="100"
+                                                     Value="{Binding PreviewProgress, Mode=OneWay}"
+                                                     Foreground="{StaticResource AccentBrush}"
+                                                     Background="{StaticResource ProgressTrackBrush}" />
+
+                                        <Grid Grid.Row="2" Margin="0,12,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="10" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="10" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="14" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" Style="{StaticResource OperationMetaChipStyle}">
+                                                <TextBlock Text="{Binding PreviewFilesFound, StringFormat='Files: {0}'}" Foreground="{StaticResource MetaTextBrush}" FontSize="11" FontWeight="SemiBold" />
+                                            </Border>
+                                            <Border Grid.Column="2" Style="{StaticResource OperationMetaChipStyle}">
+                                                <TextBlock Text="{Binding PreviewReclaimableSpace, StringFormat='Space: {0}'}" Foreground="{StaticResource MetaTextBrush}" FontSize="11" FontWeight="SemiBold" />
+                                            </Border>
+                                            <Border Grid.Column="4" Style="{StaticResource OperationMetaChipStyle}">
+                                                <TextBlock Text="{Binding PreviewIssues, StringFormat='Issues: {0}'}" Foreground="{StaticResource MetaTextBrush}" FontSize="11" FontWeight="SemiBold" />
+                                            </Border>
+                                            <TextBlock Grid.Column="6"
+                                                       Text="{Binding PreviewStatus}"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                                       FontSize="11"
+                                                       VerticalAlignment="Center" />
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+
+                                <TextBlock Margin="0,18,0,0"
+                                           Text="Local storage"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="10"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Margin="0,3,0,0"
+                                           Text="{Binding SchedulesPath}"
+                                           ToolTip="{Binding SchedulesPath}"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="10"
+                                           TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </Border>
+                    </ScrollViewer>
+
+                    <Border Grid.Row="2"
+                            Margin="0,12,0,0"
+                            Padding="16,12"
+                            Background="{StaticResource SurfaceBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding Status}"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       FontSize="11"
+                                       TextWrapping="Wrap"
+                                       VerticalAlignment="Center" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="16,0,0,0">
+                                <Button Command="{Binding BackToSchedulesCommand}"
+                                        Content="Cancel"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Margin="0,0,8,0" />
+                                <Button Command="{Binding SaveScheduleCommand}"
+                                        Content="{Binding SaveButtonText}"
+                                        Style="{StaticResource PrimaryButtonStyle}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
             </Grid>
 
             <Grid Grid.Row="1"

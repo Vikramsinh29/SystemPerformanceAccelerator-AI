@@ -12,6 +12,7 @@ public static class ApplicationFeatureCatalogue
             [ApplicationFeature.Cleaner] = new(ApplicationFeature.Cleaner, "Cleaner"),
             [ApplicationFeature.HealthCheck] = new(ApplicationFeature.HealthCheck, "Health Check"),
             [ApplicationFeature.CustomClean] = new(ApplicationFeature.CustomClean, "Custom Clean"),
+            [ApplicationFeature.AutoCleanSchedule] = new(ApplicationFeature.AutoCleanSchedule, "Auto Clean Schedule"),
             [ApplicationFeature.LargeFileFinder] = new(ApplicationFeature.LargeFileFinder, "Large File Finder"),
             [ApplicationFeature.DuplicateFileFinder] = new(ApplicationFeature.DuplicateFileFinder, "Duplicate File Finder"),
             [ApplicationFeature.StartupManager] = new(ApplicationFeature.StartupManager, "Startup Manager"),

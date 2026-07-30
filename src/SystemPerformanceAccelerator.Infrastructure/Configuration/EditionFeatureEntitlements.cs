@@ -12,6 +12,7 @@ public static class EditionFeatureEntitlements
             [ApplicationFeature.Cleaner] = AvailableToAll(ApplicationFeature.Cleaner),
             [ApplicationFeature.HealthCheck] = AvailableToAll(ApplicationFeature.HealthCheck),
             [ApplicationFeature.CustomClean] = AvailableToAll(ApplicationFeature.CustomClean),
+            [ApplicationFeature.AutoCleanSchedule] = AvailableToAll(ApplicationFeature.AutoCleanSchedule),
             [ApplicationFeature.LargeFileFinder] = AvailableToAll(ApplicationFeature.LargeFileFinder),
             [ApplicationFeature.DuplicateFileFinder] = AvailableToAll(ApplicationFeature.DuplicateFileFinder),
             [ApplicationFeature.StartupManager] = AvailableToAll(ApplicationFeature.StartupManager),

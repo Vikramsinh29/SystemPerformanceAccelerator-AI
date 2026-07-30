@@ -18,6 +18,7 @@ public partial class MainWindow : Window
 
         var temporaryFileService = new TemporaryFileService();
         var customCleanService = new CustomCleanService(temporaryFileService);
+        var autoCleanScheduleService = new AutoCleanScheduleService();
         var largeFileCleanupService = new LargeFileCleanupService();
         var startupItemService = new StartupItemService();
         var systemMonitorService = new SystemMonitorService();
@@ -43,6 +44,7 @@ public partial class MainWindow : Window
         DataContext = new MainWindowViewModel(
             temporaryFileService,
             customCleanService,
+            autoCleanScheduleService,
             new LargeFileService(),
             largeFileCleanupService,
             new DuplicateFileService(),
