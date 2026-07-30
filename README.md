@@ -195,6 +195,19 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Integrated with the central Sprint 17 feature-access system
 - Planning foundation only: no automatic execution, Windows Task Scheduler, background service, registry change, or unattended cleanup
 
+### Premium visual design system
+
+- Central Fluent-inspired design tokens for light and dark themes
+- Unified application palette, typography, spacing, corner radius, and elevation
+- Reusable premium card and elevated-card styles
+- Reusable primary, secondary, danger, and navigation button styles
+- Modern text box, combo box, checkbox, progress bar, and table styles
+- Consistent status badges, alert panels, page headers, and active navigation states
+- Shared shell styling applied without changing feature or service behaviour
+- ThemeManager updates all mutable design brushes consistently
+- Existing module layouts remain functional and responsive
+- No feature logic, cleanup behaviour, licensing rule, or system-modification behaviour changed
+
 ### Responsive layout
 
 - Large File Finder Folder or Drive field remains usable at restored and narrow widths
@@ -261,6 +274,12 @@ All selectable result tables must use the same application-wide behaviour:
 - The read-only PreviewProgress binding was explicitly constrained to OneWay, preventing the verified WPF startup crash.
 - Release build succeeded and the xUnit suite increased to 103 passed, 0 failed after Sprint 18.
 - No automatic cleanup execution, Windows Task Scheduler integration, background service, registry modification, or unattended deletion was added.
+- Premium Fluent-inspired shell, navigation, typography, cards, buttons, inputs, checkboxes, progress bars, tables, badges, alerts, and page headers were manually verified after Sprint 19.
+- Cleaner, Health Check, Custom Clean, Auto Clean Schedule, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Settings were all visually and functionally regression checked.
+- Light and dark themes were manually verified for readable text, visible control states, active navigation, table selection, and consistent colour treatment.
+- Shared controls were verified without clipping, overlap, broken commands, or responsiveness regressions.
+- Release build succeeded and the xUnit suite remained at 103 passed, 0 failed after Sprint 19.
+- No feature logic, cleanup behaviour, licensing rule, automatic execution, or system-modification behaviour changed.
 - System Monitor live CPU and physical-memory values, Start/Stop controls, automatic stop on tab change, and read-only scope manually verified.
 - Cleaner, Large File Finder, Duplicate File Finder, and Startup Manager regression opening checks passed after Sprint 8.
 - Health Check system-drive, CPU, memory, and startup summary results manually verified.
@@ -489,11 +508,11 @@ This rule is mandatory. Repeated blind patches are not acceptable.
 
 ## Current milestone
 
-Sprint 18 — Auto Clean Schedule Foundation.
+Sprint 19 — Premium Visual Design System Foundation.
 
 ## Next milestone
 
-Sprint 19 — Premium Visual Design System, only after Sprint 18 is committed, pushed, and the working tree is clean.
+Sprint 20 — Cleaner Premium UI Migration, only after Sprint 19 is committed, pushed, and the working tree is clean.
 
 ## Compact AI handoff
 

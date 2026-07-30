@@ -1,31 +1,15 @@
 <Application x:Class="SystemPerformanceAccelerator.Desktop.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:behaviors="clr-namespace:SystemPerformanceAccelerator.Desktop.Behaviors"
-             xmlns:presentationOptions="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <SolidColorBrush x:Key="AppBackgroundBrush" presentationOptions:Freeze="False" Color="#EEF2F6" />
-        <SolidColorBrush x:Key="SurfaceBrush" presentationOptions:Freeze="False" Color="#FFFFFF" />
-        <SolidColorBrush x:Key="SurfaceMutedBrush" presentationOptions:Freeze="False" Color="#F7F9FB" />
-        <SolidColorBrush x:Key="InputBackgroundBrush" presentationOptions:Freeze="False" Color="#FFFFFF" />
-        <SolidColorBrush x:Key="InputBorderBrush" presentationOptions:Freeze="False" Color="#C8D1DC" />
-        <SolidColorBrush x:Key="TextPrimaryBrush" presentationOptions:Freeze="False" Color="#172033" />
-        <SolidColorBrush x:Key="TextSecondaryBrush" presentationOptions:Freeze="False" Color="#687386" />
-        <SolidColorBrush x:Key="BorderBrush" presentationOptions:Freeze="False" Color="#DDE3EA" />
-        <SolidColorBrush x:Key="DataGridHeaderBrush" presentationOptions:Freeze="False" Color="#F4F6F8" />
-        <SolidColorBrush x:Key="DataGridRowHoverBrush" presentationOptions:Freeze="False" Color="#F5F9FD" />
-        <SolidColorBrush x:Key="DataGridRowSelectedBrush" presentationOptions:Freeze="False" Color="#E8F2FC" />
-        <SolidColorBrush x:Key="SecondaryButtonForegroundBrush" presentationOptions:Freeze="False" Color="#485568" />
-        <SolidColorBrush x:Key="SecondaryButtonBorderBrush" presentationOptions:Freeze="False" Color="#CBD3DD" />
-        <SolidColorBrush x:Key="SecondaryButtonHoverBrush" presentationOptions:Freeze="False" Color="#F1F4F7" />
-        <SolidColorBrush x:Key="ProgressTrackBrush" presentationOptions:Freeze="False" Color="#E7ECF2" />
-        <SolidColorBrush x:Key="MetaTextBrush" presentationOptions:Freeze="False" Color="#4D5B6E" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/DesignTokens.xaml" />
+                <ResourceDictionary Source="Resources/FluentControls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
 
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-
-        <Style TargetType="{x:Type DataGrid}">
-            <Setter Property="behaviors:DataGridSelectionBehavior.IsEnabled" Value="True" />
-        </Style>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

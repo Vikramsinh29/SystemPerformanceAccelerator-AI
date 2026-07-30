@@ -8,175 +8,53 @@
         MinWidth="1000"
         MinHeight="650"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource AppBackgroundBrush}"
-        FontFamily="Segoe UI">
+        Style="{StaticResource FluentWindowStyle}"
+        Background="{DynamicResource AppBackgroundBrush}">
     <Window.Resources>
-        <SolidColorBrush x:Key="SidebarBrush" Color="#18212F" />
-        <SolidColorBrush x:Key="SidebarHoverBrush" Color="#243145" />
-        <SolidColorBrush x:Key="AccentBrush" Color="#2583E9" />
-        <SolidColorBrush x:Key="SuccessBrush" Color="#22A765" />
+        <Style x:Key="NavigationButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource FluentNavigationButtonStyle}" />
 
-        <Style x:Key="NavigationButtonStyle" TargetType="Button">
-            <Setter Property="Height" Value="44" />
-            <Setter Property="Margin" Value="10,2" />
-            <Setter Property="Padding" Value="14,0" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="#C7D0DD" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="HorizontalContentAlignment" Value="Left" />
-            <Setter Property="Cursor" Value="Arrow" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="NavBorder"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="6"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter VerticalAlignment="Center"
-                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="NavBorder" Property="Background" Value="{StaticResource SidebarHoverBrush}" />
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Opacity" Value="0.68" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="FeatureAccessBadgeStyle" TargetType="Border">
+        <Style x:Key="FeatureAccessBadgeStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource FluentBadgeStyle}">
             <Setter Property="Margin" Value="8,0,0,0" />
-            <Setter Property="Padding" Value="6,2" />
             <Setter Property="Background" Value="#31445F" />
-            <Setter Property="CornerRadius" Value="8" />
-            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="BorderThickness" Value="0" />
         </Style>
 
-        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
-            <Setter Property="Height" Value="38" />
-            <Setter Property="MinWidth" Value="112" />
-            <Setter Property="Padding" Value="18,0" />
-            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="ButtonBorder"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="5"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.88" />
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.75" />
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="ButtonBorder" Property="Background" Value="#AEB8C5" />
-                                <Setter Property="Cursor" Value="Arrow" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+        <Style x:Key="PrimaryButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource FluentPrimaryButtonStyle}" />
 
         <Style x:Key="CleanButtonStyle"
                TargetType="Button"
-               BasedOn="{StaticResource PrimaryButtonStyle}">
-            <Setter Property="Background" Value="{StaticResource SuccessBrush}" />
+               BasedOn="{StaticResource FluentPrimaryButtonStyle}">
+            <Setter Property="Background" Value="{DynamicResource SuccessBrush}" />
             <Setter Property="MinWidth" Value="132" />
         </Style>
 
-        <Style x:Key="SecondaryButtonStyle" TargetType="Button">
-            <Setter Property="Height" Value="38" />
-            <Setter Property="MinWidth" Value="96" />
-            <Setter Property="Padding" Value="18,0" />
-            <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-            <Setter Property="Foreground" Value="{StaticResource SecondaryButtonForegroundBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource SecondaryButtonBorderBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="ButtonBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="5"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource SecondaryButtonHoverBrush}" />
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Opacity" Value="0.48" />
-                                <Setter Property="Cursor" Value="Arrow" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+        <Style x:Key="SecondaryButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource FluentSecondaryButtonStyle}" />
+
+        <Style x:Key="SummaryCardStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource FluentCardStyle}">
+            <Setter Property="Padding" Value="18,15" />
         </Style>
 
-        <Style x:Key="SummaryCardStyle" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="8" />
-            <Setter Property="Padding" Value="18,14" />
-        </Style>
+        <Style x:Key="InputTextBoxStyle"
+               TargetType="TextBox"
+               BasedOn="{StaticResource FluentTextBoxStyle}" />
 
-        <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
-            <Setter Property="Height" Value="36" />
-            <Setter Property="Padding" Value="10,0" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Background" Value="{StaticResource InputBackgroundBrush}" />
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource InputBorderBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
-        </Style>
+        <Style x:Key="InputComboBoxStyle"
+               TargetType="ComboBox"
+               BasedOn="{StaticResource FluentComboBoxStyle}" />
 
-        <Style x:Key="InputComboBoxStyle" TargetType="ComboBox">
-            <Setter Property="Height" Value="36" />
-            <Setter Property="Padding" Value="8,0" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Background" Value="{StaticResource InputBackgroundBrush}" />
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource InputBorderBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
-        </Style>
+        <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource FluentDataGridColumnHeaderStyle}" />
 
-        <Style TargetType="DataGridColumnHeader">
-            <Setter Property="Height" Value="36" />
-            <Setter Property="Background" Value="{StaticResource DataGridHeaderBrush}" />
-            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Padding" Value="10,0" />
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
-            <Setter Property="BorderThickness" Value="0,0,0,1" />
-        </Style>
-
-        <Style TargetType="DataGridCell">
-            <Setter Property="Padding" Value="10,0" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
-        </Style>
+        <Style TargetType="DataGridCell" BasedOn="{StaticResource FluentDataGridCellStyle}" />
 
         <Style x:Key="ResponsiveDataGridTextStyle" TargetType="TextBlock">
             <Setter Property="VerticalAlignment" Value="Center" />
@@ -185,69 +63,51 @@
             <Setter Property="ToolTip" Value="{Binding Text, RelativeSource={RelativeSource Self}}" />
         </Style>
 
-        <Style TargetType="DataGridRow">
-            <Setter Property="Height" Value="34" />
-            <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
-            <Setter Property="BorderThickness" Value="0,0,0,1" />
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{StaticResource DataGridRowHoverBrush}" />
-                </Trigger>
-                <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="{StaticResource DataGridRowSelectedBrush}" />
-                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-        <Style x:Key="OperationStatusPanelStyle" TargetType="Border">
-            <Setter Property="Padding" Value="16,12" />
-            <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="8" />
+        <Style TargetType="DataGridRow" BasedOn="{StaticResource FluentDataGridRowStyle}" />
+        <Style x:Key="OperationStatusPanelStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource FluentCardStyle}">
+            <Setter Property="Padding" Value="16,13" />
         </Style>
 
-        <Style x:Key="OperationStatusLabelStyle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
-            <Setter Property="FontSize" Value="10" />
-            <Setter Property="FontWeight" Value="Bold" />
-        </Style>
+        <Style x:Key="OperationStatusLabelStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource FluentCaptionStyle}" />
 
         <Style x:Key="OperationStatusMessageStyle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
-            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="FontSize" Value="12.5" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="TextWrapping" Value="Wrap" />
         </Style>
 
         <Style x:Key="OperationMetaChipStyle" TargetType="Border">
             <Setter Property="Padding" Value="10,5" />
-            <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceMutedBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="12" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
 
-        <Style x:Key="ResultMetricCardStyle" TargetType="Border">
-            <Setter Property="Padding" Value="10,8" />
-            <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="6" />
+        <Style x:Key="ResultMetricCardStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource FluentCardStyle}">
+            <Setter Property="Padding" Value="11,9" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceMutedBrush}" />
+            <Setter Property="CornerRadius" Value="8" />
         </Style>
 
-        <Style x:Key="ResultMetricLabelStyle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Style x:Key="ResultMetricLabelStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource FluentCaptionStyle}">
             <Setter Property="FontSize" Value="9" />
-            <Setter Property="FontWeight" Value="Bold" />
         </Style>
 
         <Style x:Key="ResultMetricValueStyle" TargetType="TextBlock">
-            <Setter Property="Margin" Value="0,3,0,0" />
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
-            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Margin" Value="0,4,0,0" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+            <Setter Property="FontSize" Value="15" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
         </Style>
@@ -334,11 +194,11 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="0.24*" MinWidth="220" MaxWidth="250" />
+            <ColumnDefinition Width="252" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Background="{StaticResource SidebarBrush}">
+        <Border Grid.Column="0" Background="{DynamicResource SidebarBrush}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -346,13 +206,13 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <Border Padding="20,20,16,18" BorderBrush="#2A3749" BorderThickness="0,0,0,1">
+                <Border Padding="20,22,16,20" BorderBrush="{DynamicResource SidebarDividerBrush}" BorderThickness="0,0,0,1">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="42" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Border Width="34" Height="34" Background="{StaticResource AccentBrush}" CornerRadius="7">
+                        <Border Width="34" Height="34" Background="{DynamicResource AccentBrush}" CornerRadius="10">
                             <TextBlock Text="SPA"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"
@@ -362,13 +222,13 @@
                         </Border>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Text="SYSTEM PERFORMANCE" Foreground="White" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Text="ACCELERATOR" Foreground="#9FAABC" FontSize="10" FontWeight="SemiBold" />
+                            <TextBlock Text="ACCELERATOR" Foreground="{DynamicResource SidebarMutedTextBrush}" FontSize="10" FontWeight="SemiBold" />
                         </StackPanel>
                     </Grid>
                 </Border>
 
                 <StackPanel Grid.Row="1" Margin="0,16,0,0">
-                    <TextBlock Margin="22,0,0,7" Text="TOOLS" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
+                    <TextBlock Margin="22,0,0,7" Text="TOOLS" Foreground="{DynamicResource SidebarMutedTextBrush}" FontSize="10" FontWeight="Bold" />
 
                     <Button Command="{Binding ShowCleanerCommand}"
                             Visibility="{Binding CleanerAccess.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
@@ -378,7 +238,7 @@
                                 <Setter Property="Cursor" Value="Hand" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsCleanerActive}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+                                        <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}" />
                                         <Setter Property="Foreground" Value="White" />
                                         <Setter Property="FontWeight" Value="SemiBold" />
                                     </DataTrigger>
@@ -413,7 +273,7 @@
                                 <Setter Property="Cursor" Value="Hand" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsHealthCheckActive}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+                                        <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}" />
                                         <Setter Property="Foreground" Value="White" />
                                         <Setter Property="FontWeight" Value="SemiBold" />
                                     </DataTrigger>
@@ -448,7 +308,7 @@
                                 <Setter Property="Cursor" Value="Hand" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsCustomCleanActive}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+                                        <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}" />
                                         <Setter Property="Foreground" Value="White" />
                                         <Setter Property="FontWeight" Value="SemiBold" />
                                     </DataTrigger>
@@ -483,7 +343,7 @@
                                 <Setter Property="Cursor" Value="Hand" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsAutoCleanScheduleActive}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+                                        <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}" />
                                         <Setter Property="Foreground" Value="White" />
                                         <Setter Property="FontWeight" Value="SemiBold" />
                                     </DataTrigger>
@@ -518,7 +378,7 @@
                                 <Setter Property="Cursor" Value="Hand" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsLargeFileFinderActive}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+                                        <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}" />
                                         <Setter Property="Foreground" Value="White" />
                                         <Setter Property="FontWeight" Value="SemiBold" />
                                     </DataTrigger>
@@ -553,7 +413,7 @@
                                 <Setter Property="Cursor" Value="Hand" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsDuplicateFileFinderActive}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+                                        <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}" />
                                         <Setter Property="Foreground" Value="White" />
                                         <Setter Property="FontWeight" Value="SemiBold" />
                                     </DataTrigger>
@@ -588,7 +448,7 @@
                                 <Setter Property="Cursor" Value="Hand" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsStartupManagerActive}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+                                        <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}" />
                                         <Setter Property="Foreground" Value="White" />
                                         <Setter Property="FontWeight" Value="SemiBold" />
                                     </DataTrigger>
@@ -623,7 +483,7 @@
                                 <Setter Property="Cursor" Value="Hand" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsSystemMonitorActive}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+                                        <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}" />
                                         <Setter Property="Foreground" Value="White" />
                                         <Setter Property="FontWeight" Value="SemiBold" />
                                     </DataTrigger>
@@ -658,7 +518,7 @@
                                 <Setter Property="Cursor" Value="Hand" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsSettingsActive}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+                                        <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}" />
                                         <Setter Property="Foreground" Value="White" />
                                         <Setter Property="FontWeight" Value="SemiBold" />
                                     </DataTrigger>
@@ -686,12 +546,12 @@
                     </Button>
                 </StackPanel>
 
-                <Border Grid.Row="2" Margin="14" Padding="12" Background="#121A26" CornerRadius="6">
+                <Border Grid.Row="2" Margin="14,12,14,16" Padding="14" Background="{DynamicResource SidebarPanelBrush}" CornerRadius="10">
                     <StackPanel>
-                        <TextBlock Text="OFFLINE &amp; SAFE" Foreground="#83C8FF" FontSize="10" FontWeight="Bold" />
+                        <TextBlock Text="OFFLINE &amp; SAFE" Foreground="#8CC8FF" FontSize="10" FontWeight="Bold" />
                         <TextBlock Margin="0,4,0,0"
                                    Text="No cloud services. Review every file before cleanup."
-                                   Foreground="#9FAABC"
+                                   Foreground="{DynamicResource SidebarMutedTextBrush}"
                                    FontSize="11"
                                    TextWrapping="Wrap" />
                     </StackPanel>
@@ -701,12 +561,12 @@
 
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="72" />
+                <RowDefinition Height="80" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="0" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
-                <Grid Margin="24,0">
+            <Border Grid.Row="0" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                <Grid Margin="28,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
@@ -715,15 +575,10 @@
                     <StackPanel Grid.Column="0" Margin="0,0,24,0" VerticalAlignment="Center">
                         <TextBlock Text="{Binding ModuleTitle}"
                                    ToolTip="{Binding ModuleTitle}"
-                                   Foreground="{StaticResource TextPrimaryBrush}"
-                                   FontSize="22"
-                                   FontWeight="SemiBold"
-                                   TextTrimming="CharacterEllipsis" />
+                                   Style="{StaticResource FluentPageTitleStyle}" />
                         <TextBlock Text="{Binding ModuleSubtitle}"
                                    ToolTip="{Binding ModuleSubtitle}"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
-                                   FontSize="12"
-                                   TextTrimming="CharacterEllipsis" />
+                                   Style="{StaticResource FluentPageSubtitleStyle}" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -739,12 +594,9 @@
             </Border>
 
             <Border Grid.Row="1"
-                    Margin="20,16,20,18"
-                    Padding="32"
-                    Background="{StaticResource SurfaceBrush}"
-                    BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="8"
+                    Margin="24,20,24,22"
+                    Padding="36"
+                    Style="{StaticResource FluentElevatedCardStyle}"
                     Visibility="{Binding IsLockedFeatureActive, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="520">
                     <TextBlock Text="&#xE72E;"
@@ -1680,22 +1532,19 @@
                   DataContext="{Binding AutoCleanSchedule}"
                   Visibility="{Binding DataContext.IsAutoCleanScheduleContentVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.Resources>
-                    <Style x:Key="ScheduleSurfaceCardStyle" TargetType="Border">
-                        <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-                        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
-                        <Setter Property="BorderThickness" Value="1" />
+                    <Style x:Key="ScheduleSurfaceCardStyle"
+                           TargetType="Border"
+                           BasedOn="{StaticResource FluentCardStyle}">
                         <Setter Property="CornerRadius" Value="12" />
                     </Style>
-                    <Style x:Key="ScheduleSectionTitleStyle" TargetType="TextBlock">
-                        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
-                        <Setter Property="FontSize" Value="15" />
-                        <Setter Property="FontWeight" Value="SemiBold" />
-                    </Style>
-                    <Style x:Key="ScheduleFieldLabelStyle" TargetType="TextBlock">
+                    <Style x:Key="ScheduleSectionTitleStyle"
+                           TargetType="TextBlock"
+                           BasedOn="{StaticResource FluentSectionTitleStyle}" />
+                    <Style x:Key="ScheduleFieldLabelStyle"
+                           TargetType="TextBlock"
+                           BasedOn="{StaticResource FluentCaptionStyle}">
                         <Setter Property="Margin" Value="0,0,0,6" />
-                        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
                         <Setter Property="FontSize" Value="11" />
-                        <Setter Property="FontWeight" Value="SemiBold" />
                     </Style>
                     <Style x:Key="ScheduleListItemStyle" TargetType="ListBoxItem">
                         <Setter Property="Padding" Value="0" />
@@ -1720,8 +1569,8 @@
                                             <Setter TargetName="ScheduleCard" Property="Background" Value="{StaticResource SurfaceMutedBrush}" />
                                         </Trigger>
                                         <Trigger Property="IsSelected" Value="True">
-                                            <Setter TargetName="ScheduleCard" Property="Background" Value="#EEF6FF" />
-                                            <Setter TargetName="ScheduleCard" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                            <Setter TargetName="ScheduleCard" Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+                                            <Setter TargetName="ScheduleCard" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                                             <Setter TargetName="ScheduleCard" Property="BorderThickness" Value="2" />
                                         </Trigger>
                                     </ControlTemplate.Triggers>
