@@ -139,6 +139,16 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Safe cancellation and honest partial-failure reporting
 - No cleanup, repair, optimization, process termination, service modification, registry writing, or automatic system-setting changes
 
+- Premium overview hero clearly communicates read-only scope and user-requested recommendations
+- Premium `Run health check` and `Cancel current check` actions use the shared design system
+- Overall, Good, Attention, and Unknown summary cards use consistent hierarchy, icons, spacing, and colour semantics
+- Premium empty state appears before the first health check
+- Findings table uses the shared Fluent table design with clearer recommendation access
+- Focused recommendation page presents current status, current value, detected condition, recommendation, reason, warning, and available action in a structured layout
+- Premium Back navigation and context-specific action buttons remain explicit and user-controlled
+- Light and dark themes, normal and maximized layouts, and shared bottom status-panel standards are supported
+- Existing Health Check services, rules, thresholds, commands, navigation targets, and safety behaviour are unchanged
+
 ### Cross-tool result presentation
 
 - Consistent wrapped status panels across Cleaner, Custom Clean, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Health Check
@@ -326,6 +336,15 @@ All selectable result tables must use the same application-wide behaviour:
 - All existing module navigation, commands, scans, previews, monitoring, cleanup safeguards, schedules, settings, and recommendation navigation remained functional.
 - Release build succeeded and the xUnit suite remained at 103 passed, 0 failed after Sprint 21.
 - No feature, service, command, cleanup, scheduling, licensing, or system-modification behaviour changed.
+- Health Check premium overview hero, read-only safety message, `Run health check` and `Cancel current check` actions, summary cards, empty state, findings table, and shared bottom status panel were manually verified after Sprint 22.
+- Overall, Good, Attention, and Unknown summary values and status colour semantics were regression verified.
+- Findings-first behaviour remained intact: recommendations do not open automatically and each finding retains its own `View recommendation` action.
+- Focused recommendation details, Back navigation, priority, current status, current value, detected condition, recommendation, reason, warning, and available action were manually verified.
+- Context-specific navigation to Cleaner, Large File Finder, Duplicate File Finder, System Monitor, and Startup Manager continued to open the correct modules.
+- Health Check was manually verified in Light and Dark themes and at normal, maximized, and resized window sizes without clipping or overlap.
+- Cleaner, Custom Clean, Auto Clean Schedule, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Settings remained functionally unchanged.
+- Release build succeeded and the xUnit suite remained at 103 passed, 0 failed after Sprint 22.
+- No Health Check service, view-model, command, threshold, recommendation rule, system-modification, or automatic-fix behaviour changed.
 - System Monitor live CPU and physical-memory values, Start/Stop controls, automatic stop on tab change, and read-only scope manually verified.
 - Cleaner, Large File Finder, Duplicate File Finder, and Startup Manager regression opening checks passed after Sprint 8.
 - Health Check system-drive, CPU, memory, and startup summary results manually verified.
@@ -554,11 +573,11 @@ This rule is mandatory. Repeated blind patches are not acceptable.
 
 ## Current milestone
 
-Sprint 21 — Premium Window Chrome and Shell Polish.
+Sprint 22 — Health Check Premium UI Migration.
 
 ## Next milestone
 
-Sprint 22 — Health Check Premium UI Migration, only after Sprint 21 is committed, pushed, and the working tree is clean.
+Sprint 23 — Custom Clean Premium UI Migration, only after Sprint 22 is committed, pushed, and the working tree is clean.
 
 ## Compact AI handoff
 
