@@ -326,7 +326,7 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="238" />
+            <ColumnDefinition Width="0.24*" MinWidth="220" MaxWidth="250" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
@@ -536,11 +536,26 @@
 
             <Border Grid.Row="0" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
                 <Grid Margin="24,0">
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding ModuleTitle}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="22" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding ModuleSubtitle}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" />
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,24,0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding ModuleTitle}"
+                                   ToolTip="{Binding ModuleTitle}"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   FontSize="22"
+                                   FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding ModuleSubtitle}"
+                                   ToolTip="{Binding ModuleSubtitle}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="12"
+                                   TextTrimming="CharacterEllipsis" />
                     </StackPanel>
-                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
                         <TextBlock Text="Windows 10/11" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Right" />
                         <TextBlock Text="Local system utility" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" HorizontalAlignment="Right" />
                     </StackPanel>
@@ -548,7 +563,7 @@
             </Border>
 
             <Grid Grid.Row="1"
-                  Margin="22,18,22,20"
+                  Margin="20,16,20,18"
                   DataContext="{Binding HealthCheck}"
                   Visibility="{Binding DataContext.IsHealthCheckActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
@@ -714,7 +729,7 @@
             </Grid>
 
             <Grid Grid.Row="1"
-                  Margin="22,18,22,20"
+                  Margin="20,16,20,18"
                   Visibility="{Binding IsCleanerActive, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -782,11 +797,21 @@
                 </Grid>
 
                 <Grid Grid.Row="1" Margin="0,16,0,12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="Temporary files" Foreground="{StaticResource TextPrimaryBrush}" FontSize="16" FontWeight="SemiBold" />
-                        <TextBlock Margin="0,3,0,0" Text="Only the current user's Windows temporary folder is scanned." Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" />
+                        <TextBlock Margin="0,3,0,0"
+                                   Text="Only the current user's Windows temporary folder is scanned."
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="11"
+                                   TextWrapping="Wrap" />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+
+                    <StackPanel Grid.Row="1" Margin="0,10,0,0" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Command="{Binding ScanCommand}" Content="Scan" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
                         <Button Command="{Binding CleanCommand}" Content="Clean selected" Style="{StaticResource CleanButtonStyle}" Margin="0,0,8,0" />
                         <Button Command="{Binding CancelCommand}" Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" />
@@ -809,6 +834,8 @@
                               SelectionUnit="FullRow"
                               Background="{StaticResource SurfaceBrush}"
                               AlternationCount="2"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                              ScrollViewer.VerticalScrollBarVisibility="Auto"
                               EnableRowVirtualization="True"
                               EnableColumnVirtualization="True">
                         <DataGrid.Columns>
@@ -824,10 +851,10 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="FILE NAME" Binding="{Binding Name}" IsReadOnly="True" Width="2*" MinWidth="180" />
-                            <DataGridTextColumn Header="SIZE" Binding="{Binding Size}" IsReadOnly="True" Width="105" />
-                            <DataGridTextColumn Header="MODIFIED" Binding="{Binding LastModified, StringFormat={}{0:dd MMM yyyy  HH:mm}}" IsReadOnly="True" Width="170" />
-                            <DataGridTextColumn Header="LOCATION" Binding="{Binding FullPath}" IsReadOnly="True" Width="3*" MinWidth="240" />
+                            <DataGridTextColumn Header="FILE NAME" Binding="{Binding Name}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="2*" MinWidth="180" />
+                            <DataGridTextColumn Header="SIZE" Binding="{Binding Size}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="105" />
+                            <DataGridTextColumn Header="MODIFIED" Binding="{Binding LastModified, StringFormat={}{0:dd MMM yyyy  HH:mm}}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="170" />
+                            <DataGridTextColumn Header="LOCATION" Binding="{Binding FullPath}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="3*" MinWidth="240" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Border>
@@ -889,7 +916,7 @@
             </Grid>
 
             <Grid Grid.Row="1"
-                  Margin="22,18,22,20"
+                  Margin="20,16,20,18"
                   DataContext="{Binding CustomClean}"
                   Visibility="{Binding DataContext.IsCustomCleanActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
@@ -938,10 +965,10 @@
                         BorderThickness="1"
                         CornerRadius="8">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="EXISTING CLEANER CATEGORIES" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
@@ -970,10 +997,10 @@
                                        TextWrapping="Wrap" />
                         </StackPanel>
 
-                        <StackPanel Grid.Column="1"
-                                    Margin="18,0,0,0"
+                        <StackPanel Grid.Row="1"
+                                    Margin="0,10,0,0"
                                     Orientation="Horizontal"
-                                    VerticalAlignment="Center">
+                                    HorizontalAlignment="Right">
                             <Button Command="{Binding PreviewCommand}" Content="Preview" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
                             <Button Command="{Binding CleanCommand}" Content="Clean previewed" Style="{StaticResource CleanButtonStyle}" Margin="0,0,8,0" />
                             <Button Command="{Binding CancelCommand}" Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" />
@@ -1095,7 +1122,7 @@
             </Grid>
 
             <Grid Grid.Row="1"
-                  Margin="22,18,22,20"
+                  Margin="20,16,20,18"
                   DataContext="{Binding LargeFileFinder}"
                   Visibility="{Binding DataContext.IsLargeFileFinderActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
@@ -1138,36 +1165,43 @@
 
                 <Border Grid.Row="1" Margin="0,16,0,12" Padding="16,14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="12" />
-                            <ColumnDefinition Width="150" />
-                            <ColumnDefinition Width="12" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="FOLDER OR DRIVE" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <Grid Margin="0,6,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="8" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBox Text="{Binding SelectedFolder, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" />
-                                <Button Grid.Column="2" Command="{Binding BrowseCommand}" Content="Browse" Style="{StaticResource SecondaryButtonStyle}" MinWidth="90" />
-                            </Grid>
-                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="3*" MinWidth="300" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="1*" MinWidth="130" />
+                            </Grid.ColumnDefinitions>
 
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="MINIMUM SIZE (MB)" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBox Margin="0,6,0,0"
-                                     Text="{Binding MinimumSizeText, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource InputTextBoxStyle}"
-                                     HorizontalContentAlignment="Right" />
-                        </StackPanel>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="FOLDER OR DRIVE" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
+                                <Grid Margin="0,6,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="8" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Text="{Binding SelectedFolder, UpdateSourceTrigger=PropertyChanged}"
+                                             ToolTip="{Binding SelectedFolder}"
+                                             Style="{StaticResource InputTextBoxStyle}" />
+                                    <Button Grid.Column="2" Command="{Binding BrowseCommand}" Content="Browse" Style="{StaticResource SecondaryButtonStyle}" MinWidth="90" />
+                                </Grid>
+                            </StackPanel>
 
-                        <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Bottom">
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="MINIMUM SIZE (MB)" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
+                                <TextBox Margin="0,6,0,0"
+                                         Text="{Binding MinimumSizeText, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource InputTextBoxStyle}"
+                                         HorizontalContentAlignment="Right" />
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Grid.Row="1" Margin="0,10,0,0" Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Command="{Binding ScanCommand}" Content="Scan" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
                             <Button Command="{Binding DeleteSelectedCommand}" Content="Delete selected" Style="{StaticResource CleanButtonStyle}" Margin="0,0,8,0" />
                             <Button Command="{Binding CancelCommand}" Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" />
@@ -1191,6 +1225,8 @@
                               SelectionMode="Extended"
                               SelectionUnit="FullRow"
                               Background="{StaticResource SurfaceBrush}"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                              ScrollViewer.VerticalScrollBarVisibility="Auto"
                               EnableRowVirtualization="True"
                               EnableColumnVirtualization="True">
                         <DataGrid.Columns>
@@ -1206,10 +1242,10 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="FILE NAME" Binding="{Binding Name}" IsReadOnly="True" Width="2*" MinWidth="190" />
-                            <DataGridTextColumn Header="SIZE" Binding="{Binding SizeDisplay}" IsReadOnly="True" Width="110" />
-                            <DataGridTextColumn Header="MODIFIED" Binding="{Binding LastModified, StringFormat={}{0:dd MMM yyyy  HH:mm}}" IsReadOnly="True" Width="170" />
-                            <DataGridTextColumn Header="LOCATION" Binding="{Binding Location}" IsReadOnly="True" Width="3*" MinWidth="260" />
+                            <DataGridTextColumn Header="FILE NAME" Binding="{Binding Name}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="2*" MinWidth="190" />
+                            <DataGridTextColumn Header="SIZE" Binding="{Binding SizeDisplay}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="110" />
+                            <DataGridTextColumn Header="MODIFIED" Binding="{Binding LastModified, StringFormat={}{0:dd MMM yyyy  HH:mm}}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="170" />
+                            <DataGridTextColumn Header="LOCATION" Binding="{Binding Location}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="3*" MinWidth="260" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Border>
@@ -1272,7 +1308,7 @@
             </Grid>
 
             <Grid Grid.Row="1"
-                  Margin="22,18,22,20"
+                  Margin="20,16,20,18"
                   DataContext="{Binding DuplicateFileFinder}"
                   Visibility="{Binding DataContext.IsDuplicateFileFinderActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
@@ -1315,13 +1351,12 @@
 
                 <Border Grid.Row="1" Margin="0,16,0,12" Padding="16,14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="12" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-                        <StackPanel Grid.Column="0">
+                        <StackPanel>
                             <TextBlock Text="FOLDER OR DRIVE" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
                             <Grid Margin="0,6,0,0">
                                 <Grid.ColumnDefinitions>
@@ -1329,23 +1364,34 @@
                                     <ColumnDefinition Width="8" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBox Text="{Binding SelectedFolder, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" />
+                                <TextBox Text="{Binding SelectedFolder, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip="{Binding SelectedFolder}"
+                                         Style="{StaticResource InputTextBoxStyle}" />
                                 <Button Grid.Column="2" Command="{Binding BrowseCommand}" Content="Browse" Style="{StaticResource SecondaryButtonStyle}" MinWidth="90" />
                             </Grid>
                         </StackPanel>
 
-                        <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
+                        <Grid Grid.Row="1" Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
                             <TextBlock Text="{Binding SelectionSummary}"
-                                       HorizontalAlignment="Right"
+                                       ToolTip="{Binding SelectionSummary}"
+                                       VerticalAlignment="Center"
                                        Foreground="{StaticResource TextSecondaryBrush}"
                                        FontSize="11"
-                                       FontWeight="SemiBold" />
-                            <StackPanel Margin="0,6,0,0" Orientation="Horizontal">
+                                       FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis" />
+
+                            <StackPanel Grid.Column="2" Orientation="Horizontal">
                                 <Button Command="{Binding ScanCommand}" Content="Scan" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
                                 <Button Command="{Binding CancelCommand}" Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0" />
                                 <Button Command="{Binding RecycleSelectedCommand}" Content="Recycle Selected" Style="{StaticResource CleanButtonStyle}" MinWidth="145" />
                             </StackPanel>
-                        </StackPanel>
+                        </Grid>
                     </Grid>
                 </Border>
 
@@ -1365,6 +1411,8 @@
                               SelectionMode="Extended"
                               SelectionUnit="FullRow"
                               Background="{StaticResource SurfaceBrush}"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                              ScrollViewer.VerticalScrollBarVisibility="Auto"
                               EnableRowVirtualization="True"
                               EnableColumnVirtualization="True">
                         <DataGrid.Columns>
@@ -1380,12 +1428,12 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="GROUP" Binding="{Binding GroupDisplay}" IsReadOnly="True" Width="115" />
-                            <DataGridTextColumn Header="FILE NAME" Binding="{Binding Name}" IsReadOnly="True" Width="2*" MinWidth="170" />
-                            <DataGridTextColumn Header="SIZE" Binding="{Binding SizeDisplay}" IsReadOnly="True" Width="95" />
-                            <DataGridTextColumn Header="GROUP POTENTIAL" Binding="{Binding GroupReclaimableDisplay}" IsReadOnly="True" Width="130" />
-                            <DataGridTextColumn Header="SHA-256" Binding="{Binding HashDisplay}" IsReadOnly="True" Width="115" />
-                            <DataGridTextColumn Header="LOCATION" Binding="{Binding Location}" IsReadOnly="True" Width="3*" MinWidth="230" />
+                            <DataGridTextColumn Header="GROUP" Binding="{Binding GroupDisplay}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="115" />
+                            <DataGridTextColumn Header="FILE NAME" Binding="{Binding Name}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="2*" MinWidth="170" />
+                            <DataGridTextColumn Header="SIZE" Binding="{Binding SizeDisplay}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="95" />
+                            <DataGridTextColumn Header="GROUP POTENTIAL" Binding="{Binding GroupReclaimableDisplay}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="130" />
+                            <DataGridTextColumn Header="SHA-256" Binding="{Binding HashDisplay}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="115" />
+                            <DataGridTextColumn Header="LOCATION" Binding="{Binding Location}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="3*" MinWidth="230" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Border>
@@ -1448,7 +1496,7 @@
             </Grid>
 
             <Grid Grid.Row="1"
-                  Margin="22,18,22,20"
+                  Margin="20,16,20,18"
                   DataContext="{Binding StartupManager}"
                   Visibility="{Binding DataContext.IsStartupManagerActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
@@ -1618,7 +1666,7 @@
             </Grid>
 
             <Grid Grid.Row="1"
-                  Margin="22,18,22,20"
+                  Margin="20,16,20,18"
                   DataContext="{Binding SystemMonitor}"
                   Visibility="{Binding DataContext.IsSystemMonitorActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
@@ -1834,7 +1882,7 @@
 
 
             <Grid Grid.Row="1"
-                  Margin="22,18,22,20"
+                  Margin="20,16,20,18"
                   DataContext="{Binding Settings}"
                   Visibility="{Binding DataContext.IsSettingsActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
@@ -1845,7 +1893,7 @@
                 <ScrollViewer Grid.Row="0"
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel MaxWidth="860" HorizontalAlignment="Left">
+                    <StackPanel HorizontalAlignment="Stretch">
                         <Border Padding="18"
                                 Background="{StaticResource SurfaceBrush}"
                                 BorderBrush="{StaticResource BorderBrush}"
@@ -1853,9 +1901,9 @@
                                 CornerRadius="8">
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="220" />
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="1.25*" MinWidth="180" />
+                                    <ColumnDefinition Width="18" />
+                                    <ColumnDefinition Width="1*" MinWidth="180" />
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Column="0">
@@ -1876,8 +1924,9 @@
                                 </StackPanel>
 
                                 <ComboBox Grid.Column="2"
-                                          Width="220"
-                                          HorizontalAlignment="Left"
+                                          MinWidth="180"
+                                          MaxWidth="300"
+                                          HorizontalAlignment="Stretch"
                                           VerticalAlignment="Center"
                                           ItemsSource="{Binding ThemeOptions}"
                                           SelectedItem="{Binding SelectedTheme, Mode=TwoWay}"
@@ -1899,11 +1948,11 @@
 
                                 <Grid Margin="0,14,0,0">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="220" />
-                                        <ColumnDefinition Width="24" />
-                                        <ColumnDefinition Width="220" />
-                                        <ColumnDefinition Width="24" />
-                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="1.35*" MinWidth="170" />
+                                        <ColumnDefinition Width="18" />
+                                        <ColumnDefinition Width="1*" MinWidth="130" />
+                                        <ColumnDefinition Width="18" />
+                                        <ColumnDefinition Width="1.55*" MinWidth="170" />
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel Grid.Column="0">
@@ -1920,7 +1969,7 @@
 
                                     <Grid Grid.Column="2" VerticalAlignment="Center">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="140" />
+                                            <ColumnDefinition Width="*" MinWidth="100" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <TextBox Text="{Binding LargeFileMinimumSizeText, UpdateSourceTrigger=PropertyChanged}"
@@ -1946,11 +1995,11 @@
 
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="220" />
-                                        <ColumnDefinition Width="24" />
-                                        <ColumnDefinition Width="220" />
-                                        <ColumnDefinition Width="24" />
-                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="1.35*" MinWidth="170" />
+                                        <ColumnDefinition Width="18" />
+                                        <ColumnDefinition Width="1*" MinWidth="130" />
+                                        <ColumnDefinition Width="18" />
+                                        <ColumnDefinition Width="1.55*" MinWidth="170" />
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel Grid.Column="0">
@@ -1967,7 +2016,7 @@
 
                                     <Grid Grid.Column="2" VerticalAlignment="Center">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="140" />
+                                            <ColumnDefinition Width="*" MinWidth="100" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <TextBox Text="{Binding SystemMonitorRefreshIntervalText, UpdateSourceTrigger=PropertyChanged}"
@@ -1997,9 +2046,9 @@
                                 CornerRadius="8">
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="220" />
-                                    <ColumnDefinition Width="24" />
-                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="1.1*" MinWidth="170" />
+                                    <ColumnDefinition Width="18" />
+                                    <ColumnDefinition Width="2.2*" MinWidth="280" />
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Column="0">

@@ -148,6 +148,18 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Cleanup confirmation remains permanently enabled as a non-disableable safety rule
 - No cloud account, telemetry, registry writing, startup modification, or automatic optimization
 
+### Responsive layout
+
+- Large File Finder Folder or Drive field remains usable at restored and narrow widths
+- Folder/path and minimum-size fields resize proportionally
+- Crowded action buttons use dedicated rows instead of compressing input fields
+- Wide result tables expose horizontal scrolling when required
+- Settings expands with the available window width
+- Header content avoids overlap during resizing
+- Sidebar respects practical minimum and maximum widths
+- Restored, maximized, narrow, and stretched layouts are supported
+- UI-only implementation with no command, binding, service, scanning, cleanup, or settings-logic changes
+
 ### Shared WPF table interaction
 
 All selectable result tables must use the same application-wide behaviour:
@@ -174,7 +186,10 @@ All selectable result tables must use the same application-wide behaviour:
 - Startup Manager registry and Startup-folder enumeration manually verified.
 - Startup Manager re-scan, cancellation, status reporting, restored/maximized layout, and read-only controls manually verified.
 - Cleaner and Duplicate File Finder regression opening checks passed after Sprint 7.
-- Large File Finder remained functional after Sprint 7; its pre-existing narrow-window Folder or Drive field compression is deferred to a dedicated responsive-layout sprint.
+- Large File Finder Folder or Drive compression was resolved and manually verified after Sprint 14.
+- Restored, maximized, narrow, and stretched layouts were manually verified across every implemented module.
+- Action rows, table scrolling, Settings width, sidebar sizing, and header overlap behaviour were manually verified after Sprint 14.
+- Cleaner, Custom Clean, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, Health Check, and Settings remained functionally unchanged during Sprint 14 regression verification.
 - System Monitor live CPU and physical-memory values, Start/Stop controls, automatic stop on tab change, and read-only scope manually verified.
 - Cleaner, Large File Finder, Duplicate File Finder, and Startup Manager regression opening checks passed after Sprint 8.
 - Health Check system-drive, CPU, memory, and startup summary results manually verified.
@@ -403,11 +418,11 @@ This rule is mandatory. Repeated blind patches are not acceptable.
 
 ## Current milestone
 
-Sprint 6 — Safe Duplicate Cleanup.
+Sprint 14 — Responsive Layout Polish.
 
 ## Next milestone
 
-Select one narrow functional module or reliability improvement only after Sprint 6 is committed and the working tree is clean.
+Select one narrow functional module or reliability improvement only after Sprint 14 is committed and the working tree is clean.
 
 ## Compact AI handoff
 
