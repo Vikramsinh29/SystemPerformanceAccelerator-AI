@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Data;
 using Microsoft.Win32;
 using SystemPerformanceAccelerator.Core.Interfaces;
 using SystemPerformanceAccelerator.Core.Models;
@@ -32,6 +33,10 @@ public sealed class DuplicateFileFinderViewModel : INotifyPropertyChanged
         _duplicateFileService = duplicateFileService;
         _duplicateFileCleanupService = duplicateFileCleanupService;
 
+        GroupedResults = CollectionViewSource.GetDefaultView(Results);
+        GroupedResults.GroupDescriptions.Add(
+            new PropertyGroupDescription(nameof(DuplicateFileCandidateViewModel.GroupKey)));
+
         BrowseCommand = new RelayCommand(Browse, () => !IsBusy);
         ScanCommand = new AsyncRelayCommand(ScanAsync, () => !IsBusy);
         RecycleSelectedCommand = new AsyncRelayCommand(
@@ -41,6 +46,7 @@ public sealed class DuplicateFileFinderViewModel : INotifyPropertyChanged
     }
 
     public ObservableCollection<DuplicateFileCandidateViewModel> Results { get; } = [];
+    public ICollectionView GroupedResults { get; }
     public RelayCommand BrowseCommand { get; }
     public AsyncRelayCommand ScanCommand { get; }
     public AsyncRelayCommand RecycleSelectedCommand { get; }

@@ -15,14 +15,23 @@ public sealed class DuplicateFileCandidateViewModel : INotifyPropertyChanged, IS
     {
         Model = model;
         GroupNumber = groupNumber;
+        GroupFileCount = groupFileCount;
         GroupDisplay = $"Group {groupNumber:N0} ({groupFileCount:N0})";
+        GroupTitle = $"Duplicate Group {groupNumber:N0}";
+        GroupCopiesDisplay = $"{groupFileCount:N0} content-matched copies";
+        GroupRemovalGuidance = $"Up to {Math.Max(0, groupFileCount - 1):N0} removable - keep at least 1";
         GroupReclaimableDisplay = MainWindowViewModel.FormatBytes(groupReclaimableBytes);
     }
 
     public DuplicateFileCandidate Model { get; }
     public int GroupNumber { get; }
+    public int GroupFileCount { get; }
     public string GroupKey => $"{Model.SizeBytes}:{Model.Sha256Hash}";
     public string GroupDisplay { get; }
+    public string GroupTitle { get; }
+    public string GroupCopiesDisplay { get; }
+    public string GroupRemovalGuidance { get; }
+    public string GroupSizeDisplay => Model.SizeDisplay;
     public string GroupReclaimableDisplay { get; }
     public string Name => Model.Name;
     public string FullPath => Model.FullPath;

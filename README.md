@@ -91,6 +91,11 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Locked, missing, changed, inaccessible, unsafe, outside-scope, and reparse-point files are skipped and reported
 - Deleted, skipped, and reclaimed-space totals
 - Results refresh after cleanup
+- Duplicate files displayed in clearly separated content-matched groups
+- Group number, confirmed copy count, per-file size, and potential reclaimable space shown in each group header
+- Select, File Name, Size, Modified, and Location columns aligned consistently
+- Light row and column separators improve report readability
+- Individual selection remains available within every group
 - Structured completion statistics with truncated status text and a full-message tooltip
 
 ### Startup Manager
@@ -190,6 +195,9 @@ All selectable result tables must use the same application-wide behaviour:
 - Restored, maximized, narrow, and stretched layouts were manually verified across every implemented module.
 - Action rows, table scrolling, Settings width, sidebar sizing, and header overlap behaviour were manually verified after Sprint 14.
 - Cleaner, Custom Clean, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, Health Check, and Settings remained functionally unchanged during Sprint 14 regression verification.
+- Duplicate Finder grouping, group headers, copy counts, reclaimable-space summaries, aligned columns, separators, scrolling, and row selection manually verified after Sprint 15.
+- Duplicate Finder final-copy protection and safe Recycle Bin cleanup remained unchanged and were regression verified after Sprint 15.
+- Release build succeeded and the xUnit suite remained at 52 passed, 0 failed after Sprint 15.
 - System Monitor live CPU and physical-memory values, Start/Stop controls, automatic stop on tab change, and read-only scope manually verified.
 - Cleaner, Large File Finder, Duplicate File Finder, and Startup Manager regression opening checks passed after Sprint 8.
 - Health Check system-drive, CPU, memory, and startup summary results manually verified.
@@ -418,11 +426,11 @@ This rule is mandatory. Repeated blind patches are not acceptable.
 
 ## Current milestone
 
-Sprint 14 — Responsive Layout Polish.
+Sprint 15 — Duplicate Finder Grouping and Table Readability.
 
 ## Next milestone
 
-Select one narrow functional module or reliability improvement only after Sprint 14 is committed and the working tree is clean.
+Select one narrow functional module or reliability improvement only after Sprint 15 is committed and the working tree is clean.
 
 ## Compact AI handoff
 

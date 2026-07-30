@@ -1397,7 +1397,7 @@
 
                 <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
                     <DataGrid x:Name="DuplicateFilesGrid"
-                              ItemsSource="{Binding Results}"
+                              ItemsSource="{Binding GroupedResults}"
                               behaviors:DataGridSelectionBehavior.IsEnabled="True"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
@@ -1405,18 +1405,172 @@
                               CanUserDeleteRows="False"
                               CanUserReorderColumns="False"
                               HeadersVisibility="Column"
-                              GridLinesVisibility="None"
+                              GridLinesVisibility="Vertical"
+                              VerticalGridLinesBrush="{StaticResource BorderBrush}"
                               BorderThickness="0"
                               RowHeaderWidth="0"
                               SelectionMode="Extended"
                               SelectionUnit="FullRow"
-                              Background="{StaticResource SurfaceBrush}"
+                              Background="{StaticResource SurfaceMutedBrush}"
                               ScrollViewer.HorizontalScrollBarVisibility="Auto"
                               ScrollViewer.VerticalScrollBarVisibility="Auto"
                               EnableRowVirtualization="True"
-                              EnableColumnVirtualization="True">
+                              EnableColumnVirtualization="True"
+                              FrozenColumnCount="1"
+                              MinColumnWidth="54"
+                              HorizontalContentAlignment="Stretch"
+                              VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling">
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style TargetType="DataGridColumnHeader"
+                                   BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                                <Setter Property="Padding" Value="10,0" />
+                                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+                                <Setter Property="BorderThickness" Value="0,0,1,1" />
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+                        <DataGrid.CellStyle>
+                            <Style TargetType="DataGridCell"
+                                   BasedOn="{StaticResource {x:Type DataGridCell}}">
+                                <Setter Property="Padding" Value="10,0" />
+                                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+                                <Setter Property="BorderThickness" Value="0,0,1,0" />
+                            </Style>
+                        </DataGrid.CellStyle>
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow"
+                                   BasedOn="{StaticResource {x:Type DataGridRow}}">
+                                <Setter Property="Height" Value="38" />
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            </Style>
+                        </DataGrid.RowStyle>
+                        <DataGrid.GroupStyle>
+                            <GroupStyle>
+                                <GroupStyle.HeaderTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="14,10"
+                                                Background="{StaticResource SurfaceMutedBrush}"
+                                                BorderBrush="{StaticResource BorderBrush}"
+                                                BorderThickness="0,0,0,1">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="12" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="8" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <Border Width="34"
+                                                        Height="34"
+                                                        Background="#F1EDF9"
+                                                        CornerRadius="17">
+                                                    <TextBlock Text="&#xE8B7;"
+                                                               FontFamily="Segoe MDL2 Assets"
+                                                               Foreground="#7757B7"
+                                                               FontSize="15"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center" />
+                                                </Border>
+
+                                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Items[0].GroupTitle}"
+                                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                                               FontSize="13"
+                                                               FontWeight="SemiBold" />
+                                                    <StackPanel Margin="0,2,0,0" Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Items[0].GroupCopiesDisplay}"
+                                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                                   FontSize="11" />
+                                                        <TextBlock Margin="8,0" Text="&#x2022;" Foreground="{StaticResource TextSecondaryBrush}" />
+                                                        <TextBlock Text="{Binding Items[0].GroupRemovalGuidance}"
+                                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                                   FontSize="11" />
+                                                    </StackPanel>
+                                                </StackPanel>
+
+                                                <Border Grid.Column="3"
+                                                        Padding="10,6"
+                                                        Background="{StaticResource SurfaceBrush}"
+                                                        BorderBrush="{StaticResource BorderBrush}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="5"
+                                                        VerticalAlignment="Center">
+                                                    <StackPanel>
+                                                        <TextBlock Text="EACH FILE"
+                                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                                   FontSize="9"
+                                                                   FontWeight="Bold" />
+                                                        <TextBlock Margin="0,2,0,0"
+                                                                   Text="{Binding Items[0].GroupSizeDisplay}"
+                                                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                                                   FontSize="12"
+                                                                   FontWeight="SemiBold" />
+                                                    </StackPanel>
+                                                </Border>
+
+                                                <Border Grid.Column="5"
+                                                        Padding="10,6"
+                                                        Background="#E6F6EE"
+                                                        BorderBrush="#B8E2CA"
+                                                        BorderThickness="1"
+                                                        CornerRadius="5"
+                                                        VerticalAlignment="Center">
+                                                    <StackPanel>
+                                                        <TextBlock Text="RECLAIMABLE"
+                                                                   Foreground="#23764C"
+                                                                   FontSize="9"
+                                                                   FontWeight="Bold" />
+                                                        <TextBlock Margin="0,2,0,0"
+                                                                   Text="{Binding Items[0].GroupReclaimableDisplay}"
+                                                                   Foreground="#17613C"
+                                                                   FontSize="12"
+                                                                   FontWeight="SemiBold" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </GroupStyle.HeaderTemplate>
+                                <GroupStyle.ContainerStyle>
+                                    <Style TargetType="{x:Type GroupItem}">
+                                        <Setter Property="Margin" Value="0,8,0,10" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                    <Border Background="{StaticResource SurfaceBrush}"
+                                                            BorderBrush="{StaticResource BorderBrush}"
+                                                            BorderThickness="0,1,0,1"
+                                                            CornerRadius="0"
+                                                            ClipToBounds="True"
+                                                            HorizontalAlignment="Stretch">
+                                                        <Grid HorizontalAlignment="Stretch">
+                                                            <Grid.RowDefinitions>
+                                                                <RowDefinition Height="Auto" />
+                                                                <RowDefinition Height="Auto" />
+                                                            </Grid.RowDefinitions>
+                                                            <ContentPresenter Grid.Row="0"
+                                                                              Content="{TemplateBinding Content}"
+                                                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                                              HorizontalAlignment="Stretch" />
+                                                            <ItemsPresenter Grid.Row="1"
+                                                                            HorizontalAlignment="Stretch" />
+                                                        </Grid>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </GroupStyle.ContainerStyle>
+                            </GroupStyle>
+                        </DataGrid.GroupStyle>
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="SELECT" Width="72">
+                            <DataGridTemplateColumn Header="SELECT"
+                                                    Width="58"
+                                                    MinWidth="58"
+                                                    MaxWidth="58">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -1428,12 +1582,32 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="GROUP" Binding="{Binding GroupDisplay}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="115" />
-                            <DataGridTextColumn Header="FILE NAME" Binding="{Binding Name}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="2*" MinWidth="170" />
-                            <DataGridTextColumn Header="SIZE" Binding="{Binding SizeDisplay}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="95" />
-                            <DataGridTextColumn Header="GROUP POTENTIAL" Binding="{Binding GroupReclaimableDisplay}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="130" />
-                            <DataGridTextColumn Header="SHA-256" Binding="{Binding HashDisplay}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="115" />
-                            <DataGridTextColumn Header="LOCATION" Binding="{Binding Location}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="3*" MinWidth="230" />
+                            <DataGridTextColumn Header="FILE NAME"
+                                                Binding="{Binding Name}"
+                                                ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
+                                                IsReadOnly="True"
+                                                Width="2*"
+                                                MinWidth="220" />
+                            <DataGridTextColumn Header="SIZE"
+                                                Binding="{Binding SizeDisplay}"
+                                                ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
+                                                IsReadOnly="True"
+                                                Width="90"
+                                                MinWidth="90"
+                                                MaxWidth="110" />
+                            <DataGridTextColumn Header="MODIFIED"
+                                                Binding="{Binding LastModified, StringFormat={}{0:g}}"
+                                                ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
+                                                IsReadOnly="True"
+                                                Width="145"
+                                                MinWidth="135"
+                                                MaxWidth="175" />
+                            <DataGridTextColumn Header="LOCATION"
+                                                Binding="{Binding Location}"
+                                                ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
+                                                IsReadOnly="True"
+                                                Width="3*"
+                                                MinWidth="320" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Border>
