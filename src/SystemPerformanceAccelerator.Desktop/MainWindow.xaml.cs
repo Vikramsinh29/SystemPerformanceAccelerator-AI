@@ -1,6 +1,7 @@
 using System.Windows;
 using SystemPerformanceAccelerator.Desktop.Services;
 using SystemPerformanceAccelerator.Desktop.ViewModels;
+using SystemPerformanceAccelerator.Infrastructure.Configuration;
 using SystemPerformanceAccelerator.Infrastructure.Services;
 
 namespace SystemPerformanceAccelerator.Desktop;
@@ -24,6 +25,21 @@ public partial class MainWindow : Window
             systemMonitorService,
             startupItemService);
 
+#if DEBUG
+        const bool enableDevelopmentEditionOverride = true;
+#else
+        const bool enableDevelopmentEditionOverride = false;
+#endif
+        var developmentEditionOverrideProvider =
+            new DevelopmentEditionOverrideProvider(
+                enableDevelopmentEditionOverride);
+        var featureAccessService = new FeatureAccessService(
+            EditionFeatureEntitlements.DefaultEdition,
+            EditionFeatureEntitlements.Current,
+            developmentEditionOverrideProvider);
+        var featureAccessGuard = new FeatureAccessGuard(
+            featureAccessService);
+
         DataContext = new MainWindowViewModel(
             temporaryFileService,
             customCleanService,
@@ -35,6 +51,7 @@ public partial class MainWindow : Window
             systemMonitorService,
             healthCheckService,
             applicationSettingsService,
-            settingsLoadResult);
+            settingsLoadResult,
+            featureAccessGuard);
     }
 }

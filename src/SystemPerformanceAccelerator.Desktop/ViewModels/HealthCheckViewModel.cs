@@ -23,13 +23,20 @@ public sealed class HealthCheckViewModel : INotifyPropertyChanged
 
     public HealthCheckViewModel(
         IHealthCheckService healthCheckService,
-        Action<HealthCheckNavigationTarget> navigate)
+        Action<HealthCheckNavigationTarget> navigate,
+        IFeatureAccessGuard featureAccessGuard)
     {
         _healthCheckService = healthCheckService ??
             throw new ArgumentNullException(nameof(healthCheckService));
         _navigate = navigate ??
             throw new ArgumentNullException(nameof(navigate));
-        RunCheckCommand = new AsyncRelayCommand(RunCheckAsync, () => !IsBusy);
+        ArgumentNullException.ThrowIfNull(featureAccessGuard);
+        RunCheckCommand = new AsyncRelayCommand(
+            RunCheckAsync,
+            featureAccessGuard,
+            ApplicationFeature.HealthCheck,
+            FeatureAccessRequirement.Execute,
+            () => !IsBusy);
         CancelCommand = new RelayCommand(Cancel, () => IsBusy);
         BackToFindingsCommand = new RelayCommand(
             BackToFindings,

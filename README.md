@@ -160,6 +160,23 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Cleanup confirmation remains permanently enabled as a non-disableable safety rule
 - No cloud account, telemetry, registry writing, startup modification, or automatic optimization
 
+### Edition and feature access foundation
+
+- One shared codebase supports Trial, Free, Standard, Pro, and Business editions
+- Explicit edition hierarchy keeps Trial separate from the commercial Free-to-Business ranking
+- Strongly typed catalogue covers every current application module
+- One central entitlement configuration defines feature availability
+- Central feature-access service returns Available, Trial, Locked, or Hidden states
+- Access results include the required edition and a user-facing availability message
+- Unknown editions, features, requirements, and malformed entitlement entries fail closed
+- Reusable access guard protects both module navigation and executable commands
+- Sidebar badges and locked-feature presentation are reusable without redesigning module layouts
+- Debug-only local override uses the `SPA_DEVELOPMENT_EDITION` environment variable
+- Release builds ignore the local development override
+- The normal Sprint 17 configuration keeps every existing module available
+- Trial, Locked, and Hidden behaviour is exercised without adding billing or real licensing
+- No payment gateway, subscription, account, product key, hardware fingerprint, licence server, or permanent commercial assignment
+
 ### Responsive layout
 
 - Large File Finder Folder or Drive field remains usable at restored and narrow widths
@@ -186,7 +203,7 @@ All selectable result tables must use the same application-wide behaviour:
 ## Verified state
 
 - Release build succeeds.
-- xUnit suite: 55 passed, 0 failed.
+- xUnit suite: 89 passed, 0 failed.
 - Cleaner scan and safe cleanup manually verified.
 - Large File Finder scan and Recycle Bin cleanup manually verified.
 - Shared one-click checkbox and double-click row selection manually verified in all selectable tables.
@@ -211,6 +228,13 @@ All selectable result tables must use the same application-wide behaviour:
 - No generic Apply, Fix, Disable, Delete, Optimize, or automatic system-changing action is present in Health Check.
 - Release build succeeded and the xUnit suite increased to 55 passed, 0 failed after Sprint 16.
 - Cleaner, Custom Clean, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Settings regression checks passed after Sprint 16.
+- Edition hierarchy, feature availability, Trial, Locked, Hidden, development override, malformed configuration, and unknown-value behaviour are covered by automated tests.
+- Release mode manually verified as `Free edition • local system utility` with every existing module available and no unexpected access badges.
+- Debug Trial override manually verified as `Trial edition • local development override` with visible TRIAL badges and every existing module remaining available.
+- Cleaner, Health Check, Custom Clean, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Settings navigation and commands were regression verified after Sprint 17.
+- Health Check recommendation navigation continued to open the correct feature-access-guarded target modules.
+- Release build succeeded and the xUnit suite increased to 89 passed, 0 failed after Sprint 17.
+- No payment, subscription, online licensing, account, product-key, hardware-fingerprint, or permanent commercial-tier implementation was added.
 - System Monitor live CPU and physical-memory values, Start/Stop controls, automatic stop on tab change, and read-only scope manually verified.
 - Cleaner, Large File Finder, Duplicate File Finder, and Startup Manager regression opening checks passed after Sprint 8.
 - Health Check system-drive, CPU, memory, and startup summary results manually verified.
@@ -439,11 +463,11 @@ This rule is mandatory. Repeated blind patches are not acceptable.
 
 ## Current milestone
 
-Sprint 16 — Findings-first Health Recommendations.
+Sprint 17 — Edition and Feature Access Foundation.
 
 ## Next milestone
 
-Select one narrow functional module or reliability improvement only after Sprint 16 is committed and the working tree is clean.
+Select one narrow functional module or reliability improvement only after Sprint 17 is committed, pushed, and the working tree is clean.
 
 ## Compact AI handoff
 

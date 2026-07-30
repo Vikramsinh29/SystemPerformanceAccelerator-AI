@@ -24,11 +24,18 @@ public sealed class SystemMonitorViewModel : INotifyPropertyChanged
 
     public SystemMonitorViewModel(
         ISystemMonitorService systemMonitorService,
+        IFeatureAccessGuard featureAccessGuard,
         int refreshIntervalSeconds = 1)
     {
         _systemMonitorService = systemMonitorService;
+        ArgumentNullException.ThrowIfNull(featureAccessGuard);
         _refreshInterval = TimeSpan.FromSeconds(Math.Clamp(refreshIntervalSeconds, 1, 10));
-        StartCommand = new AsyncRelayCommand(MonitorAsync, () => !IsMonitoring);
+        StartCommand = new AsyncRelayCommand(
+            MonitorAsync,
+            featureAccessGuard,
+            ApplicationFeature.SystemMonitor,
+            FeatureAccessRequirement.Execute,
+            () => !IsMonitoring);
         StopCommand = new RelayCommand(StopMonitoring, () => IsMonitoring);
     }
 

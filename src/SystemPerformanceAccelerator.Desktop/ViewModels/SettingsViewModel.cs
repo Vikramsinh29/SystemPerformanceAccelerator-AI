@@ -19,13 +19,15 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     public SettingsViewModel(
         IApplicationSettingsService settingsService,
         ApplicationSettingsLoadResult loadResult,
-        Action<ApplicationSettings> applySettings)
+        Action<ApplicationSettings> applySettings,
+        IFeatureAccessGuard featureAccessGuard)
     {
         _settingsService = settingsService ??
             throw new ArgumentNullException(nameof(settingsService));
         ArgumentNullException.ThrowIfNull(loadResult);
         _applySettings = applySettings ??
             throw new ArgumentNullException(nameof(applySettings));
+        ArgumentNullException.ThrowIfNull(featureAccessGuard);
 
         _selectedTheme = loadResult.Settings.Theme;
         _largeFileMinimumSizeText =
@@ -36,8 +38,16 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             ? loadResult.Warning
             : "Settings are stored locally on this computer.";
 
-        SaveCommand = new RelayCommand(Save);
-        RestoreDefaultsCommand = new RelayCommand(RestoreDefaults);
+        SaveCommand = new RelayCommand(
+            Save,
+            featureAccessGuard,
+            ApplicationFeature.Settings,
+            FeatureAccessRequirement.Execute);
+        RestoreDefaultsCommand = new RelayCommand(
+            RestoreDefaults,
+            featureAccessGuard,
+            ApplicationFeature.Settings,
+            FeatureAccessRequirement.Execute);
     }
 
     public IReadOnlyList<ApplicationTheme> ThemeOptions { get; } =

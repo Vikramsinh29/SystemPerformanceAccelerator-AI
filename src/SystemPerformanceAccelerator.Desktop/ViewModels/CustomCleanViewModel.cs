@@ -21,15 +21,25 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
     private string _previewStatus = "Not previewed";
     private OperationResultPresentation _operationResult = OperationResultPresentation.Hidden;
 
-    public CustomCleanViewModel(ICustomCleanService customCleanService)
+    public CustomCleanViewModel(
+        ICustomCleanService customCleanService,
+        IFeatureAccessGuard featureAccessGuard)
     {
         _customCleanService = customCleanService ??
             throw new ArgumentNullException(nameof(customCleanService));
+        ArgumentNullException.ThrowIfNull(featureAccessGuard);
+
         PreviewCommand = new AsyncRelayCommand(
             PreviewAsync,
+            featureAccessGuard,
+            ApplicationFeature.CustomClean,
+            FeatureAccessRequirement.Execute,
             () => !IsBusy && SelectedCategoryCount > 0);
         CleanCommand = new AsyncRelayCommand(
             CleanAsync,
+            featureAccessGuard,
+            ApplicationFeature.CustomClean,
+            FeatureAccessRequirement.Execute,
             () => !IsBusy && SelectedCategoryCount > 0 && Results.Count > 0);
         CancelCommand = new RelayCommand(Cancel, () => IsBusy);
     }

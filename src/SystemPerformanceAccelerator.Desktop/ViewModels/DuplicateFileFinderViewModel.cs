@@ -28,19 +28,34 @@ public sealed class DuplicateFileFinderViewModel : INotifyPropertyChanged
 
     public DuplicateFileFinderViewModel(
         IDuplicateFileService duplicateFileService,
-        IDuplicateFileCleanupService duplicateFileCleanupService)
+        IDuplicateFileCleanupService duplicateFileCleanupService,
+        IFeatureAccessGuard featureAccessGuard)
     {
         _duplicateFileService = duplicateFileService;
         _duplicateFileCleanupService = duplicateFileCleanupService;
+        ArgumentNullException.ThrowIfNull(featureAccessGuard);
 
         GroupedResults = CollectionViewSource.GetDefaultView(Results);
         GroupedResults.GroupDescriptions.Add(
             new PropertyGroupDescription(nameof(DuplicateFileCandidateViewModel.GroupKey)));
 
-        BrowseCommand = new RelayCommand(Browse, () => !IsBusy);
-        ScanCommand = new AsyncRelayCommand(ScanAsync, () => !IsBusy);
+        BrowseCommand = new RelayCommand(
+            Browse,
+            featureAccessGuard,
+            ApplicationFeature.DuplicateFileFinder,
+            FeatureAccessRequirement.Execute,
+            () => !IsBusy);
+        ScanCommand = new AsyncRelayCommand(
+            ScanAsync,
+            featureAccessGuard,
+            ApplicationFeature.DuplicateFileFinder,
+            FeatureAccessRequirement.Execute,
+            () => !IsBusy);
         RecycleSelectedCommand = new AsyncRelayCommand(
             RecycleSelectedAsync,
+            featureAccessGuard,
+            ApplicationFeature.DuplicateFileFinder,
+            FeatureAccessRequirement.Execute,
             () => !IsBusy && Results.Any(result => result.IsSelected));
         CancelCommand = new RelayCommand(Cancel, () => IsBusy);
     }

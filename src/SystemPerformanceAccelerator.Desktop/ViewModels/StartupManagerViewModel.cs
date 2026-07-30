@@ -17,10 +17,18 @@ public sealed class StartupManagerViewModel : INotifyPropertyChanged
     private string _scanStatus = "Not scanned";
     private string _progressText = "0 locations checked";
 
-    public StartupManagerViewModel(IStartupItemService startupItemService)
+    public StartupManagerViewModel(
+        IStartupItemService startupItemService,
+        IFeatureAccessGuard featureAccessGuard)
     {
         _startupItemService = startupItemService;
-        ScanCommand = new AsyncRelayCommand(ScanAsync, () => !IsBusy);
+        ArgumentNullException.ThrowIfNull(featureAccessGuard);
+        ScanCommand = new AsyncRelayCommand(
+            ScanAsync,
+            featureAccessGuard,
+            ApplicationFeature.StartupManager,
+            FeatureAccessRequirement.Execute,
+            () => !IsBusy);
         CancelCommand = new RelayCommand(Cancel, () => IsBusy);
     }
 

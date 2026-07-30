@@ -48,6 +48,14 @@
             </Setter>
         </Style>
 
+        <Style x:Key="FeatureAccessBadgeStyle" TargetType="Border">
+            <Setter Property="Margin" Value="8,0,0,0" />
+            <Setter Property="Padding" Value="6,2" />
+            <Setter Property="Background" Value="#31445F" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
         <Style x:Key="PrimaryButtonStyle" TargetType="Button">
             <Setter Property="Height" Value="38" />
             <Setter Property="MinWidth" Value="112" />
@@ -362,7 +370,9 @@
                 <StackPanel Grid.Row="1" Margin="0,16,0,0">
                     <TextBlock Margin="22,0,0,7" Text="TOOLS" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
 
-                    <Button Command="{Binding ShowCleanerCommand}">
+                    <Button Command="{Binding ShowCleanerCommand}"
+                            Visibility="{Binding CleanerAccess.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            ToolTip="{Binding CleanerAccess.Message}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource NavigationButtonStyle}">
                                 <Setter Property="Cursor" Value="Hand" />
@@ -375,13 +385,29 @@
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Width="28" Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
-                            <TextBlock Text="Cleaner" VerticalAlignment="Center" />
-                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="28" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
+                            <TextBlock Grid.Column="1" Text="Cleaner" VerticalAlignment="Center" />
+                            <Border Grid.Column="2"
+                                    Style="{StaticResource FeatureAccessBadgeStyle}"
+                                    Visibility="{Binding CleanerAccess.IsBadgeVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    ToolTip="{Binding CleanerAccess.Message}">
+                                <TextBlock Text="{Binding CleanerAccess.BadgeText}"
+                                           Foreground="White"
+                                           FontSize="8"
+                                           FontWeight="Bold" />
+                            </Border>
+                        </Grid>
                     </Button>
 
-                    <Button Command="{Binding ShowHealthCheckCommand}">
+                    <Button Command="{Binding ShowHealthCheckCommand}"
+                            Visibility="{Binding HealthCheckAccess.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            ToolTip="{Binding HealthCheckAccess.Message}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource NavigationButtonStyle}">
                                 <Setter Property="Cursor" Value="Hand" />
@@ -394,13 +420,29 @@
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Width="28" Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
-                            <TextBlock Text="Health Check" VerticalAlignment="Center" />
-                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="28" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
+                            <TextBlock Grid.Column="1" Text="Health Check" VerticalAlignment="Center" />
+                            <Border Grid.Column="2"
+                                    Style="{StaticResource FeatureAccessBadgeStyle}"
+                                    Visibility="{Binding HealthCheckAccess.IsBadgeVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    ToolTip="{Binding HealthCheckAccess.Message}">
+                                <TextBlock Text="{Binding HealthCheckAccess.BadgeText}"
+                                           Foreground="White"
+                                           FontSize="8"
+                                           FontWeight="Bold" />
+                            </Border>
+                        </Grid>
                     </Button>
 
-                    <Button Command="{Binding ShowCustomCleanCommand}">
+                    <Button Command="{Binding ShowCustomCleanCommand}"
+                            Visibility="{Binding CustomCleanAccess.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            ToolTip="{Binding CustomCleanAccess.Message}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource NavigationButtonStyle}">
                                 <Setter Property="Cursor" Value="Hand" />
@@ -413,13 +455,29 @@
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Width="28" Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
-                            <TextBlock Text="Custom Clean" VerticalAlignment="Center" />
-                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="28" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
+                            <TextBlock Grid.Column="1" Text="Custom Clean" VerticalAlignment="Center" />
+                            <Border Grid.Column="2"
+                                    Style="{StaticResource FeatureAccessBadgeStyle}"
+                                    Visibility="{Binding CustomCleanAccess.IsBadgeVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    ToolTip="{Binding CustomCleanAccess.Message}">
+                                <TextBlock Text="{Binding CustomCleanAccess.BadgeText}"
+                                           Foreground="White"
+                                           FontSize="8"
+                                           FontWeight="Bold" />
+                            </Border>
+                        </Grid>
                     </Button>
 
-                    <Button Command="{Binding ShowLargeFileFinderCommand}">
+                    <Button Command="{Binding ShowLargeFileFinderCommand}"
+                            Visibility="{Binding LargeFileFinderAccess.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            ToolTip="{Binding LargeFileFinderAccess.Message}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource NavigationButtonStyle}">
                                 <Setter Property="Cursor" Value="Hand" />
@@ -432,13 +490,29 @@
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Width="28" Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
-                            <TextBlock Text="Large File Finder" VerticalAlignment="Center" />
-                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="28" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
+                            <TextBlock Grid.Column="1" Text="Large File Finder" VerticalAlignment="Center" />
+                            <Border Grid.Column="2"
+                                    Style="{StaticResource FeatureAccessBadgeStyle}"
+                                    Visibility="{Binding LargeFileFinderAccess.IsBadgeVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    ToolTip="{Binding LargeFileFinderAccess.Message}">
+                                <TextBlock Text="{Binding LargeFileFinderAccess.BadgeText}"
+                                           Foreground="White"
+                                           FontSize="8"
+                                           FontWeight="Bold" />
+                            </Border>
+                        </Grid>
                     </Button>
 
-                    <Button Command="{Binding ShowDuplicateFileFinderCommand}">
+                    <Button Command="{Binding ShowDuplicateFileFinderCommand}"
+                            Visibility="{Binding DuplicateFileFinderAccess.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            ToolTip="{Binding DuplicateFileFinderAccess.Message}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource NavigationButtonStyle}">
                                 <Setter Property="Cursor" Value="Hand" />
@@ -451,13 +525,29 @@
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Width="28" Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
-                            <TextBlock Text="Duplicate Finder" VerticalAlignment="Center" />
-                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="28" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
+                            <TextBlock Grid.Column="1" Text="Duplicate Finder" VerticalAlignment="Center" />
+                            <Border Grid.Column="2"
+                                    Style="{StaticResource FeatureAccessBadgeStyle}"
+                                    Visibility="{Binding DuplicateFileFinderAccess.IsBadgeVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    ToolTip="{Binding DuplicateFileFinderAccess.Message}">
+                                <TextBlock Text="{Binding DuplicateFileFinderAccess.BadgeText}"
+                                           Foreground="White"
+                                           FontSize="8"
+                                           FontWeight="Bold" />
+                            </Border>
+                        </Grid>
                     </Button>
 
-                    <Button Command="{Binding ShowStartupManagerCommand}">
+                    <Button Command="{Binding ShowStartupManagerCommand}"
+                            Visibility="{Binding StartupManagerAccess.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            ToolTip="{Binding StartupManagerAccess.Message}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource NavigationButtonStyle}">
                                 <Setter Property="Cursor" Value="Hand" />
@@ -470,13 +560,29 @@
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Width="28" Text="&#xE768;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
-                            <TextBlock Text="Startup Manager" VerticalAlignment="Center" />
-                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="28" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="&#xE768;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
+                            <TextBlock Grid.Column="1" Text="Startup Manager" VerticalAlignment="Center" />
+                            <Border Grid.Column="2"
+                                    Style="{StaticResource FeatureAccessBadgeStyle}"
+                                    Visibility="{Binding StartupManagerAccess.IsBadgeVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    ToolTip="{Binding StartupManagerAccess.Message}">
+                                <TextBlock Text="{Binding StartupManagerAccess.BadgeText}"
+                                           Foreground="White"
+                                           FontSize="8"
+                                           FontWeight="Bold" />
+                            </Border>
+                        </Grid>
                     </Button>
 
-                    <Button Command="{Binding ShowSystemMonitorCommand}">
+                    <Button Command="{Binding ShowSystemMonitorCommand}"
+                            Visibility="{Binding SystemMonitorAccess.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            ToolTip="{Binding SystemMonitorAccess.Message}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource NavigationButtonStyle}">
                                 <Setter Property="Cursor" Value="Hand" />
@@ -489,13 +595,29 @@
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Width="28" Text="&#xE9D2;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
-                            <TextBlock Text="System Monitor" VerticalAlignment="Center" />
-                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="28" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="&#xE9D2;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
+                            <TextBlock Grid.Column="1" Text="System Monitor" VerticalAlignment="Center" />
+                            <Border Grid.Column="2"
+                                    Style="{StaticResource FeatureAccessBadgeStyle}"
+                                    Visibility="{Binding SystemMonitorAccess.IsBadgeVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    ToolTip="{Binding SystemMonitorAccess.Message}">
+                                <TextBlock Text="{Binding SystemMonitorAccess.BadgeText}"
+                                           Foreground="White"
+                                           FontSize="8"
+                                           FontWeight="Bold" />
+                            </Border>
+                        </Grid>
                     </Button>
 
-                    <Button Command="{Binding ShowSettingsCommand}">
+                    <Button Command="{Binding ShowSettingsCommand}"
+                            Visibility="{Binding SettingsAccess.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            ToolTip="{Binding SettingsAccess.Message}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource NavigationButtonStyle}">
                                 <Setter Property="Cursor" Value="Hand" />
@@ -508,10 +630,24 @@
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Width="28" Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
-                            <TextBlock Text="Settings" VerticalAlignment="Center" />
-                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="28" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
+                            <TextBlock Grid.Column="1" Text="Settings" VerticalAlignment="Center" />
+                            <Border Grid.Column="2"
+                                    Style="{StaticResource FeatureAccessBadgeStyle}"
+                                    Visibility="{Binding SettingsAccess.IsBadgeVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    ToolTip="{Binding SettingsAccess.Message}">
+                                <TextBlock Text="{Binding SettingsAccess.BadgeText}"
+                                           Foreground="White"
+                                           FontSize="8"
+                                           FontWeight="Bold" />
+                            </Border>
+                        </Grid>
                     </Button>
                 </StackPanel>
 
@@ -557,15 +693,56 @@
 
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                         <TextBlock Text="Windows 10/11" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Right" />
-                        <TextBlock Text="Local system utility" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" HorizontalAlignment="Right" />
+                        <TextBlock Text="{Binding EditionStatusText}"
+                                   ToolTip="{Binding EditionStatusText}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="11"
+                                   TextTrimming="CharacterEllipsis"
+                                   HorizontalAlignment="Right" />
                     </StackPanel>
                 </Grid>
+            </Border>
+
+            <Border Grid.Row="1"
+                    Margin="20,16,20,18"
+                    Padding="32"
+                    Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Visibility="{Binding IsLockedFeatureActive, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="520">
+                    <TextBlock Text="&#xE72E;"
+                               FontFamily="Segoe MDL2 Assets"
+                               FontSize="38"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               HorizontalAlignment="Center" />
+                    <TextBlock Margin="0,14,0,0"
+                               Text="{Binding ModuleTitle}"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               FontSize="22"
+                               FontWeight="SemiBold"
+                               HorizontalAlignment="Center" />
+                    <TextBlock Margin="0,8,0,0"
+                               Text="{Binding CurrentFeatureAccess.Message}"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap" />
+                    <TextBlock Margin="0,6,0,0"
+                               Text="{Binding EditionStatusText}"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               FontSize="11"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap" />
+                </StackPanel>
             </Border>
 
             <Grid Grid.Row="1"
                   Margin="20,16,20,18"
                   DataContext="{Binding HealthCheck}"
-                  Visibility="{Binding DataContext.IsHealthCheckActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                  Visibility="{Binding DataContext.IsHealthCheckContentVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
 
                 <Grid>
                     <Grid.Style>
@@ -1072,7 +1249,7 @@
 
             <Grid Grid.Row="1"
                   Margin="20,16,20,18"
-                  Visibility="{Binding IsCleanerActive, Converter={StaticResource BooleanToVisibilityConverter}}">
+                  Visibility="{Binding IsCleanerContentVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -1260,7 +1437,7 @@
             <Grid Grid.Row="1"
                   Margin="20,16,20,18"
                   DataContext="{Binding CustomClean}"
-                  Visibility="{Binding DataContext.IsCustomCleanActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                  Visibility="{Binding DataContext.IsCustomCleanContentVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -1466,7 +1643,7 @@
             <Grid Grid.Row="1"
                   Margin="20,16,20,18"
                   DataContext="{Binding LargeFileFinder}"
-                  Visibility="{Binding DataContext.IsLargeFileFinderActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                  Visibility="{Binding DataContext.IsLargeFileFinderContentVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -1652,7 +1829,7 @@
             <Grid Grid.Row="1"
                   Margin="20,16,20,18"
                   DataContext="{Binding DuplicateFileFinder}"
-                  Visibility="{Binding DataContext.IsDuplicateFileFinderActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                  Visibility="{Binding DataContext.IsDuplicateFileFinderContentVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -2014,7 +2191,7 @@
             <Grid Grid.Row="1"
                   Margin="20,16,20,18"
                   DataContext="{Binding StartupManager}"
-                  Visibility="{Binding DataContext.IsStartupManagerActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                  Visibility="{Binding DataContext.IsStartupManagerContentVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -2184,7 +2361,7 @@
             <Grid Grid.Row="1"
                   Margin="20,16,20,18"
                   DataContext="{Binding SystemMonitor}"
-                  Visibility="{Binding DataContext.IsSystemMonitorActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                  Visibility="{Binding DataContext.IsSystemMonitorContentVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -2400,7 +2577,7 @@
             <Grid Grid.Row="1"
                   Margin="20,16,20,18"
                   DataContext="{Binding Settings}"
-                  Visibility="{Binding DataContext.IsSettingsActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                  Visibility="{Binding DataContext.IsSettingsContentVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />

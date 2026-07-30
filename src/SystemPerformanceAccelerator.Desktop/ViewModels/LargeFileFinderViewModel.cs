@@ -27,16 +27,31 @@ public sealed class LargeFileFinderViewModel : INotifyPropertyChanged
     public LargeFileFinderViewModel(
         ILargeFileService largeFileService,
         ILargeFileCleanupService largeFileCleanupService,
+        IFeatureAccessGuard featureAccessGuard,
         int defaultMinimumSizeMb = 100)
     {
         _largeFileService = largeFileService;
         _largeFileCleanupService = largeFileCleanupService;
+        ArgumentNullException.ThrowIfNull(featureAccessGuard);
         _minimumSizeText = Math.Max(1, defaultMinimumSizeMb).ToString();
 
-        BrowseCommand = new RelayCommand(Browse, () => !IsBusy);
-        ScanCommand = new AsyncRelayCommand(ScanAsync, () => !IsBusy);
+        BrowseCommand = new RelayCommand(
+            Browse,
+            featureAccessGuard,
+            ApplicationFeature.LargeFileFinder,
+            FeatureAccessRequirement.Execute,
+            () => !IsBusy);
+        ScanCommand = new AsyncRelayCommand(
+            ScanAsync,
+            featureAccessGuard,
+            ApplicationFeature.LargeFileFinder,
+            FeatureAccessRequirement.Execute,
+            () => !IsBusy);
         DeleteSelectedCommand = new AsyncRelayCommand(
             DeleteSelectedAsync,
+            featureAccessGuard,
+            ApplicationFeature.LargeFileFinder,
+            FeatureAccessRequirement.Execute,
             () => !IsBusy && Results.Any(result => result.IsSelected));
         CancelCommand = new RelayCommand(Cancel, () => IsBusy);
     }

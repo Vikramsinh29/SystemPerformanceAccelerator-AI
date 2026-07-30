@@ -25,6 +25,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     }
 
     private readonly ITemporaryFileService _temporaryFileService;
+    private readonly IFeatureAccessGuard _featureAccessGuard;
     private CancellationTokenSource? _cancellationTokenSource;
     private ApplicationModule _currentModule = ApplicationModule.Cleaner;
     private bool _isBusy;
@@ -44,61 +45,78 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ISystemMonitorService systemMonitorService,
         IHealthCheckService healthCheckService,
         IApplicationSettingsService applicationSettingsService,
-        ApplicationSettingsLoadResult settingsLoadResult)
+        ApplicationSettingsLoadResult settingsLoadResult,
+        IFeatureAccessGuard featureAccessGuard)
     {
         _temporaryFileService = temporaryFileService;
+        _featureAccessGuard = featureAccessGuard ??
+            throw new ArgumentNullException(nameof(featureAccessGuard));
+
+        CleanerAccess = CreateAccess(ApplicationFeature.Cleaner);
+        HealthCheckAccess = CreateAccess(ApplicationFeature.HealthCheck);
+        CustomCleanAccess = CreateAccess(ApplicationFeature.CustomClean);
+        LargeFileFinderAccess = CreateAccess(ApplicationFeature.LargeFileFinder);
+        DuplicateFileFinderAccess = CreateAccess(ApplicationFeature.DuplicateFileFinder);
+        StartupManagerAccess = CreateAccess(ApplicationFeature.StartupManager);
+        SystemMonitorAccess = CreateAccess(ApplicationFeature.SystemMonitor);
+        SettingsAccess = CreateAccess(ApplicationFeature.Settings);
+        _currentModule = GetInitialModule();
+
         HealthCheck = new HealthCheckViewModel(
             healthCheckService,
-            OpenHealthCheckTarget);
+            OpenHealthCheckTarget,
+            featureAccessGuard);
         HealthCheck.PropertyChanged += OnChildModulePropertyChanged;
-        CustomClean = new CustomCleanViewModel(customCleanService);
+        CustomClean = new CustomCleanViewModel(
+            customCleanService,
+            featureAccessGuard);
         CustomClean.PropertyChanged += OnChildModulePropertyChanged;
         LargeFileFinder = new LargeFileFinderViewModel(
             largeFileService,
             largeFileCleanupService,
+            featureAccessGuard,
             settingsLoadResult.Settings.LargeFileMinimumSizeMb);
         LargeFileFinder.PropertyChanged += OnChildModulePropertyChanged;
         DuplicateFileFinder = new DuplicateFileFinderViewModel(
             duplicateFileService,
-            duplicateFileCleanupService);
+            duplicateFileCleanupService,
+            featureAccessGuard);
         DuplicateFileFinder.PropertyChanged += OnChildModulePropertyChanged;
-        StartupManager = new StartupManagerViewModel(startupItemService);
+        StartupManager = new StartupManagerViewModel(
+            startupItemService,
+            featureAccessGuard);
         StartupManager.PropertyChanged += OnChildModulePropertyChanged;
         SystemMonitor = new SystemMonitorViewModel(
             systemMonitorService,
+            featureAccessGuard,
             settingsLoadResult.Settings.SystemMonitorRefreshIntervalSeconds);
         Settings = new SettingsViewModel(
             applicationSettingsService,
             settingsLoadResult,
-            ApplySettings);
+            ApplySettings,
+            featureAccessGuard);
 
-        ScanCommand = new AsyncRelayCommand(ScanAsync, () => !IsBusy);
-        CleanCommand = new AsyncRelayCommand(CleanAsync, () => !IsBusy && Candidates.Any(x => x.IsSelected));
+        ScanCommand = new AsyncRelayCommand(
+            ScanAsync,
+            featureAccessGuard,
+            ApplicationFeature.Cleaner,
+            FeatureAccessRequirement.Execute,
+            () => !IsBusy);
+        CleanCommand = new AsyncRelayCommand(
+            CleanAsync,
+            featureAccessGuard,
+            ApplicationFeature.Cleaner,
+            FeatureAccessRequirement.Execute,
+            () => !IsBusy && Candidates.Any(x => x.IsSelected));
         CancelCommand = new RelayCommand(Cancel, () => IsBusy);
-        ShowCleanerCommand = new RelayCommand(
-            () => SwitchModule(ApplicationModule.Cleaner),
-            CanSwitchModule);
-        ShowHealthCheckCommand = new RelayCommand(
-            () => SwitchModule(ApplicationModule.HealthCheck),
-            CanSwitchModule);
-        ShowCustomCleanCommand = new RelayCommand(
-            () => SwitchModule(ApplicationModule.CustomClean),
-            CanSwitchModule);
-        ShowLargeFileFinderCommand = new RelayCommand(
-            () => SwitchModule(ApplicationModule.LargeFileFinder),
-            CanSwitchModule);
-        ShowDuplicateFileFinderCommand = new RelayCommand(
-            () => SwitchModule(ApplicationModule.DuplicateFileFinder),
-            CanSwitchModule);
-        ShowStartupManagerCommand = new RelayCommand(
-            () => SwitchModule(ApplicationModule.StartupManager),
-            CanSwitchModule);
-        ShowSystemMonitorCommand = new RelayCommand(
-            () => SwitchModule(ApplicationModule.SystemMonitor),
-            CanSwitchModule);
-        ShowSettingsCommand = new RelayCommand(
-            () => SwitchModule(ApplicationModule.Settings),
-            CanSwitchModule);
+        ShowCleanerCommand = CreateNavigationCommand(ApplicationModule.Cleaner);
+        ShowHealthCheckCommand = CreateNavigationCommand(ApplicationModule.HealthCheck);
+        ShowCustomCleanCommand = CreateNavigationCommand(ApplicationModule.CustomClean);
+        ShowLargeFileFinderCommand = CreateNavigationCommand(ApplicationModule.LargeFileFinder);
+        ShowDuplicateFileFinderCommand = CreateNavigationCommand(ApplicationModule.DuplicateFileFinder);
+        ShowStartupManagerCommand = CreateNavigationCommand(ApplicationModule.StartupManager);
+        ShowSystemMonitorCommand = CreateNavigationCommand(ApplicationModule.SystemMonitor);
+        ShowSettingsCommand = CreateNavigationCommand(ApplicationModule.Settings);
     }
 
     public ObservableCollection<CleanupCandidateViewModel> Candidates { get; } = [];
@@ -109,6 +127,14 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public StartupManagerViewModel StartupManager { get; }
     public SystemMonitorViewModel SystemMonitor { get; }
     public SettingsViewModel Settings { get; }
+    public FeatureAccessPresentation CleanerAccess { get; }
+    public FeatureAccessPresentation HealthCheckAccess { get; }
+    public FeatureAccessPresentation CustomCleanAccess { get; }
+    public FeatureAccessPresentation LargeFileFinderAccess { get; }
+    public FeatureAccessPresentation DuplicateFileFinderAccess { get; }
+    public FeatureAccessPresentation StartupManagerAccess { get; }
+    public FeatureAccessPresentation SystemMonitorAccess { get; }
+    public FeatureAccessPresentation SettingsAccess { get; }
     public AsyncRelayCommand ScanCommand { get; }
     public AsyncRelayCommand CleanCommand { get; }
     public RelayCommand CancelCommand { get; }
@@ -129,6 +155,34 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public bool IsStartupManagerActive => _currentModule == ApplicationModule.StartupManager;
     public bool IsSystemMonitorActive => _currentModule == ApplicationModule.SystemMonitor;
     public bool IsSettingsActive => _currentModule == ApplicationModule.Settings;
+
+    public bool IsCleanerContentVisible => IsCleanerActive && CleanerAccess.IsAvailable;
+    public bool IsHealthCheckContentVisible => IsHealthCheckActive && HealthCheckAccess.IsAvailable;
+    public bool IsCustomCleanContentVisible => IsCustomCleanActive && CustomCleanAccess.IsAvailable;
+    public bool IsLargeFileFinderContentVisible => IsLargeFileFinderActive && LargeFileFinderAccess.IsAvailable;
+    public bool IsDuplicateFileFinderContentVisible => IsDuplicateFileFinderActive && DuplicateFileFinderAccess.IsAvailable;
+    public bool IsStartupManagerContentVisible => IsStartupManagerActive && StartupManagerAccess.IsAvailable;
+    public bool IsSystemMonitorContentVisible => IsSystemMonitorActive && SystemMonitorAccess.IsAvailable;
+    public bool IsSettingsContentVisible => IsSettingsActive && SettingsAccess.IsAvailable;
+
+    public FeatureAccessPresentation CurrentFeatureAccess =>
+        GetAccessPresentation(_currentModule);
+
+    public bool IsLockedFeatureActive =>
+        CurrentFeatureAccess.IsVisible && !CurrentFeatureAccess.IsAvailable;
+
+    public string EditionStatusText
+    {
+        get
+        {
+            var editionName = ApplicationEditionHierarchy.GetDisplayName(
+                _featureAccessGuard.EffectiveEdition);
+            return _featureAccessGuard.IsDevelopmentOverrideActive
+                ? $"{editionName} edition • local development override"
+                : $"{editionName} edition • local system utility";
+        }
+    }
+
     public string ModuleTitle => _currentModule switch
     {
         ApplicationModule.Cleaner => "Cleaner",
@@ -202,7 +256,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     private void SwitchModule(ApplicationModule module)
     {
-        if (_currentModule == module || !CanSwitchModule())
+        var feature = GetFeature(module);
+        if (_currentModule == module ||
+            !CanSwitchModule() ||
+            !_featureAccessGuard.CanAccess(
+                feature,
+                FeatureAccessRequirement.Navigate))
         {
             return;
         }
@@ -214,6 +273,63 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
 
         _currentModule = module;
+        RaiseModulePropertiesChanged();
+    }
+
+    private RelayCommand CreateNavigationCommand(ApplicationModule module) =>
+        new(
+            () => SwitchModule(module),
+            _featureAccessGuard,
+            GetFeature(module),
+            FeatureAccessRequirement.Navigate,
+            CanSwitchModule);
+
+    private FeatureAccessPresentation CreateAccess(ApplicationFeature feature) =>
+        new(_featureAccessGuard.GetAccess(feature));
+
+    private FeatureAccessPresentation GetAccessPresentation(
+        ApplicationModule module) => module switch
+        {
+            ApplicationModule.Cleaner => CleanerAccess,
+            ApplicationModule.HealthCheck => HealthCheckAccess,
+            ApplicationModule.CustomClean => CustomCleanAccess,
+            ApplicationModule.LargeFileFinder => LargeFileFinderAccess,
+            ApplicationModule.DuplicateFileFinder => DuplicateFileFinderAccess,
+            ApplicationModule.StartupManager => StartupManagerAccess,
+            ApplicationModule.SystemMonitor => SystemMonitorAccess,
+            ApplicationModule.Settings => SettingsAccess,
+            _ => CleanerAccess
+        };
+
+    private ApplicationModule GetInitialModule()
+    {
+        foreach (var module in Enum.GetValues<ApplicationModule>())
+        {
+            if (GetAccessPresentation(module).IsVisible)
+            {
+                return module;
+            }
+        }
+
+        return ApplicationModule.Cleaner;
+    }
+
+    private static ApplicationFeature GetFeature(ApplicationModule module) =>
+        module switch
+        {
+            ApplicationModule.Cleaner => ApplicationFeature.Cleaner,
+            ApplicationModule.HealthCheck => ApplicationFeature.HealthCheck,
+            ApplicationModule.CustomClean => ApplicationFeature.CustomClean,
+            ApplicationModule.LargeFileFinder => ApplicationFeature.LargeFileFinder,
+            ApplicationModule.DuplicateFileFinder => ApplicationFeature.DuplicateFileFinder,
+            ApplicationModule.StartupManager => ApplicationFeature.StartupManager,
+            ApplicationModule.SystemMonitor => ApplicationFeature.SystemMonitor,
+            ApplicationModule.Settings => ApplicationFeature.Settings,
+            _ => (ApplicationFeature)(-1)
+        };
+
+    private void RaiseModulePropertiesChanged()
+    {
         OnPropertyChanged(nameof(IsCleanerActive));
         OnPropertyChanged(nameof(IsHealthCheckActive));
         OnPropertyChanged(nameof(IsCustomCleanActive));
@@ -222,6 +338,16 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(IsStartupManagerActive));
         OnPropertyChanged(nameof(IsSystemMonitorActive));
         OnPropertyChanged(nameof(IsSettingsActive));
+        OnPropertyChanged(nameof(IsCleanerContentVisible));
+        OnPropertyChanged(nameof(IsHealthCheckContentVisible));
+        OnPropertyChanged(nameof(IsCustomCleanContentVisible));
+        OnPropertyChanged(nameof(IsLargeFileFinderContentVisible));
+        OnPropertyChanged(nameof(IsDuplicateFileFinderContentVisible));
+        OnPropertyChanged(nameof(IsStartupManagerContentVisible));
+        OnPropertyChanged(nameof(IsSystemMonitorContentVisible));
+        OnPropertyChanged(nameof(IsSettingsContentVisible));
+        OnPropertyChanged(nameof(CurrentFeatureAccess));
+        OnPropertyChanged(nameof(IsLockedFeatureActive));
         OnPropertyChanged(nameof(ModuleTitle));
         OnPropertyChanged(nameof(ModuleSubtitle));
     }
