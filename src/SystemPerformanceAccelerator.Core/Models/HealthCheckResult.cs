@@ -2,6 +2,7 @@ namespace SystemPerformanceAccelerator.Core.Models;
 
 public sealed record HealthCheckResult(
     IReadOnlyList<HealthCheckItem> Items,
+    IReadOnlyList<HealthRecommendation> Recommendations,
     IReadOnlyList<string> Errors,
     DateTimeOffset CompletedAt)
 {
@@ -13,6 +14,10 @@ public sealed record HealthCheckResult(
 
     public int UnknownCount =>
         Items.Count(item => item.Status == HealthCheckStatus.Unknown);
+
+    public int HighPriorityRecommendationCount =>
+        Recommendations.Count(item =>
+            item.Priority == HealthRecommendationPriority.High);
 
     public HealthCheckStatus OverallStatus
     {

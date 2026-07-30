@@ -566,164 +566,506 @@
                   Margin="20,16,20,18"
                   DataContext="{Binding HealthCheck}"
                   Visibility="{Binding DataContext.IsHealthCheckActive, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
 
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="10" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="10" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="10" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasSelectedRecommendation}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
 
-                    <Border Grid.Column="0" Style="{StaticResource SummaryCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="OVERALL" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Margin="0,4,0,0" Text="{Binding OverallStatusText}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" />
-                        </StackPanel>
-                    </Border>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                    <Border Grid.Column="2" Style="{StaticResource SummaryCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="GOOD" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Margin="0,4,0,0" Text="{Binding GoodCount}" Foreground="{StaticResource SuccessBrush}" FontSize="23" FontWeight="SemiBold" />
-                        </StackPanel>
-                    </Border>
-
-                    <Border Grid.Column="4" Style="{StaticResource SummaryCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="ATTENTION" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Margin="0,4,0,0" Text="{Binding AttentionCount}" Foreground="#D87924" FontSize="23" FontWeight="SemiBold" />
-                        </StackPanel>
-                    </Border>
-
-                    <Border Grid.Column="6" Style="{StaticResource SummaryCardStyle}">
-                        <StackPanel>
-                            <TextBlock Text="UNKNOWN" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Margin="0,4,0,0" Text="{Binding UnknownCount}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="23" FontWeight="SemiBold" />
-                        </StackPanel>
-                    </Border>
-                </Grid>
-
-                <Border Grid.Row="1" Margin="0,16,0,12" Padding="16,14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="READ-ONLY HEALTH CHECK" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Margin="0,5,0,0"
-                                       Text="Reviews system-drive free space, one current CPU/memory sample, and the existing startup inventory. It does not clean, repair, optimize, terminate processes, or change Windows settings."
-                                       Foreground="{StaticResource TextPrimaryBrush}"
-                                       FontSize="12"
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
+                        <Border Grid.Column="0" Style="{StaticResource SummaryCardStyle}">
+                            <StackPanel>
+                                <TextBlock Text="OVERALL" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
+                                <TextBlock Margin="0,4,0,0" Text="{Binding OverallStatusText}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="23" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Border>
 
-                        <StackPanel Grid.Column="1" Margin="18,0,0,0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Button Command="{Binding RunCheckCommand}" Content="Run Check" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
-                            <Button Command="{Binding CancelCommand}" Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" />
-                        </StackPanel>
+                        <Border Grid.Column="2" Style="{StaticResource SummaryCardStyle}">
+                            <StackPanel>
+                                <TextBlock Text="GOOD" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
+                                <TextBlock Margin="0,4,0,0" Text="{Binding GoodCount}" Foreground="{StaticResource SuccessBrush}" FontSize="23" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="4" Style="{StaticResource SummaryCardStyle}">
+                            <StackPanel>
+                                <TextBlock Text="ATTENTION" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
+                                <TextBlock Margin="0,4,0,0" Text="{Binding AttentionCount}" Foreground="#D87924" FontSize="23" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="6" Style="{StaticResource SummaryCardStyle}">
+                            <StackPanel>
+                                <TextBlock Text="UNKNOWN" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
+                                <TextBlock Margin="0,4,0,0" Text="{Binding UnknownCount}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="23" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Border>
                     </Grid>
-                </Border>
 
-                <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
-                    <DataGrid ItemsSource="{Binding Results}"
-                              behaviors:DataGridSelectionBehavior.IsEnabled="False"
-                              AutoGenerateColumns="False"
-                              IsReadOnly="True"
-                              CanUserAddRows="False"
-                              CanUserDeleteRows="False"
-                              CanUserReorderColumns="False"
-                              HeadersVisibility="Column"
-                              GridLinesVisibility="None"
-                              BorderThickness="0"
-                              RowHeaderWidth="0"
-                              SelectionMode="Single"
-                              SelectionUnit="FullRow"
-                              Background="{StaticResource SurfaceBrush}"
-                              ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                              ScrollViewer.VerticalScrollBarVisibility="Auto">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="CHECK"
-                                                Binding="{Binding Name, Mode=OneWay}"
-                                                ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
-                                                IsReadOnly="True"
-                                                Width="1.3*" />
-                            <DataGridTextColumn Header="STATUS"
-                                                Binding="{Binding StatusText, Mode=OneWay}"
-                                                ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
-                                                IsReadOnly="True"
-                                                Width="0.9*" />
-                            <DataGridTextColumn Header="VALUE"
-                                                Binding="{Binding Value, Mode=OneWay}"
-                                                ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
-                                                IsReadOnly="True"
-                                                Width="1.4*" />
-                            <DataGridTextColumn Header="DETAILS"
-                                                Binding="{Binding Details, Mode=OneWay}"
-                                                ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
-                                                IsReadOnly="True"
-                                                Width="3.4*" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Border>
-
-                <Border Grid.Row="3"
-                        Margin="0,14,0,0"
-                        Style="{StaticResource OperationStatusPanelStyle}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-
-                        <ProgressBar Height="6"
-                                     Minimum="0"
-                                     Maximum="100"
-                                     Value="0"
-                                     IsIndeterminate="{Binding IsBusy}"
-                                     Foreground="{StaticResource AccentBrush}"
-                                     Background="{StaticResource ProgressTrackBrush}" />
-
-                        <Grid Grid.Row="1" Margin="0,10,0,0">
+                    <Border Grid.Row="1" Margin="0,16,0,12" Padding="16,14" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+                        <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
-                            <Border Width="34" Height="34" Background="#E8F2FC" CornerRadius="17">
-                                <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource AccentBrush}" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            </Border>
-
-                            <StackPanel Grid.Column="1" Margin="11,0,18,0">
-                                <TextBlock Text="HEALTH CHECK STATUS" Style="{StaticResource OperationStatusLabelStyle}" />
-                                <TextBlock Margin="0,3,0,0"
-                                           Text="{Binding Status}"
-                                           ToolTip="{Binding Status}"
-                                           Style="{StaticResource OperationStatusMessageStyle}" />
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="READ-ONLY HEALTH CHECK" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontWeight="Bold" />
+                                <TextBlock Margin="0,5,0,0"
+                                           Text="Reviews system-drive free space, one current CPU/memory sample, and the existing startup inventory. Findings appear first. Open only the recommendation you want to review."
+                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                           FontSize="12"
+                                           TextWrapping="Wrap" />
                             </StackPanel>
 
-                            <Border Grid.Column="2" Style="{StaticResource OperationMetaChipStyle}">
-                                <TextBlock Text="{Binding CheckState}" Foreground="{StaticResource MetaTextBrush}" FontSize="11" FontWeight="SemiBold" />
-                            </Border>
+                            <StackPanel Grid.Column="1" Margin="18,0,0,0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Button Command="{Binding RunCheckCommand}" Content="Run Check" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
+                                <Button Command="{Binding CancelCommand}" Content="Cancel" Style="{StaticResource SecondaryButtonStyle}" />
+                            </StackPanel>
                         </Grid>
+                    </Border>
 
-                        <StackPanel Grid.Row="2" Margin="45,7,0,0" Orientation="Horizontal">
-                            <TextBlock Text="{Binding LastChecked, StringFormat='Checked: {0}'}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,16,0" />
-                            <TextBlock Text="{Binding WarningText}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" />
-                        </StackPanel>
+                    <Border Grid.Row="2"
+                            Background="{StaticResource SurfaceBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            ClipToBounds="True">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <Border Padding="14,9"
+                                    Background="{StaticResource SurfaceMutedBrush}"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="0,0,0,1">
+                                <TextBlock Text="HEALTH FINDINGS"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           FontSize="10"
+                                           FontWeight="Bold" />
+                            </Border>
+
+                            <DataGrid Grid.Row="1"
+                                      ItemsSource="{Binding Results}"
+                                      behaviors:DataGridSelectionBehavior.IsEnabled="False"
+                                      AutoGenerateColumns="False"
+                                      IsReadOnly="True"
+                                      CanUserAddRows="False"
+                                      CanUserDeleteRows="False"
+                                      CanUserReorderColumns="False"
+                                      HeadersVisibility="Column"
+                                      GridLinesVisibility="None"
+                                      BorderThickness="0"
+                                      RowHeaderWidth="0"
+                                      SelectionMode="Single"
+                                      SelectionUnit="FullRow"
+                                      Background="{StaticResource SurfaceBrush}"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="CHECK"
+                                                        Binding="{Binding Name, Mode=OneWay}"
+                                                        ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
+                                                        IsReadOnly="True"
+                                                        Width="1.3*" />
+                                    <DataGridTextColumn Header="STATUS"
+                                                        Binding="{Binding StatusText, Mode=OneWay}"
+                                                        ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
+                                                        IsReadOnly="True"
+                                                        Width="0.9*" />
+                                    <DataGridTextColumn Header="VALUE"
+                                                        Binding="{Binding Value, Mode=OneWay}"
+                                                        ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
+                                                        IsReadOnly="True"
+                                                        Width="1.4*" />
+                                    <DataGridTextColumn Header="DETAILS"
+                                                        Binding="{Binding Details, Mode=OneWay}"
+                                                        ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
+                                                        IsReadOnly="True"
+                                                        Width="3.1*" />
+                                    <DataGridTemplateColumn Header="RECOMMENDATION"
+                                                            Width="175"
+                                                            MinWidth="160">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Content="View recommendations"
+                                                        Command="{Binding ViewRecommendationCommand}"
+                                                        Style="{StaticResource SecondaryButtonStyle}"
+                                                        Height="30"
+                                                        MinWidth="145"
+                                                        Padding="10,0"
+                                                        Margin="6,2"
+                                                        HorizontalAlignment="Center" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Row="3"
+                            Margin="0,14,0,0"
+                            Style="{StaticResource OperationStatusPanelStyle}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <ProgressBar Height="6"
+                                         Minimum="0"
+                                         Maximum="100"
+                                         Value="0"
+                                         IsIndeterminate="{Binding IsBusy}"
+                                         Foreground="{StaticResource AccentBrush}"
+                                         Background="{StaticResource ProgressTrackBrush}" />
+
+                            <Grid Grid.Row="1" Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <Border Width="34" Height="34" Background="#E8F2FC" CornerRadius="17">
+                                    <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource AccentBrush}" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+
+                                <StackPanel Grid.Column="1" Margin="11,0,18,0">
+                                    <TextBlock Text="HEALTH CHECK STATUS" Style="{StaticResource OperationStatusLabelStyle}" />
+                                    <TextBlock Margin="0,3,0,0"
+                                               Text="{Binding Status}"
+                                               ToolTip="{Binding Status}"
+                                               Style="{StaticResource OperationStatusMessageStyle}" />
+                                </StackPanel>
+
+                                <Border Grid.Column="2" Style="{StaticResource OperationMetaChipStyle}">
+                                    <TextBlock Text="{Binding CheckState}" Foreground="{StaticResource MetaTextBrush}" FontSize="11" FontWeight="SemiBold" />
+                                </Border>
+                            </Grid>
+
+                            <StackPanel Grid.Row="2" Margin="45,7,0,0" Orientation="Horizontal">
+                                <TextBlock Text="{Binding LastChecked, StringFormat='Checked: {0}'}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,16,0" />
+                                <TextBlock Text="{Binding WarningText}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <Border Background="{StaticResource SurfaceBrush}"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="9"
+                        ClipToBounds="True">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasSelectedRecommendation}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Border Padding="16,12"
+                                Background="{StaticResource SurfaceMutedBrush}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="0,0,0,1">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <Button Content="←  Back to Health Findings"
+                                        Command="{Binding BackToFindingsCommand}"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        FontFamily="Segoe UI"
+                                        Height="34"
+                                        MinWidth="190"
+                                        Padding="12,0" />
+
+                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding SelectedFinding.Name}"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontSize="10"
+                                               FontWeight="Bold" />
+                                    <TextBlock Margin="0,3,0,0"
+                                               Text="{Binding SelectedFinding.Recommendation.Title}"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               FontSize="18"
+                                               FontWeight="SemiBold"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+
+                                <Border Grid.Column="3"
+                                        Margin="16,0,0,0"
+                                        Padding="12,6"
+                                        Background="#FFF3E6"
+                                        CornerRadius="12"
+                                        VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Priority: "
+                                                   Foreground="#A65300"
+                                                   FontSize="11"
+                                                   FontWeight="Bold" />
+                                        <TextBlock Text="{Binding SelectedFinding.Recommendation.PriorityText}"
+                                                   Foreground="#A65300"
+                                                   FontSize="11"
+                                                   FontWeight="Bold" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <ScrollViewer Grid.Row="1"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      Padding="18">
+                            <StackPanel>
+                                <Border Padding="14"
+                                        Background="{StaticResource SurfaceMutedBrush}"
+                                        BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="7">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1.2*" />
+                                            <ColumnDefinition Width="12" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="12" />
+                                            <ColumnDefinition Width="2.2*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel>
+                                            <TextBlock Text="CURRENT STATUS"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                                       FontSize="10"
+                                                       FontWeight="Bold" />
+                                            <TextBlock Margin="0,6,0,0"
+                                                       Text="{Binding SelectedFinding.StatusText}"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                                       FontSize="13"
+                                                       FontWeight="SemiBold" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="CURRENT VALUE"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                                       FontSize="10"
+                                                       FontWeight="Bold" />
+                                            <TextBlock Margin="0,6,0,0"
+                                                       Text="{Binding SelectedFinding.Value}"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                                       FontSize="13"
+                                                       FontWeight="SemiBold"
+                                                       TextWrapping="Wrap" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="4">
+                                            <TextBlock Text="WHAT WAS DETECTED"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                                       FontSize="10"
+                                                       FontWeight="Bold" />
+                                            <TextBlock Margin="0,6,0,0"
+                                                       Text="{Binding SelectedFinding.Details}"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                                       FontSize="12"
+                                                       TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <Grid Margin="0,14,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="14" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Padding="14"
+                                            Background="{StaticResource SurfaceMutedBrush}"
+                                            BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="7">
+                                        <StackPanel>
+                                            <TextBlock Text="RECOMMENDED CHANGE"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                                       FontSize="10"
+                                                       FontWeight="Bold" />
+                                            <TextBlock Margin="0,6,0,0"
+                                                       Text="{Binding SelectedFinding.Recommendation.Recommendation}"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                                       FontSize="12"
+                                                       TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Grid.Column="2"
+                                            Padding="14"
+                                            Background="{StaticResource SurfaceMutedBrush}"
+                                            BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="7">
+                                        <StackPanel>
+                                            <TextBlock Text="WHY IT MATTERS"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                                       FontSize="10"
+                                                       FontWeight="Bold" />
+                                            <TextBlock Margin="0,6,0,0"
+                                                       Text="{Binding SelectedFinding.Recommendation.WhyItMatters}"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                                       FontSize="12"
+                                                       TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+
+                                <Border Margin="0,14,0,0"
+                                        Padding="14"
+                                        Background="#FFF7E8"
+                                        BorderBrush="#E4B86B"
+                                        BorderThickness="1"
+                                        CornerRadius="7">
+                                    <StackPanel>
+                                        <TextBlock Text="WARNING / SAFETY"
+                                                   Foreground="#8A5200"
+                                                   FontSize="10"
+                                                   FontWeight="Bold" />
+                                        <TextBlock Margin="0,6,0,0"
+                                                   Text="{Binding SelectedFinding.SafetyNotice}"
+                                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                                   FontSize="12"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Margin="0,14,0,0"
+                                        Padding="16"
+                                        Background="#EAF4FD"
+                                        BorderBrush="#94BFE4"
+                                        BorderThickness="1"
+                                        CornerRadius="7">
+                                    <StackPanel>
+                                        <TextBlock Text="AVAILABLE ACTIONS"
+                                                   Foreground="#245F91"
+                                                   FontSize="10"
+                                                   FontWeight="Bold" />
+                                        <TextBlock Margin="0,6,0,0"
+                                                   Text="{Binding SelectedFinding.AvailableAction}"
+                                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                                   FontSize="12"
+                                                   TextWrapping="Wrap" />
+
+                                        <WrapPanel Margin="0,12,0,0">
+                                            <WrapPanel.Style>
+                                                <Style TargetType="WrapPanel">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding SelectedFinding.ShowDiskActions}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </WrapPanel.Style>
+                                            <Button Content="Open Cleaner"
+                                                    Command="{Binding SelectedFinding.OpenCleanerCommand}"
+                                                    Style="{StaticResource PrimaryButtonStyle}"
+                                                    Margin="0,0,8,8" />
+                                            <Button Content="Open Large File Finder"
+                                                    Command="{Binding SelectedFinding.OpenLargeFileFinderCommand}"
+                                                    Style="{StaticResource SecondaryButtonStyle}"
+                                                    Margin="0,0,8,8" />
+                                            <Button Content="Open Duplicate Finder"
+                                                    Command="{Binding SelectedFinding.OpenDuplicateFileFinderCommand}"
+                                                    Style="{StaticResource SecondaryButtonStyle}"
+                                                    Margin="0,0,8,8" />
+                                        </WrapPanel>
+
+                                        <Button Content="Open System Monitor"
+                                                Command="{Binding SelectedFinding.OpenSystemMonitorCommand}"
+                                                HorizontalAlignment="Left"
+                                                Margin="0,12,0,0">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding SelectedFinding.ShowSystemMonitorAction}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+
+                                        <Button Content="Open Startup Manager"
+                                                Command="{Binding SelectedFinding.OpenStartupManagerCommand}"
+                                                HorizontalAlignment="Left"
+                                                Margin="0,12,0,0">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding SelectedFinding.ShowStartupManagerAction}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+
+                        <Border Grid.Row="2"
+                                Padding="16,11"
+                                Background="{StaticResource SurfaceMutedBrush}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="0,1,0,0">
+                            <TextBlock Text="Health Check does not apply changes. Action buttons open the relevant tool, where the user can review, select, confirm, and see results under that tool's existing safety rules."
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       FontSize="11"
+                                       TextWrapping="Wrap" />
+                        </Border>
                     </Grid>
                 </Border>
             </Grid>

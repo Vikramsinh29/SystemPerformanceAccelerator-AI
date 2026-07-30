@@ -47,7 +47,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ApplicationSettingsLoadResult settingsLoadResult)
     {
         _temporaryFileService = temporaryFileService;
-        HealthCheck = new HealthCheckViewModel(healthCheckService);
+        HealthCheck = new HealthCheckViewModel(
+            healthCheckService,
+            OpenHealthCheckTarget);
         HealthCheck.PropertyChanged += OnChildModulePropertyChanged;
         CustomClean = new CustomCleanViewModel(customCleanService);
         CustomClean.PropertyChanged += OnChildModulePropertyChanged;
@@ -222,6 +224,21 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(IsSettingsActive));
         OnPropertyChanged(nameof(ModuleTitle));
         OnPropertyChanged(nameof(ModuleSubtitle));
+    }
+
+    private void OpenHealthCheckTarget(HealthCheckNavigationTarget target)
+    {
+        var module = target switch
+        {
+            HealthCheckNavigationTarget.Cleaner => ApplicationModule.Cleaner,
+            HealthCheckNavigationTarget.LargeFileFinder => ApplicationModule.LargeFileFinder,
+            HealthCheckNavigationTarget.DuplicateFileFinder => ApplicationModule.DuplicateFileFinder,
+            HealthCheckNavigationTarget.SystemMonitor => ApplicationModule.SystemMonitor,
+            HealthCheckNavigationTarget.StartupManager => ApplicationModule.StartupManager,
+            _ => ApplicationModule.HealthCheck
+        };
+
+        SwitchModule(module);
     }
 
     private bool CanSwitchModule() =>

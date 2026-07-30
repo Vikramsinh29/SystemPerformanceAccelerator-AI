@@ -129,8 +129,15 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Current CPU and physical-memory assessment using the existing monitor service
 - Startup-item summary using the existing startup service
 - Clear `Good`, `Attention`, and `Unknown` statuses
+- Findings are shown first without opening recommendations automatically
+- Every finding provides its own `View recommendations` action
+- Opening a recommendation replaces the findings list with a focused detail page
+- Recommendation detail shows priority, recommended change, why it matters, safety warning, and available manual action
+- `Back to Health Findings` restores the findings list
+- Context-specific navigation links open Cleaner, Large File Finder, Duplicate Finder, System Monitor, or Startup Manager
+- Recommendations remain guidance only; no generic Apply, Fix, Disable, Delete, or Optimize action exists
 - Safe cancellation and honest partial-failure reporting
-- No cleanup, repair, optimization, process termination, registry writing, or system-setting changes
+- No cleanup, repair, optimization, process termination, service modification, registry writing, or automatic system-setting changes
 
 ### Cross-tool result presentation
 
@@ -179,7 +186,7 @@ All selectable result tables must use the same application-wide behaviour:
 ## Verified state
 
 - Release build succeeds.
-- xUnit suite: 52 passed, 0 failed.
+- xUnit suite: 55 passed, 0 failed.
 - Cleaner scan and safe cleanup manually verified.
 - Large File Finder scan and Recycle Bin cleanup manually verified.
 - Shared one-click checkbox and double-click row selection manually verified in all selectable tables.
@@ -198,6 +205,12 @@ All selectable result tables must use the same application-wide behaviour:
 - Duplicate Finder grouping, group headers, copy counts, reclaimable-space summaries, aligned columns, separators, scrolling, and row selection manually verified after Sprint 15.
 - Duplicate Finder final-copy protection and safe Recycle Bin cleanup remained unchanged and were regression verified after Sprint 15.
 - Release build succeeded and the xUnit suite remained at 52 passed, 0 failed after Sprint 15.
+- Health Check findings-first flow, per-area View recommendations actions, focused recommendation pages, and Back navigation manually verified after Sprint 16.
+- Recommendation priority, recommended change, why-it-matters explanation, warning/safety guidance, and context-specific tool navigation manually verified after Sprint 16.
+- Disk recommendations correctly navigate to Cleaner, Large File Finder, and Duplicate Finder; CPU and memory recommendations navigate to System Monitor; startup recommendations navigate to Startup Manager.
+- No generic Apply, Fix, Disable, Delete, Optimize, or automatic system-changing action is present in Health Check.
+- Release build succeeded and the xUnit suite increased to 55 passed, 0 failed after Sprint 16.
+- Cleaner, Custom Clean, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Settings regression checks passed after Sprint 16.
 - System Monitor live CPU and physical-memory values, Start/Stop controls, automatic stop on tab change, and read-only scope manually verified.
 - Cleaner, Large File Finder, Duplicate File Finder, and Startup Manager regression opening checks passed after Sprint 8.
 - Health Check system-drive, CPU, memory, and startup summary results manually verified.
@@ -426,11 +439,11 @@ This rule is mandatory. Repeated blind patches are not acceptable.
 
 ## Current milestone
 
-Sprint 15 — Duplicate Finder Grouping and Table Readability.
+Sprint 16 — Findings-first Health Recommendations.
 
 ## Next milestone
 
-Select one narrow functional module or reliability improvement only after Sprint 15 is committed and the working tree is clean.
+Select one narrow functional module or reliability improvement only after Sprint 16 is committed and the working tree is clean.
 
 ## Compact AI handoff
 

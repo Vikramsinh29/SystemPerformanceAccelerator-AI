@@ -10,26 +10,53 @@ namespace SystemPerformanceAccelerator.Desktop.ViewModels;
 public sealed class HealthCheckViewModel : INotifyPropertyChanged
 {
     private readonly IHealthCheckService _healthCheckService;
+    private readonly Action<HealthCheckNavigationTarget> _navigate;
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _isBusy;
     private bool _hasResults;
     private HealthCheckStatus _overallStatus = HealthCheckStatus.Unknown;
     private int _warningCount;
+    private HealthCheckFindingViewModel? _selectedFinding;
     private string _status =
-        "Run a read-only health check to review drive space, CPU, memory, and startup items.";
+        "Run a read-only health check. Recommendations stay hidden until you choose View recommendations for a finding.";
     private string _lastChecked = "Not checked";
 
-    public HealthCheckViewModel(IHealthCheckService healthCheckService)
+    public HealthCheckViewModel(
+        IHealthCheckService healthCheckService,
+        Action<HealthCheckNavigationTarget> navigate)
     {
         _healthCheckService = healthCheckService ??
             throw new ArgumentNullException(nameof(healthCheckService));
+        _navigate = navigate ??
+            throw new ArgumentNullException(nameof(navigate));
         RunCheckCommand = new AsyncRelayCommand(RunCheckAsync, () => !IsBusy);
         CancelCommand = new RelayCommand(Cancel, () => IsBusy);
+        BackToFindingsCommand = new RelayCommand(
+            BackToFindings,
+            () => HasSelectedRecommendation);
     }
 
-    public ObservableCollection<HealthCheckItem> Results { get; } = [];
+    public ObservableCollection<HealthCheckFindingViewModel> Results { get; } = [];
     public AsyncRelayCommand RunCheckCommand { get; }
     public RelayCommand CancelCommand { get; }
+    public RelayCommand BackToFindingsCommand { get; }
+
+    public HealthCheckFindingViewModel? SelectedFinding
+    {
+        get => _selectedFinding;
+        private set
+        {
+            if (!SetField(ref _selectedFinding, value))
+            {
+                return;
+            }
+
+            OnPropertyChanged(nameof(HasSelectedRecommendation));
+            BackToFindingsCommand.RaiseCanExecuteChanged();
+        }
+    }
+
+    public bool HasSelectedRecommendation => SelectedFinding is not null;
 
     public bool IsBusy
     {
@@ -89,10 +116,33 @@ public sealed class HealthCheckViewModel : INotifyPropertyChanged
             var result = await _healthCheckService.RunAsync(
                 _cancellationTokenSource!.Token);
 
+            var recommendationsByArea = result.Recommendations
+                .GroupBy(item => item.Area, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.First(),
+                    StringComparer.OrdinalIgnoreCase);
+
             Results.Clear();
             foreach (var item in result.Items)
             {
-                Results.Add(item);
+                if (!recommendationsByArea.TryGetValue(
+                        item.Name,
+                        out var recommendation))
+                {
+                    recommendation = new HealthRecommendation(
+                        item.Name,
+                        "Recommendation unavailable",
+                        "Run Health Check again before making a change.",
+                        "A recommendation should be linked to every finding. Missing guidance means the result should be reviewed again.",
+                        HealthRecommendationPriority.Medium);
+                }
+
+                Results.Add(new HealthCheckFindingViewModel(
+                    item,
+                    recommendation,
+                    ShowRecommendation,
+                    _navigate));
             }
 
             _hasResults = true;
@@ -100,8 +150,8 @@ public sealed class HealthCheckViewModel : INotifyPropertyChanged
             _warningCount = result.Errors.Count;
             LastChecked = result.CompletedAt.ToLocalTime().ToString("HH:mm:ss");
             Status = result.Errors.Count == 0
-                ? "Read-only health check completed. No system settings were changed."
-                : $"Health check completed with {result.Errors.Count:N0} warning(s). No system settings were changed.";
+                ? "Read-only health check completed. Choose View recommendations only for the areas you want to review."
+                : $"Health check completed with {result.Errors.Count:N0} warning(s). Choose View recommendations for any area you want to review.";
             RaiseSummaryProperties();
         }
         catch (OperationCanceledException)
@@ -125,6 +175,7 @@ public sealed class HealthCheckViewModel : INotifyPropertyChanged
         _cancellationTokenSource?.Dispose();
         _cancellationTokenSource = new CancellationTokenSource();
         Results.Clear();
+        SelectedFinding = null;
         _hasResults = false;
         _overallStatus = HealthCheckStatus.Unknown;
         _warningCount = 0;
@@ -140,6 +191,11 @@ public sealed class HealthCheckViewModel : INotifyPropertyChanged
         _cancellationTokenSource?.Dispose();
         _cancellationTokenSource = null;
     }
+
+    private void ShowRecommendation(HealthCheckFindingViewModel finding) =>
+        SelectedFinding = finding;
+
+    private void BackToFindings() => SelectedFinding = null;
 
     private void Cancel() => _cancellationTokenSource?.Cancel();
 
