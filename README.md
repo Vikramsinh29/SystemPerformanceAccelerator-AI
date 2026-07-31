@@ -329,6 +329,18 @@ All selectable result tables must use the same application-wide behaviour:
 - Custom Clean uses compact wrapped summary cards, a readable responsive preview table, a left-aligned hero description, and no duplicate category checkbox.
 - Custom maximization remains constrained to the Windows work area above the taskbar.
 
+### Windows x64 portable release
+
+- Application version `1.0.0` is defined through explicit assembly, file, product, and informational-version metadata.
+- The supported first distribution is a portable Windows 10/11 x64 ZIP.
+- Publishing is self-contained, so the extracted application carries its required .NET runtime files.
+- Single-file publishing, trimming, ReadyToRun, installer creation, automatic updating, and code signing are intentionally excluded from this release.
+- `Windows-x64-Portable.pubxml` defines the repeatable Release publish configuration.
+- `scripts/Publish-Windows-x64.ps1` performs the clean build, full tests, self-contained publish, metadata checks, PDB removal, ZIP creation, SHA-256 generation, archive validation, and signature-status reporting.
+- Generated publish and release artifacts remain under the ignored `artifacts` directory.
+- The final manually verified portable ZIP has SHA-256 `2390cee212f559d9fd7cdf3d3a6cb8589dba968b905ee5e5c84db94fc348ab18`.
+- The unsigned executable is expected to report `NotSigned`; Windows may therefore show an Unknown Publisher or SmartScreen warning.
+
 ## Verified state
 
 - Release build succeeds.
@@ -454,6 +466,23 @@ All selectable result tables must use the same application-wide behaviour:
 - Light-mode selected navigation remained clearly readable across modules.
 - Release build succeeded and the xUnit suite increased to 111 passed, 0 failed after Sprint 27.
 - Sprint 27 introduced no new scan rule, cleanup rule, background task, automatic cleanup, registry modification, process termination, cloud service, or unrelated system-changing behaviour.
+- Sprint 28 added explicit `1.0.0` release metadata, a self-contained Windows x64 publish profile, and a reusable portable-release script.
+- Clean Release build and all 111 tests passed before the release candidate was packaged.
+- Self-contained `win-x64` publishing succeeded and included the required local .NET runtime without requiring a separately installed runtime.
+- Publish-time PDB files were removed and the final archive was verified to contain no PDB files.
+- The portable ZIP and its SHA-256 checksum were generated and independently verified before extraction.
+- File version `1.0.0.0` and product version `1.0.0` with source-commit metadata were verified on the published executable.
+- The extracted portable application launched successfully from a separate Desktop test folder.
+- Cleaner, Health Check, Custom Clean, Auto Clean Schedule, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Settings opened correctly from the portable package.
+- Light and Dark themes, settings persistence after restart, maximize/minimize/restore, tables, checkboxes, tri-state `ALL` selectors, normal shutdown, and missing-runtime/missing-DLL absence were manually verified.
+- Large File Finder action order was standardized to `Scan files`, `Cancel`, then the destructive `Delete selected` action at the far right.
+- Duplicate Finder retained the consistent `Scan duplicates`, `Cancel`, then `Recycle selected` action order.
+- Auto Clean Schedule retained `Edit selected`, then `Remove`, and the destructive Remove action now uses the shared danger-button treatment.
+- The corrected action order, danger styling, alignment, normal-window layout, and maximized layout were manually verified before the portable release was regenerated.
+- The regenerated portable archive SHA-256 `2390cee212f559d9fd7cdf3d3a6cb8589dba968b905ee5e5c84db94fc348ab18` was verified before extraction and final launch testing.
+- Startup Manager remained intentionally read-only for version `1.0.0`; safe startup enable/disable functionality is deferred to a separate post-release sprint.
+- The executable remained intentionally unsigned, matching the confirmed no-code-signing Sprint 28 scope.
+- Sprint 28 added no installer, updater, cloud service, telemetry, licensing, cleanup rule, scan rule, background execution, registry modification, process termination, startup-entry modification, or unrelated application feature.
 - System Monitor live CPU and physical-memory values, Start/Stop controls, automatic stop on tab change, and read-only scope manually verified.
 - Cleaner, Large File Finder, Duplicate File Finder, and Startup Manager regression opening checks passed after Sprint 8.
 - Health Check system-drive, CPU, memory, and startup summary results manually verified.
@@ -682,19 +711,22 @@ This rule is mandatory. Repeated blind patches are not acceptable.
 
 ## Current milestone
 
-Sprint 27 — Tri-state Bulk Selection and Responsive Review Layout.
+Sprint 28 — Windows Release Readiness.
 
-- Reusable `ALL` tri-state selection is complete in Cleaner, Custom Clean, Large File Finder, and Duplicate File Finder.
-- Responsive visual corrections are complete for selected navigation, Custom Clean review cards, preview-table headers, hero alignment, and taskbar-safe maximization.
-- Release build succeeded, all 111 tests passed, and the affected manual verification matrix passed.
+- Version `1.0.0` metadata, the self-contained `win-x64` publish profile, and the repeatable portable-release script are complete.
+- Clean Release build, all 111 tests, self-contained publishing, ZIP/checksum generation, archive validation, and extracted portable-launch verification passed.
+- Destructive-action placement is consistent across Large File Finder, Duplicate Finder, and Auto Clean Schedule, with destructive actions isolated at the far right and using danger styling where applicable.
+- The final regenerated portable ZIP checksum is `2390cee212f559d9fd7cdf3d3a6cb8589dba968b905ee5e5c84db94fc348ab18`.
+- The full portable manual matrix passed with no missing runtime, missing DLL, theme, persistence, navigation, window, table, selection, action-order, or shutdown regression.
+- Startup Manager remains read-only in version `1.0.0`; safe enable/disable support is reserved for a later focused sprint.
 
 ## Next milestone
 
-Sprint 28 — Windows Release Readiness, only after Sprint 27 is committed, pushed, and the working tree is clean.
+Sprint 29 — Version 1.0.0 Release Publication, only after Sprint 28 is committed, pushed, and the working tree is clean.
 
-- Confirm the exact Windows publish and distribution scope before modifying files.
-- Verify Release metadata, publish output, first launch, upgrade/replacement workflow, and the existing functional and safety matrix.
-- Do not add new cleanup rules, automatic system changes, cloud services, licensing, or unrelated features.
+- Regenerate the final portable ZIP and SHA-256 checksum from the committed Sprint 28 source state.
+- Verify final version metadata, source-commit metadata, archive contents, checksum, and one extracted launch smoke test.
+- Publish the portable ZIP and checksum through the approved distribution channel without adding an installer, code signing, updater, telemetry, licensing, or unrelated features.
 
 ## Compact AI handoff
 

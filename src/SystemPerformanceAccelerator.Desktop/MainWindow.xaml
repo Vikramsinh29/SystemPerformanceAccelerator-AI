@@ -2913,7 +2913,7 @@
                                                 Style="{StaticResource FluentSecondaryButtonStyle}"
                                                 Margin="0,0,8,0" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE70F;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Edit selected" VerticalAlignment="Center" /></StackPanel></Button>
                                         <Button Command="{Binding RemoveScheduleCommand}"
-                                                Style="{StaticResource FluentSecondaryButtonStyle}" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74D;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Remove" VerticalAlignment="Center" /></StackPanel></Button>
+                                                Style="{StaticResource FluentDangerButtonStyle}" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74D;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Remove" VerticalAlignment="Center" /></StackPanel></Button>
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -3311,8 +3311,8 @@
                         </Grid>
                         <StackPanel Grid.Row="1" Margin="0,11,0,0" Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Command="{Binding ScanCommand}" Style="{StaticResource FluentPrimaryButtonStyle}" Margin="0,0,8,0" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE72C;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Scan files" VerticalAlignment="Center" /></StackPanel></Button>
-                            <Button Command="{Binding DeleteSelectedCommand}" Style="{StaticResource FluentDangerButtonStyle}" Margin="0,0,8,0" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74D;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Delete selected" VerticalAlignment="Center" /></StackPanel></Button>
-                            <Button Command="{Binding CancelCommand}" Style="{StaticResource FluentSecondaryButtonStyle}" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE711;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Cancel" VerticalAlignment="Center" /></StackPanel></Button>
+                            <Button Command="{Binding CancelCommand}" Style="{StaticResource FluentSecondaryButtonStyle}" Margin="0,0,8,0" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE711;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Cancel" VerticalAlignment="Center" /></StackPanel></Button>
+                            <Button Command="{Binding DeleteSelectedCommand}" Style="{StaticResource FluentDangerButtonStyle}" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74D;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Delete selected" VerticalAlignment="Center" /></StackPanel></Button>
                         </StackPanel>
                     </Grid>
                 </Border>
