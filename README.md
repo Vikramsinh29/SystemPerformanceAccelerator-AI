@@ -109,16 +109,24 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 
 ### Startup Manager
 
-- Completely read-only startup inventory
 - HKCU and HKLM `Run` key enumeration
 - 64-bit and 32-bit registry views where applicable
 - Current-user and all-users Startup folder enumeration
-- Name, command/path, source, location, and status display
-- Read-only StartupApproved status detection when available
-- Missing, unresolved, and malformed target reporting
+- Name, command/path, source, location, target condition, and startup state display
+- Windows `StartupApproved` state detection and verified state changes
+- Compact row-level status controls: green Enabled, muted red Disabled, amber Unknown, and blue Updating
+- Click an Enabled or Disabled status to change only that startup item
+- Explicit confirmation before every state change
+- Original registry commands and Startup-folder files are never deleted or rewritten
+- Fresh identity, command, file metadata, and target checks before each state change
+- Inventory refresh and state verification after successful changes
+- Current-user and all-users state support with 32-bit and 64-bit registry handling
+- Missing, unresolved, malformed, stale, unsupported, and access-denied reporting
 - Shortcut resolution without executing startup items
-- Safe handling of inaccessible keys/folders, malformed values, and cancellation
-- No enable, disable, delete, edit, execution, or registry-writing actions
+- Safe handling of inaccessible keys/folders, malformed values, cancellation, and partial scan failures
+- Total, Enabled, Disabled, and Unknown counters always account for every displayed row
+- The desktop application requests administrator permission at launch for protected Windows startup locations
+- No startup entry deletion, command editing, startup-item execution, or unrelated registry modification
 
 ### System Monitor
 

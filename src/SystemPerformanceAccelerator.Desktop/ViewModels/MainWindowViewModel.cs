@@ -219,7 +219,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ApplicationModule.AutoCleanSchedule => "Plan local cleanup schedules and preview them without automatic execution",
         ApplicationModule.LargeFileFinder => "Find and safely move selected large files to the Windows Recycle Bin",
         ApplicationModule.DuplicateFileFinder => "Find content-confirmed duplicates and safely recycle selected copies",
-        ApplicationModule.StartupManager => "Review Windows startup entries without changing them",
+        ApplicationModule.StartupManager => "Safely enable or disable Windows startup entries without deleting them",
         ApplicationModule.SystemMonitor => "View live total CPU and physical-memory usage without changing the system",
         ApplicationModule.Settings => "Manage local appearance and safe operating defaults",
         _ => string.Empty

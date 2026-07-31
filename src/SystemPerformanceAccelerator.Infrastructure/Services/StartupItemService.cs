@@ -1,3 +1,4 @@
+using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
@@ -18,6 +19,7 @@ public sealed class StartupItemService : IStartupItemService
     private readonly string _currentUserStartupFolder;
     private readonly string _allUsersStartupFolder;
     private readonly bool _scanRegistry;
+    private readonly IStartupItemStateBackend _stateBackend;
 
     public StartupItemService()
         : this(
@@ -35,12 +37,40 @@ public sealed class StartupItemService : IStartupItemService
         _currentUserStartupFolder = currentUserStartupFolder;
         _allUsersStartupFolder = allUsersStartupFolder;
         _scanRegistry = scanRegistry;
+        _stateBackend = new WindowsStartupItemStateBackend(
+            currentUserStartupFolder,
+            allUsersStartupFolder);
+    }
+
+    internal StartupItemService(
+        string currentUserStartupFolder,
+        string allUsersStartupFolder,
+        bool scanRegistry,
+        IStartupItemStateBackend stateBackend)
+    {
+        _currentUserStartupFolder = currentUserStartupFolder;
+        _allUsersStartupFolder = allUsersStartupFolder;
+        _scanRegistry = scanRegistry;
+        _stateBackend = stateBackend ??
+            throw new ArgumentNullException(nameof(stateBackend));
     }
 
     public Task<StartupItemScanResult> ScanAsync(
         IProgress<StartupItemScanProgress>? progress = null,
         CancellationToken cancellationToken = default) =>
         Task.Run(() => Scan(progress, cancellationToken), cancellationToken);
+
+    public Task<StartupItemStateChangeResult> SetStateAsync(
+        StartupItem item,
+        StartupItemState requestedState,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+
+        return Task.Run(
+            () => SetState(item, requestedState, cancellationToken),
+            cancellationToken);
+    }
 
     private StartupItemScanResult Scan(
         IProgress<StartupItemScanProgress>? progress,
@@ -105,6 +135,193 @@ public sealed class StartupItemService : IStartupItemService
             stopwatch.Elapsed);
     }
 
+    private StartupItemStateChangeResult SetState(
+        StartupItem item,
+        StartupItemState requestedState,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (requestedState is not (
+            StartupItemState.Enabled or StartupItemState.Disabled))
+        {
+            return Unsupported(
+                requestedState,
+                "Only Enabled or Disabled is a supported startup state.");
+        }
+
+        if (item.State == requestedState)
+        {
+            return new StartupItemStateChangeResult(
+                StartupItemStateChangeOutcome.NoChange,
+                requestedState,
+                $"'{item.Name}' is already {requestedState.ToString().ToLowerInvariant()}.");
+        }
+
+        if (requestedState == StartupItemState.Disabled && !item.CanDisable)
+        {
+            return Unsupported(
+                requestedState,
+                string.IsNullOrWhiteSpace(item.StateChangeUnavailableReason)
+                    ? "This startup entry cannot be disabled safely."
+                    : item.StateChangeUnavailableReason);
+        }
+
+        if (requestedState == StartupItemState.Enabled && !item.CanEnable)
+        {
+            return Unsupported(
+                requestedState,
+                string.IsNullOrWhiteSpace(item.StateChangeUnavailableReason)
+                    ? "This startup entry cannot be enabled safely."
+                    : item.StateChangeUnavailableReason);
+        }
+
+        try
+        {
+            var snapshot = _stateBackend.Read(item);
+            var validationMessage = ValidateSnapshot(
+                item,
+                snapshot,
+                requestedState);
+
+            if (validationMessage is not null)
+            {
+                return Stale(requestedState, validationMessage);
+            }
+
+            if (snapshot.State == requestedState)
+            {
+                return new StartupItemStateChangeResult(
+                    StartupItemStateChangeOutcome.NoChange,
+                    requestedState,
+                    $"'{item.Name}' is already {requestedState.ToString().ToLowerInvariant()} in Windows.");
+            }
+
+            if (snapshot.State != item.State)
+            {
+                return Stale(
+                    requestedState,
+                    $"The state of '{item.Name}' changed after the scan. Run a fresh scan and try again.");
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var preWriteSnapshot = _stateBackend.Read(item);
+            validationMessage = ValidateSnapshot(
+                item,
+                preWriteSnapshot,
+                requestedState);
+
+            if (validationMessage is not null ||
+                preWriteSnapshot.State != snapshot.State)
+            {
+                return Stale(
+                    requestedState,
+                    validationMessage ??
+                        $"The state of '{item.Name}' changed before Windows could be updated. Run a fresh scan.");
+            }
+
+            _stateBackend.Write(item, requestedState);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var verification = _stateBackend.Read(item);
+            if (!verification.Exists ||
+                verification.State != requestedState)
+            {
+                return new StartupItemStateChangeResult(
+                    StartupItemStateChangeOutcome.Failed,
+                    requestedState,
+                    $"Windows did not confirm the requested state for '{item.Name}'. No startup command or file was deleted.");
+            }
+
+            var action = requestedState == StartupItemState.Enabled
+                ? "enabled"
+                : "disabled";
+            return new StartupItemStateChangeResult(
+                StartupItemStateChangeOutcome.Changed,
+                requestedState,
+                $"'{item.Name}' was {action}. Its original startup command or file was preserved.");
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or SecurityException)
+        {
+            return new StartupItemStateChangeResult(
+                StartupItemStateChangeOutcome.AccessDenied,
+                requestedState,
+                $"Windows denied permission to change '{item.Name}'. All-users entries may require administrator access. No startup command or file was deleted.");
+        }
+        catch (Exception ex) when (ex is
+            IOException or
+            InvalidOperationException or
+            ArgumentException or
+            NotSupportedException)
+        {
+            return new StartupItemStateChangeResult(
+                StartupItemStateChangeOutcome.Failed,
+                requestedState,
+                $"Could not change '{item.Name}' safely: {ex.Message}");
+        }
+    }
+
+    private static string? ValidateSnapshot(
+        StartupItem item,
+        StartupItemStateSnapshot snapshot,
+        StartupItemState requestedState)
+    {
+        if (!snapshot.Exists)
+        {
+            return $"'{item.Name}' no longer exists in the scanned startup location. Run a fresh scan.";
+        }
+
+        if (!string.Equals(
+            snapshot.Command,
+            item.Command,
+            StringComparison.Ordinal))
+        {
+            return $"The command or target for '{item.Name}' changed after the scan. Run a fresh scan.";
+        }
+
+        if (item.Kind == StartupItemKind.StartupFolder &&
+            (snapshot.SourceLengthBytes != item.SourceLengthBytes ||
+             snapshot.SourceLastWriteUtc != item.SourceLastWriteUtc))
+        {
+            return $"The Startup-folder file for '{item.Name}' changed after the scan. Run a fresh scan.";
+        }
+
+        if (snapshot.State == StartupItemState.Unknown)
+        {
+            return $"Windows could not confirm the current state of '{item.Name}'. No change was made.";
+        }
+
+        if (requestedState == StartupItemState.Enabled &&
+            StartupCommandInspector.DetermineTargetState(snapshot.Command) !=
+                StartupTargetState.Available)
+        {
+            return $"The target for '{item.Name}' is not currently available, so it cannot be enabled safely.";
+        }
+
+        return null;
+    }
+
+    private static StartupItemStateChangeResult Unsupported(
+        StartupItemState requestedState,
+        string message) =>
+        new(
+            StartupItemStateChangeOutcome.Unsupported,
+            requestedState,
+            message);
+
+    private static StartupItemStateChangeResult Stale(
+        StartupItemState requestedState,
+        string message) =>
+        new(
+            StartupItemStateChangeOutcome.Stale,
+            requestedState,
+            message);
+
     private static IReadOnlyList<RegistrySource> CreateRegistrySources()
     {
         var views = Environment.Is64BitOperatingSystem
@@ -115,9 +332,10 @@ public sealed class StartupItemService : IStartupItemService
         foreach (var view in views)
         {
             var viewLabel = view == RegistryView.Registry64 ? "64-bit" : "32-bit";
-            var approvalLeaf = Environment.Is64BitOperatingSystem && view == RegistryView.Registry32
-                ? "Run32"
-                : "Run";
+            var approvalLeaf = Environment.Is64BitOperatingSystem &&
+                view == RegistryView.Registry32
+                    ? "Run32"
+                    : "Run";
 
             sources.Add(new RegistrySource(
                 RegistryHive.CurrentUser,
@@ -172,45 +390,78 @@ public sealed class StartupItemService : IStartupItemService
                     var displayName = string.IsNullOrWhiteSpace(valueName)
                         ? "(Default)"
                         : valueName;
+                    var approval = GetApprovalRecord(
+                        approvalStates,
+                        valueName);
 
                     if (string.IsNullOrWhiteSpace(command))
                     {
-                        AddOrMerge(items, new StartupItem(
+                        AddOrMerge(items, CreateRegistryItem(
                             displayName,
                             value?.ToString() ?? string.Empty,
-                            source.Source,
-                            source.DisplayLocation,
-                            GetApprovalState(approvalStates, valueName),
+                            source,
+                            valueName,
+                            approval,
                             StartupTargetState.Malformed));
-                        errors.Add($"Startup entry '{displayName}' in '{source.DisplayLocation}' has an empty or unsupported command value.");
+                        errors.Add(
+                            $"Startup entry '{displayName}' in '{source.DisplayLocation}' has an empty or unsupported command value.");
                         continue;
                     }
 
-                    var targetState = StartupCommandInspector.DetermineTargetState(command);
-                    AddOrMerge(items, new StartupItem(
+                    var targetState =
+                        StartupCommandInspector.DetermineTargetState(command);
+                    AddOrMerge(items, CreateRegistryItem(
                         displayName,
                         command,
-                        source.Source,
-                        source.DisplayLocation,
-                        GetApprovalState(approvalStates, valueName),
+                        source,
+                        valueName,
+                        approval,
                         targetState));
 
                     if (targetState == StartupTargetState.Malformed)
                     {
-                        errors.Add($"Startup entry '{displayName}' in '{source.DisplayLocation}' contains a malformed command.");
+                        errors.Add(
+                            $"Startup entry '{displayName}' in '{source.DisplayLocation}' contains a malformed command.");
                     }
                 }
                 catch (Exception ex) when (IsRecoverableRegistryException(ex))
                 {
-                    errors.Add($"Could not read startup entry '{valueName}' in '{source.DisplayLocation}': {ex.Message}");
+                    errors.Add(
+                        $"Could not read startup entry '{valueName}' in '{source.DisplayLocation}': {ex.Message}");
                 }
             }
         }
         catch (Exception ex) when (IsRecoverableRegistryException(ex))
         {
-            errors.Add($"Could not read startup location '{source.DisplayLocation}' ({source.Source}): {ex.Message}");
+            errors.Add(
+                $"Could not read startup location '{source.DisplayLocation}' ({source.Source}): {ex.Message}");
         }
     }
+
+    private static StartupItem CreateRegistryItem(
+        string displayName,
+        string command,
+        RegistrySource source,
+        string valueName,
+        ApprovalRecord approval,
+        StartupTargetState targetState) =>
+        new(
+            displayName,
+            command,
+            source.Source,
+            source.DisplayLocation,
+            approval.State,
+            targetState)
+        {
+            Kind = StartupItemKind.RegistryRun,
+            SourceScope = ToItemScope(source.Hive),
+            SourceRegistryView = ToItemView(source.View),
+            EntryIdentifier = valueName,
+            ApprovalScope = ToItemScope(approval.Hive),
+            ApprovalRegistryView = ToItemView(approval.View),
+            ApprovalCategory = approval.Category,
+            HasAmbiguousStateIdentity = approval.IsAmbiguous
+        };
 
     private static void ScanStartupFolder(
         string folderPath,
@@ -258,54 +509,72 @@ public sealed class StartupItemService : IStartupItemService
                 errors,
                 folderPath)
             : new ApprovalLookup(
-                new Dictionary<string, StartupItemState>(StringComparer.OrdinalIgnoreCase),
-                WasReadable: true);
+                new Dictionary<string, ApprovalRecord>(
+                    StringComparer.OrdinalIgnoreCase),
+                WasReadable: true,
+                approvalHive,
+                GetNativeRegistryView(),
+                "StartupFolder");
 
         try
         {
-            foreach (var filePath in Directory.EnumerateFiles(folderPath, "*", SearchOption.TopDirectoryOnly))
+            foreach (var filePath in Directory.EnumerateFiles(
+                folderPath,
+                "*",
+                SearchOption.TopDirectoryOnly))
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 try
                 {
-                    var fileName = Path.GetFileName(filePath);
+                    var fileInfo = new FileInfo(filePath);
+                    fileInfo.Refresh();
+                    var fileName = fileInfo.Name;
                     var displayName = Path.GetFileNameWithoutExtension(filePath);
-                    var state = GetApprovalState(approvalStates, fileName);
+                    var approval = GetApprovalRecord(
+                        approvalStates,
+                        fileName);
 
-                    if (string.Equals(Path.GetExtension(filePath), ".lnk", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(
+                        fileInfo.Extension,
+                        ".lnk",
+                        StringComparison.OrdinalIgnoreCase))
                     {
                         var shortcut = ShortcutResolver.Resolve(filePath);
                         if (!shortcut.Succeeded)
                         {
-                            AddOrMerge(items, new StartupItem(
+                            AddOrMerge(items, CreateFolderItem(
                                 displayName,
                                 filePath,
                                 source,
-                                filePath,
-                                state,
+                                approvalHive,
+                                fileInfo,
+                                approval,
                                 StartupTargetState.Unresolved));
-                            errors.Add($"Could not resolve startup shortcut '{filePath}': {shortcut.ErrorMessage}");
+                            errors.Add(
+                                $"Could not resolve startup shortcut '{filePath}': {shortcut.ErrorMessage}");
                             continue;
                         }
 
                         var command = QuoteCommandPath(shortcut.TargetPath);
-                        AddOrMerge(items, new StartupItem(
+                        AddOrMerge(items, CreateFolderItem(
                             displayName,
                             command,
                             source,
-                            filePath,
-                            state,
+                            approvalHive,
+                            fileInfo,
+                            approval,
                             StartupCommandInspector.DetermineTargetState(command)));
                         continue;
                     }
 
-                    AddOrMerge(items, new StartupItem(
+                    AddOrMerge(items, CreateFolderItem(
                         displayName,
                         filePath,
                         source,
-                        filePath,
-                        state,
+                        approvalHive,
+                        fileInfo,
+                        approval,
                         StartupCommandInspector.DetermineTargetState(
                             QuoteCommandPath(filePath))));
                 }
@@ -316,7 +585,8 @@ public sealed class StartupItemService : IStartupItemService
                     NotSupportedException or
                     ArgumentException)
                 {
-                    errors.Add($"Could not inspect startup item '{filePath}': {ex.Message}");
+                    errors.Add(
+                        $"Could not inspect startup item '{filePath}': {ex.Message}");
                 }
             }
         }
@@ -327,16 +597,48 @@ public sealed class StartupItemService : IStartupItemService
             NotSupportedException or
             ArgumentException)
         {
-            errors.Add($"Could not enumerate startup location '{folderPath}': {ex.Message}");
+            errors.Add(
+                $"Could not enumerate startup location '{folderPath}': {ex.Message}");
         }
     }
+
+    private static StartupItem CreateFolderItem(
+        string displayName,
+        string command,
+        string source,
+        RegistryHive sourceHive,
+        FileInfo fileInfo,
+        ApprovalRecord approval,
+        StartupTargetState targetState) =>
+        new(
+            displayName,
+            command,
+            source,
+            fileInfo.FullName,
+            approval.State,
+            targetState)
+        {
+            Kind = StartupItemKind.StartupFolder,
+            SourceScope = ToItemScope(sourceHive),
+            SourceRegistryView = StartupRegistryView.NotApplicable,
+            EntryIdentifier = fileInfo.Name,
+            ApprovalScope = ToItemScope(approval.Hive),
+            ApprovalRegistryView = ToItemView(approval.View),
+            ApprovalCategory = approval.Category,
+            SourceLengthBytes = fileInfo.Length,
+            HasAmbiguousStateIdentity = approval.IsAmbiguous,
+            SourceLastWriteUtc = new DateTimeOffset(
+                fileInfo.LastWriteTimeUtc,
+                TimeSpan.Zero)
+        };
 
     private static ApprovalLookup ReadFolderApprovalStates(
         RegistryHive primaryHive,
         ICollection<string> errors,
         string displayLocation)
     {
-        var states = new Dictionary<string, StartupItemState>(StringComparer.OrdinalIgnoreCase);
+        var states = new Dictionary<string, ApprovalRecord>(
+            StringComparer.OrdinalIgnoreCase);
         var allSourcesReadable = true;
         var hives = primaryHive == RegistryHive.LocalMachine
             ? new[] { RegistryHive.CurrentUser, RegistryHive.LocalMachine }
@@ -359,15 +661,30 @@ public sealed class StartupItemService : IStartupItemService
 
                 foreach (var pair in lookup.States)
                 {
-                    if (!states.ContainsKey(pair.Key) || pair.Value == StartupItemState.Disabled)
+                    if (!states.TryGetValue(pair.Key, out var existing))
                     {
                         states[pair.Key] = pair.Value;
+                        continue;
                     }
+
+                    var preferred = GetStatePriority(pair.Value.State) >
+                        GetStatePriority(existing.State)
+                            ? pair.Value
+                            : existing;
+                    states[pair.Key] = preferred with
+                    {
+                        IsAmbiguous = true
+                    };
                 }
             }
         }
 
-        return new ApprovalLookup(states, allSourcesReadable);
+        return new ApprovalLookup(
+            states,
+            allSourcesReadable,
+            primaryHive,
+            GetNativeRegistryView(),
+            "StartupFolder");
     }
 
     private static ApprovalLookup ReadApprovalStates(
@@ -377,16 +694,24 @@ public sealed class StartupItemService : IStartupItemService
         ICollection<string> errors,
         string displayLocation)
     {
-        var states = new Dictionary<string, StartupItemState>(StringComparer.OrdinalIgnoreCase);
+        var states = new Dictionary<string, ApprovalRecord>(
+            StringComparer.OrdinalIgnoreCase);
         var keyPath = $@"{StartupApprovedRoot}\{approvalLeaf}";
 
         try
         {
             using var baseKey = RegistryKey.OpenBaseKey(hive, view);
-            using var approvalKey = baseKey.OpenSubKey(keyPath, writable: false);
+            using var approvalKey = baseKey.OpenSubKey(
+                keyPath,
+                writable: false);
             if (approvalKey is null)
             {
-                return new ApprovalLookup(states, WasReadable: true);
+                return new ApprovalLookup(
+                    states,
+                    WasReadable: true,
+                    hive,
+                    view,
+                    approvalLeaf);
             }
 
             foreach (var valueName in approvalKey.GetValueNames())
@@ -397,7 +722,7 @@ public sealed class StartupItemService : IStartupItemService
                         valueName,
                         defaultValue: null,
                         RegistryValueOptions.DoNotExpandEnvironmentNames);
-                    states[valueName] = value is byte[] { Length: > 0 } data
+                    var state = value is byte[] { Length: > 0 } data
                         ? data[0] switch
                         {
                             0x02 => StartupItemState.Enabled,
@@ -405,31 +730,59 @@ public sealed class StartupItemService : IStartupItemService
                             _ => StartupItemState.Unknown
                         }
                         : StartupItemState.Unknown;
+                    states[valueName] = new ApprovalRecord(
+                        state,
+                        hive,
+                        view,
+                        approvalLeaf,
+                        IsAmbiguous: false);
                 }
                 catch (Exception ex) when (IsRecoverableRegistryException(ex))
                 {
-                    states[valueName] = StartupItemState.Unknown;
-                    errors.Add($"Could not read startup status '{valueName}' for '{displayLocation}': {ex.Message}");
+                    states[valueName] = new ApprovalRecord(
+                        StartupItemState.Unknown,
+                        hive,
+                        view,
+                        approvalLeaf,
+                        IsAmbiguous: false);
+                    errors.Add(
+                        $"Could not read startup status '{valueName}' for '{displayLocation}': {ex.Message}");
                 }
             }
 
-            return new ApprovalLookup(states, WasReadable: true);
+            return new ApprovalLookup(
+                states,
+                WasReadable: true,
+                hive,
+                view,
+                approvalLeaf);
         }
         catch (Exception ex) when (IsRecoverableRegistryException(ex))
         {
-            errors.Add($"Could not read startup status metadata for '{displayLocation}': {ex.Message}");
-            return new ApprovalLookup(states, WasReadable: false);
+            errors.Add(
+                $"Could not read startup status metadata for '{displayLocation}': {ex.Message}");
+            return new ApprovalLookup(
+                states,
+                WasReadable: false,
+                hive,
+                view,
+                approvalLeaf);
         }
     }
 
-    private static StartupItemState GetApprovalState(
+    private static ApprovalRecord GetApprovalRecord(
         ApprovalLookup approvalLookup,
         string valueName) =>
-        approvalLookup.States.TryGetValue(valueName, out var state)
-            ? state
-            : approvalLookup.WasReadable
-                ? StartupItemState.Enabled
-                : StartupItemState.Unknown;
+        approvalLookup.States.TryGetValue(valueName, out var approval)
+            ? approval
+            : new ApprovalRecord(
+                approvalLookup.WasReadable
+                    ? StartupItemState.Enabled
+                    : StartupItemState.Unknown,
+                approvalLookup.DefaultHive,
+                approvalLookup.DefaultView,
+                approvalLookup.Category,
+                IsAmbiguous: false);
 
     private static void AddOrMerge(
         IDictionary<string, StartupItem> items,
@@ -447,9 +800,11 @@ public sealed class StartupItemService : IStartupItemService
             return;
         }
 
-        var mergedSource = existing.Source.Contains(item.Source, StringComparison.OrdinalIgnoreCase)
-            ? existing.Source
-            : $"{existing.Source}; {item.Source}";
+        var mergedSource = existing.Source.Contains(
+            item.Source,
+            StringComparison.OrdinalIgnoreCase)
+                ? existing.Source
+                : $"{existing.Source}; {item.Source}";
         var mergedState = existing.State == item.State
             ? existing.State
             : StartupItemState.Unknown;
@@ -457,9 +812,56 @@ public sealed class StartupItemService : IStartupItemService
         items[key] = existing with
         {
             Source = mergedSource,
-            State = mergedState
+            State = mergedState,
+            HasAmbiguousStateIdentity =
+                existing.HasAmbiguousStateIdentity ||
+                item.HasAmbiguousStateIdentity ||
+                !HasSameStateIdentity(existing, item)
         };
     }
+
+    private static bool HasSameStateIdentity(
+        StartupItem first,
+        StartupItem second) =>
+        first.Kind == second.Kind &&
+        first.SourceScope == second.SourceScope &&
+        first.SourceRegistryView == second.SourceRegistryView &&
+        string.Equals(
+            first.EntryIdentifier,
+            second.EntryIdentifier,
+            StringComparison.OrdinalIgnoreCase) &&
+        first.ApprovalScope == second.ApprovalScope &&
+        first.ApprovalRegistryView == second.ApprovalRegistryView &&
+        string.Equals(
+            first.ApprovalCategory,
+            second.ApprovalCategory,
+            StringComparison.OrdinalIgnoreCase);
+
+    private static int GetStatePriority(StartupItemState state) => state switch
+    {
+        StartupItemState.Disabled => 3,
+        StartupItemState.Enabled => 2,
+        _ => 1
+    };
+
+    private static RegistryView GetNativeRegistryView() =>
+        Environment.Is64BitOperatingSystem
+            ? RegistryView.Registry64
+            : RegistryView.Registry32;
+
+    private static StartupItemScope ToItemScope(RegistryHive hive) => hive switch
+    {
+        RegistryHive.CurrentUser => StartupItemScope.CurrentUser,
+        RegistryHive.LocalMachine => StartupItemScope.AllUsers,
+        _ => StartupItemScope.Unknown
+    };
+
+    private static StartupRegistryView ToItemView(RegistryView view) => view switch
+    {
+        RegistryView.Registry64 => StartupRegistryView.Registry64,
+        RegistryView.Registry32 => StartupRegistryView.Registry32,
+        _ => StartupRegistryView.NotApplicable
+    };
 
     private static string NormalizeForComparison(string value) =>
         value.Trim().Trim('"').Replace('/', '\\');
@@ -472,9 +874,19 @@ public sealed class StartupItemService : IStartupItemService
     private static bool IsRecoverableRegistryException(Exception exception) =>
         exception is IOException or UnauthorizedAccessException or SecurityException;
 
+    private sealed record ApprovalRecord(
+        StartupItemState State,
+        RegistryHive Hive,
+        RegistryView View,
+        string Category,
+        bool IsAmbiguous);
+
     private sealed record ApprovalLookup(
-        IReadOnlyDictionary<string, StartupItemState> States,
-        bool WasReadable);
+        IReadOnlyDictionary<string, ApprovalRecord> States,
+        bool WasReadable,
+        RegistryHive DefaultHive,
+        RegistryView DefaultView,
+        string Category);
 
     private sealed record RegistrySource(
         RegistryHive Hive,
@@ -482,6 +894,316 @@ public sealed class StartupItemService : IStartupItemService
         string Source,
         string DisplayLocation,
         string ApprovalLeaf);
+}
+
+internal interface IStartupItemStateBackend
+{
+    StartupItemStateSnapshot Read(StartupItem item);
+
+    void Write(StartupItem item, StartupItemState requestedState);
+}
+
+internal sealed record StartupItemStateSnapshot(
+    bool Exists,
+    string Command,
+    StartupItemState State,
+    long? SourceLengthBytes,
+    DateTimeOffset? SourceLastWriteUtc);
+
+internal sealed class WindowsStartupItemStateBackend : IStartupItemStateBackend
+{
+    private const string RunKeyPath =
+        @"Software\Microsoft\Windows\CurrentVersion\Run";
+    private const string StartupApprovedRoot =
+        @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved";
+
+    private readonly string _currentUserStartupFolder;
+    private readonly string _allUsersStartupFolder;
+
+    public WindowsStartupItemStateBackend(
+        string currentUserStartupFolder,
+        string allUsersStartupFolder)
+    {
+        _currentUserStartupFolder = currentUserStartupFolder;
+        _allUsersStartupFolder = allUsersStartupFolder;
+    }
+
+    public StartupItemStateSnapshot Read(StartupItem item) =>
+        item.Kind switch
+        {
+            StartupItemKind.RegistryRun => ReadRegistryItem(item),
+            StartupItemKind.StartupFolder => ReadStartupFolderItem(item),
+            _ => new StartupItemStateSnapshot(
+                false,
+                string.Empty,
+                StartupItemState.Unknown,
+                null,
+                null)
+        };
+
+    public void Write(
+        StartupItem item,
+        StartupItemState requestedState)
+    {
+        if (requestedState is not (
+            StartupItemState.Enabled or StartupItemState.Disabled))
+        {
+            throw new InvalidOperationException(
+                "Only Enabled or Disabled can be written.");
+        }
+
+        if (!IsSupportedApprovalCategory(
+            item.Kind,
+            item.ApprovalCategory))
+        {
+            throw new InvalidOperationException(
+                "The startup entry points to an unsupported Windows state location.");
+        }
+
+        var hive = ToRegistryHive(item.ApprovalScope);
+        var view = ToRegistryView(item.ApprovalRegistryView);
+        var keyPath =
+            $@"{StartupApprovedRoot}\{item.ApprovalCategory}";
+        var data = CreateApprovalData(
+            requestedState,
+            DateTimeOffset.UtcNow);
+
+        using var baseKey = RegistryKey.OpenBaseKey(hive, view);
+        using var approvalKey = baseKey.CreateSubKey(
+            keyPath,
+            writable: true) ??
+            throw new IOException(
+                $"Windows could not open startup state metadata '{keyPath}'.");
+
+        approvalKey.SetValue(
+            item.EntryIdentifier,
+            data,
+            RegistryValueKind.Binary);
+    }
+
+    internal static byte[] CreateApprovalData(
+        StartupItemState state,
+        DateTimeOffset timestampUtc)
+    {
+        if (state is not (
+            StartupItemState.Enabled or StartupItemState.Disabled))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(state),
+                state,
+                "Only Enabled or Disabled has a Windows approval payload.");
+        }
+
+        var data = new byte[12];
+        data[0] = state == StartupItemState.Enabled
+            ? (byte)0x02
+            : (byte)0x03;
+
+        if (state == StartupItemState.Disabled)
+        {
+            BinaryPrimitives.WriteInt64LittleEndian(
+                data.AsSpan(4, sizeof(long)),
+                timestampUtc.UtcDateTime.ToFileTimeUtc());
+        }
+
+        return data;
+    }
+
+    private StartupItemStateSnapshot ReadRegistryItem(
+        StartupItem item)
+    {
+        var hive = ToRegistryHive(item.SourceScope);
+        var view = ToRegistryView(item.SourceRegistryView);
+
+        using var baseKey = RegistryKey.OpenBaseKey(hive, view);
+        using var runKey = baseKey.OpenSubKey(
+            RunKeyPath,
+            writable: false);
+        if (runKey is null ||
+            !runKey.GetValueNames().Contains(
+                item.EntryIdentifier,
+                StringComparer.OrdinalIgnoreCase))
+        {
+            return Missing();
+        }
+
+        var value = runKey.GetValue(
+            item.EntryIdentifier,
+            defaultValue: null,
+            RegistryValueOptions.DoNotExpandEnvironmentNames);
+        if (value is not string command)
+        {
+            return Missing();
+        }
+
+        return new StartupItemStateSnapshot(
+            true,
+            command,
+            ReadApprovalState(item),
+            null,
+            null);
+    }
+
+    private StartupItemStateSnapshot ReadStartupFolderItem(
+        StartupItem item)
+    {
+        var expectedRoot = item.SourceScope switch
+        {
+            StartupItemScope.CurrentUser => _currentUserStartupFolder,
+            StartupItemScope.AllUsers => _allUsersStartupFolder,
+            _ => string.Empty
+        };
+
+        if (!IsDirectChild(item.Location, expectedRoot) ||
+            !File.Exists(item.Location))
+        {
+            return Missing();
+        }
+
+        var attributes = File.GetAttributes(item.Location);
+        if ((attributes & FileAttributes.ReparsePoint) != 0)
+        {
+            return Missing();
+        }
+
+        var fileInfo = new FileInfo(item.Location);
+        fileInfo.Refresh();
+
+        string command;
+        if (string.Equals(
+            fileInfo.Extension,
+            ".lnk",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            var shortcut = ShortcutResolver.Resolve(fileInfo.FullName);
+            command = shortcut.Succeeded
+                ? QuoteCommandPath(shortcut.TargetPath)
+                : fileInfo.FullName;
+        }
+        else
+        {
+            command = fileInfo.FullName;
+        }
+
+        return new StartupItemStateSnapshot(
+            true,
+            command,
+            ReadApprovalState(item),
+            fileInfo.Length,
+            new DateTimeOffset(fileInfo.LastWriteTimeUtc, TimeSpan.Zero));
+    }
+
+    private static StartupItemState ReadApprovalState(StartupItem item)
+    {
+        var hive = ToRegistryHive(item.ApprovalScope);
+        var view = ToRegistryView(item.ApprovalRegistryView);
+        var keyPath =
+            $@"{StartupApprovedRoot}\{item.ApprovalCategory}";
+
+        using var baseKey = RegistryKey.OpenBaseKey(hive, view);
+        using var approvalKey = baseKey.OpenSubKey(
+            keyPath,
+            writable: false);
+        if (approvalKey is null)
+        {
+            return StartupItemState.Enabled;
+        }
+
+        var value = approvalKey.GetValue(
+            item.EntryIdentifier,
+            defaultValue: null,
+            RegistryValueOptions.DoNotExpandEnvironmentNames);
+
+        if (value is null)
+        {
+            return StartupItemState.Enabled;
+        }
+
+        return value is byte[] { Length: > 0 } data
+            ? data[0] switch
+            {
+                0x02 => StartupItemState.Enabled,
+                0x03 => StartupItemState.Disabled,
+                _ => StartupItemState.Unknown
+            }
+            : StartupItemState.Unknown;
+    }
+
+    private static bool IsDirectChild(
+        string candidatePath,
+        string expectedRoot)
+    {
+        if (string.IsNullOrWhiteSpace(candidatePath) ||
+            string.IsNullOrWhiteSpace(expectedRoot))
+        {
+            return false;
+        }
+
+        try
+        {
+            var candidate = Path.GetFullPath(candidatePath);
+            var root = Path.GetFullPath(expectedRoot)
+                .TrimEnd(
+                    Path.DirectorySeparatorChar,
+                    Path.AltDirectorySeparatorChar);
+            var parent = Path.GetDirectoryName(candidate)?
+                .TrimEnd(
+                    Path.DirectorySeparatorChar,
+                    Path.AltDirectorySeparatorChar);
+
+            return string.Equals(
+                parent,
+                root,
+                StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception ex) when (ex is
+            ArgumentException or
+            NotSupportedException or
+            PathTooLongException)
+        {
+            return false;
+        }
+    }
+
+    private static bool IsSupportedApprovalCategory(
+        StartupItemKind kind,
+        string category) => kind switch
+        {
+            StartupItemKind.RegistryRun => category is "Run" or "Run32",
+            StartupItemKind.StartupFolder => category == "StartupFolder",
+            _ => false
+        };
+
+    private static RegistryHive ToRegistryHive(
+        StartupItemScope scope) => scope switch
+        {
+            StartupItemScope.CurrentUser => RegistryHive.CurrentUser,
+            StartupItemScope.AllUsers => RegistryHive.LocalMachine,
+            _ => throw new InvalidOperationException(
+                "The startup entry has no supported registry scope.")
+        };
+
+    private static RegistryView ToRegistryView(
+        StartupRegistryView view) => view switch
+        {
+            StartupRegistryView.Registry64 => RegistryView.Registry64,
+            StartupRegistryView.Registry32 => RegistryView.Registry32,
+            _ => throw new InvalidOperationException(
+                "The startup entry has no supported registry view.")
+        };
+
+    private static string QuoteCommandPath(string targetPath) =>
+        targetPath.Contains(' ')
+            ? $"\"{targetPath}\""
+            : targetPath;
+
+    private static StartupItemStateSnapshot Missing() =>
+        new(
+            false,
+            string.Empty,
+            StartupItemState.Unknown,
+            null,
+            null);
 }
 
 public static partial class StartupCommandInspector

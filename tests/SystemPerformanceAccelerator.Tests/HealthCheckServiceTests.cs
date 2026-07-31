@@ -286,5 +286,17 @@ public sealed class HealthCheckServiceTests
             cancellationToken.ThrowIfCancellationRequested();
             return Task.FromResult(result);
         }
+
+        public Task<StartupItemStateChangeResult> SetStateAsync(
+            StartupItem item,
+            StartupItemState requestedState,
+            CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.FromResult(new StartupItemStateChangeResult(
+                StartupItemStateChangeOutcome.Unsupported,
+                requestedState,
+                "Health-check tests do not modify startup items."));
+        }
     }
 }

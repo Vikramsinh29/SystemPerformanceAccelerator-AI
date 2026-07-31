@@ -7,4 +7,9 @@ public interface IStartupItemService
     Task<StartupItemScanResult> ScanAsync(
         IProgress<StartupItemScanProgress>? progress = null,
         CancellationToken cancellationToken = default);
+
+    Task<StartupItemStateChangeResult> SetStateAsync(
+        StartupItem item,
+        StartupItemState requestedState,
+        CancellationToken cancellationToken = default);
 }

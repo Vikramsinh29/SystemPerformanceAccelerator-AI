@@ -149,6 +149,7 @@ Package:
 - Windows 10/11 x64
 - Self-contained .NET desktop application
 - Portable ZIP; no installer
+- Requests administrator permission at launch for protected startup controls
 - No code signing
 - No cloud service or telemetry
 

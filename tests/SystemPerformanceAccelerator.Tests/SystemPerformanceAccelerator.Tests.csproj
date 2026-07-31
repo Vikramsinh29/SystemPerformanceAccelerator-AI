@@ -14,5 +14,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\SystemPerformanceAccelerator.Core\SystemPerformanceAccelerator.Core.csproj" />
     <ProjectReference Include="..\..\src\SystemPerformanceAccelerator.Infrastructure\SystemPerformanceAccelerator.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\SystemPerformanceAccelerator.Desktop\SystemPerformanceAccelerator.Desktop.csproj" />
   </ItemGroup>
 </Project>
