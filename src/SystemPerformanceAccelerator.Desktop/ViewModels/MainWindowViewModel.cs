@@ -270,6 +270,28 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public string ReclaimableSpace => FormatBytes(Candidates.Sum(x => x.Model.SizeBytes));
     public string Summary => $"{FilesFound} files • {ReclaimableSpace}";
 
+    public bool? AreAllCandidatesSelected
+    {
+        get => BulkSelection.GetState(Candidates, item => item.IsSelected);
+        set
+        {
+            var targetSelection = BulkSelection.ResolveTarget(
+                value,
+                AreAllCandidatesSelected);
+            if (targetSelection is null)
+            {
+                return;
+            }
+
+            BulkSelection.SetAll(
+                Candidates,
+                targetSelection.Value,
+                static (item, isSelected) => item.IsSelected = isSelected);
+            OnPropertyChanged();
+            CleanCommand.RaiseCanExecuteChanged();
+        }
+    }
+
     private void SwitchModule(ApplicationModule module)
     {
         var feature = GetFeature(module);
@@ -436,17 +458,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 new Progress<int>(value => Progress = value),
                 _cancellationTokenSource!.Token);
 
-            Candidates.Clear();
+            ClearCandidates();
             foreach (var candidate in result.Candidates)
             {
                 var viewModel = new CleanupCandidateViewModel(candidate);
-                viewModel.PropertyChanged += (_, args) =>
-                {
-                    if (args.PropertyName == nameof(CleanupCandidateViewModel.IsSelected))
-                    {
-                        CleanCommand.RaiseCanExecuteChanged();
-                    }
-                };
+                viewModel.PropertyChanged += OnCandidatePropertyChanged;
                 Candidates.Add(viewModel);
             }
 
@@ -504,6 +520,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             var deletedPaths = selected.Select(x => x.FullPath).ToHashSet(StringComparer.OrdinalIgnoreCase);
             foreach (var item in Candidates.Where(x => deletedPaths.Contains(x.FullPath) && !File.Exists(x.FullPath)).ToArray())
             {
+                item.PropertyChanged -= OnCandidatePropertyChanged;
                 Candidates.Remove(item);
             }
 
@@ -533,6 +550,29 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
+    private void OnCandidatePropertyChanged(
+        object? sender,
+        PropertyChangedEventArgs args)
+    {
+        if (args.PropertyName == nameof(CleanupCandidateViewModel.IsSelected))
+        {
+            OnPropertyChanged(nameof(AreAllCandidatesSelected));
+            CleanCommand.RaiseCanExecuteChanged();
+        }
+    }
+
+    private void ClearCandidates()
+    {
+        foreach (var candidate in Candidates)
+        {
+            candidate.PropertyChanged -= OnCandidatePropertyChanged;
+        }
+
+        Candidates.Clear();
+        OnPropertyChanged(nameof(AreAllCandidatesSelected));
+        CleanCommand.RaiseCanExecuteChanged();
+    }
+
     private void BeginOperation(string status)
     {
         _cancellationTokenSource?.Dispose();
@@ -555,6 +595,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(FilesFound));
         OnPropertyChanged(nameof(ReclaimableSpace));
         OnPropertyChanged(nameof(Summary));
+        OnPropertyChanged(nameof(AreAllCandidatesSelected));
     }
 
     private void Cancel() => _cancellationTokenSource?.Cancel();

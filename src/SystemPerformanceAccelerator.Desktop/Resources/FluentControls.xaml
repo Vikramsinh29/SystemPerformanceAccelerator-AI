@@ -102,9 +102,13 @@
                                           HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
                     </Border>
                     <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True" />
+                                <Condition Property="Background" Value="Transparent" />
+                            </MultiTrigger.Conditions>
                             <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource SidebarHoverBrush}" />
-                        </Trigger>
+                        </MultiTrigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.82" />
                         </Trigger>
@@ -429,14 +433,25 @@
                                 BorderThickness="1"
                                 CornerRadius="4"
                                 VerticalAlignment="Center">
-                            <TextBlock x:Name="CheckGlyph"
-                                       Text="&#xE73E;"
-                                       FontFamily="Segoe MDL2 Assets"
-                                       FontSize="11"
-                                       Foreground="White"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       Visibility="Collapsed" />
+                            <Grid>
+                                <TextBlock x:Name="CheckGlyph"
+                                           Text="&#xE73E;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="11"
+                                           Foreground="White"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Visibility="Collapsed" />
+                                <TextBlock x:Name="IndeterminateGlyph"
+                                           Text="&#x2212;"
+                                           FontFamily="Segoe UI"
+                                           FontSize="13"
+                                           FontWeight="Bold"
+                                           Foreground="White"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Visibility="Collapsed" />
+                            </Grid>
                         </Border>
                         <ContentPresenter Grid.Column="1"
                                           Margin="8,0,0,0"
@@ -451,6 +466,11 @@
                             <Setter TargetName="CheckBorder" Property="Background" Value="{DynamicResource AccentBrush}" />
                             <Setter TargetName="CheckBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
                             <Setter TargetName="CheckGlyph" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="{x:Null}">
+                            <Setter TargetName="CheckBorder" Property="Background" Value="{DynamicResource AccentBrush}" />
+                            <Setter TargetName="CheckBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                            <Setter TargetName="IndeterminateGlyph" Property="Visibility" Value="Visible" />
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="CheckBorder" Property="BorderBrush" Value="{DynamicResource FocusBrush}" />

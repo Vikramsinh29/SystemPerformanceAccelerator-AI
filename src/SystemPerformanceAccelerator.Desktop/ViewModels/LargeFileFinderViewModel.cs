@@ -124,6 +124,28 @@ public sealed class LargeFileFinderViewModel : INotifyPropertyChanged
     public string FilesFound => Results.Count.ToString("N0");
     public string TotalSize => MainWindowViewModel.FormatBytes(Results.Sum(result => result.Model.SizeBytes));
 
+    public bool? AreAllResultsSelected
+    {
+        get => BulkSelection.GetState(Results, item => item.IsSelected);
+        set
+        {
+            var targetSelection = BulkSelection.ResolveTarget(
+                value,
+                AreAllResultsSelected);
+            if (targetSelection is null)
+            {
+                return;
+            }
+
+            BulkSelection.SetAll(
+                Results,
+                targetSelection.Value,
+                static (item, isSelected) => item.IsSelected = isSelected);
+            OnPropertyChanged();
+            DeleteSelectedCommand.RaiseCanExecuteChanged();
+        }
+    }
+
     public void ApplyDefaultMinimumSize(int minimumSizeMb)
     {
         if (IsBusy)
@@ -314,6 +336,7 @@ public sealed class LargeFileFinderViewModel : INotifyPropertyChanged
     {
         if (args.PropertyName == nameof(LargeFileCandidateViewModel.IsSelected))
         {
+            OnPropertyChanged(nameof(AreAllResultsSelected));
             DeleteSelectedCommand.RaiseCanExecuteChanged();
         }
     }
@@ -354,6 +377,7 @@ public sealed class LargeFileFinderViewModel : INotifyPropertyChanged
     {
         OnPropertyChanged(nameof(FilesFound));
         OnPropertyChanged(nameof(TotalSize));
+        OnPropertyChanged(nameof(AreAllResultsSelected));
     }
 
     private static string FormatElapsed(TimeSpan elapsed)

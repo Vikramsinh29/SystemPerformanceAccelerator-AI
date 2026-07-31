@@ -135,6 +135,33 @@ public sealed class DuplicateFileFinderViewModel : INotifyPropertyChanged
                 static (total, result) => SaturatingAdd(total, result.Model.SizeBytes)));
     public string SelectionSummary => $"{SelectedFiles} selected - {SelectedSpace}";
 
+    public bool? AreAllRemovableCopiesSelected
+    {
+        get => BulkSelection.GetAllButOnePerGroupState(
+            Results,
+            item => item.GroupKey,
+            item => item.IsSelected,
+            StringComparer.Ordinal);
+        set
+        {
+            var targetSelection = BulkSelection.ResolveTarget(
+                value,
+                AreAllRemovableCopiesSelected);
+            if (targetSelection is null)
+            {
+                return;
+            }
+
+            BulkSelection.SetAllButOnePerGroup(
+                Results,
+                targetSelection.Value,
+                item => item.GroupKey,
+                static (item, isSelected) => item.IsSelected = isSelected,
+                StringComparer.Ordinal);
+            RefreshSelectionSummary();
+        }
+    }
+
     private void Browse()
     {
         var dialog = new OpenFolderDialog
@@ -433,6 +460,7 @@ public sealed class DuplicateFileFinderViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(SelectedFiles));
         OnPropertyChanged(nameof(SelectedSpace));
         OnPropertyChanged(nameof(SelectionSummary));
+        OnPropertyChanged(nameof(AreAllRemovableCopiesSelected));
         RecycleSelectedCommand.RaiseCanExecuteChanged();
     }
 

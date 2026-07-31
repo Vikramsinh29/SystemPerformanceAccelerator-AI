@@ -40,7 +40,9 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
             featureAccessGuard,
             ApplicationFeature.CustomClean,
             FeatureAccessRequirement.Execute,
-            () => !IsBusy && SelectedCategoryCount > 0 && Results.Count > 0);
+            () => !IsBusy &&
+                SelectedCategoryCount > 0 &&
+                Results.Any(item => item.IsSelected));
         CancelCommand = new RelayCommand(Cancel, () => IsBusy);
     }
 
@@ -62,7 +64,7 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(SelectedCategoryCount));
             OnPropertyChanged(nameof(SelectedCategoriesText));
 
-            Results.Clear();
+            ClearResults();
             Progress = 0;
             PreviewStatus = "Selection changed";
             Status = "Category selection changed. Run Preview before cleaning.";
@@ -117,6 +119,28 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
     public string ReclaimableSpace =>
         MainWindowViewModel.FormatBytes(Results.Sum(item => item.Model.SizeBytes));
 
+    public bool? AreAllResultsSelected
+    {
+        get => BulkSelection.GetState(Results, item => item.IsSelected);
+        set
+        {
+            var targetSelection = BulkSelection.ResolveTarget(
+                value,
+                AreAllResultsSelected);
+            if (targetSelection is null)
+            {
+                return;
+            }
+
+            BulkSelection.SetAll(
+                Results,
+                targetSelection.Value,
+                static (item, isSelected) => item.IsSelected = isSelected);
+            OnPropertyChanged();
+            CleanCommand.RaiseCanExecuteChanged();
+        }
+    }
+
     private async Task PreviewAsync()
     {
         var selectedCategories = GetSelectedCategories();
@@ -129,7 +153,7 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
         BeginOperation(
             "Previewing...",
             "Scanning selected Cleaner categories in read-only mode...");
-        Results.Clear();
+        ClearResults();
         RefreshSummary();
         RaiseOperationCanExecuteChanged();
 
@@ -142,7 +166,9 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
 
             foreach (var item in result.Items)
             {
-                Results.Add(new CustomCleanPreviewItemViewModel(item));
+                var viewModel = new CustomCleanPreviewItemViewModel(item);
+                viewModel.PropertyChanged += OnResultPropertyChanged;
+                Results.Add(viewModel);
             }
 
             Progress = 100;
@@ -177,18 +203,19 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
     {
         var selectedCategories = GetSelectedCategories();
         var previewItems = Results
+            .Where(item => item.IsSelected)
             .Select(item => item.Model)
             .ToArray();
 
         if (selectedCategories.Count == 0 || previewItems.Length == 0)
         {
-            Status = "Run Preview and review at least one file before cleaning.";
+            Status = "Run Preview and select at least one file before cleaning.";
             return;
         }
 
         var totalBytes = previewItems.Sum(item => item.SizeBytes);
         var answer = MessageBox.Show(
-            $"Delete {previewItems.Length:N0} previewed temporary file(s) from the selected Custom Clean categories and attempt to reclaim {MainWindowViewModel.FormatBytes(totalBytes)}?\n\nThis cannot be undone.",
+            $"Delete {previewItems.Length:N0} selected previewed temporary file(s) from the selected Custom Clean categories and attempt to reclaim {MainWindowViewModel.FormatBytes(totalBytes)}?\n\nThis cannot be undone.",
             "Confirm Custom Clean",
             MessageBoxButton.YesNo,
             MessageBoxImage.Warning,
@@ -202,7 +229,7 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
 
         BeginOperation(
             "Cleaning...",
-            "Cleaning the previewed files from the selected categories...");
+            "Cleaning the selected previewed files from the selected categories...");
 
         try
         {
@@ -258,6 +285,29 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
         }
     }
 
+    private void OnResultPropertyChanged(
+        object? sender,
+        PropertyChangedEventArgs args)
+    {
+        if (args.PropertyName == nameof(CustomCleanPreviewItemViewModel.IsSelected))
+        {
+            OnPropertyChanged(nameof(AreAllResultsSelected));
+            CleanCommand.RaiseCanExecuteChanged();
+        }
+    }
+
+    private void ClearResults()
+    {
+        foreach (var result in Results)
+        {
+            result.PropertyChanged -= OnResultPropertyChanged;
+        }
+
+        Results.Clear();
+        OnPropertyChanged(nameof(AreAllResultsSelected));
+        CleanCommand.RaiseCanExecuteChanged();
+    }
+
     private IReadOnlyCollection<CustomCleanCategory> GetSelectedCategories()
     {
         var categories = new List<CustomCleanCategory>();
@@ -295,6 +345,7 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
             .Where(item => !File.Exists(item.FullPath))
             .ToArray())
         {
+            item.PropertyChanged -= OnResultPropertyChanged;
             Results.Remove(item);
         }
     }
@@ -303,6 +354,7 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
     {
         OnPropertyChanged(nameof(FilesFound));
         OnPropertyChanged(nameof(ReclaimableSpace));
+        OnPropertyChanged(nameof(AreAllResultsSelected));
     }
 
     private void RaiseOperationCanExecuteChanged()

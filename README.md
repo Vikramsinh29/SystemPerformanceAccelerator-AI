@@ -317,10 +317,22 @@ All selectable result tables must use the same application-wide behaviour:
 - Cleaner, Large File Finder, and Duplicate File Finder must behave identically.
 - Shared behaviour belongs in a reusable WPF behaviour/style, not duplicated per grid.
 
+### Tri-state bulk selection and responsive review layout
+
+- Cleaner, Custom Clean, Large File Finder, and Duplicate File Finder expose a consistent `ALL` tri-state header control.
+- Checked means every safely selectable item is selected, unchecked means none are selected, and indeterminate means the selection is partial.
+- Custom Clean preview items begin selected to preserve the established preview-and-clean workflow.
+- Large File Finder scan results remain initially unselected.
+- Duplicate Finder bulk selection targets only removable copies and always leaves at least one verified copy in every duplicate group.
+- Manual row selection, confirmation, cancellation, path validation, stale-result protection, Recycle Bin behaviour, and final-copy protection remain unchanged.
+- Light-mode selected navigation remains readable.
+- Custom Clean uses compact wrapped summary cards, a readable responsive preview table, a left-aligned hero description, and no duplicate category checkbox.
+- Custom maximization remains constrained to the Windows work area above the taskbar.
+
 ## Verified state
 
 - Release build succeeds.
-- xUnit suite: 103 passed, 0 failed.
+- xUnit suite: 111 passed, 0 failed.
 - Cleaner scan and safe cleanup manually verified.
 - Large File Finder scan and Recycle Bin cleanup manually verified.
 - Shared one-click checkbox and double-click row selection manually verified in all selectable tables.
@@ -434,6 +446,14 @@ All selectable result tables must use the same application-wide behaviour:
 - Settings theme switching, Save, Restore Defaults, restart persistence, mandatory cleanup confirmation, and local-only storage remained functional.
 - Release build succeeded and the xUnit suite increased to 107 passed, 0 failed after Sprint 26.
 - Sprint 26 changed only the two cleanup services, their focused tests, the shared Fluent DataGrid style, and this README.
+- Sprint 27 added reusable tri-state Select All / Deselect All behaviour to Cleaner, Custom Clean, Large File Finder, and Duplicate File Finder.
+- Checked, unchecked, partial-selection, refresh/reset, and Duplicate Finder retain-one-copy behaviour are covered by focused automated tests.
+- Cleaner, Custom Clean, Large File Finder, and Duplicate File Finder bulk selection, manual selection, confirmation, cancellation, and protected-copy behaviour were manually verified.
+- Custom Clean compact summary cards, wrapped text, duplicate-checkbox removal, preview-table visibility, `ALL` header readability, hero alignment, and maximized taskbar-safe layout were manually verified.
+- Health Check retained the same compact summary-card presentation without clipping or unnecessary vertical expansion.
+- Light-mode selected navigation remained clearly readable across modules.
+- Release build succeeded and the xUnit suite increased to 111 passed, 0 failed after Sprint 27.
+- Sprint 27 introduced no new scan rule, cleanup rule, background task, automatic cleanup, registry modification, process termination, cloud service, or unrelated system-changing behaviour.
 - System Monitor live CPU and physical-memory values, Start/Stop controls, automatic stop on tab change, and read-only scope manually verified.
 - Cleaner, Large File Finder, Duplicate File Finder, and Startup Manager regression opening checks passed after Sprint 8.
 - Health Check system-drive, CPU, memory, and startup summary results manually verified.
@@ -662,15 +682,19 @@ This rule is mandatory. Repeated blind patches are not acceptable.
 
 ## Current milestone
 
-Sprint 26 — Full Functional Regression and Safety Audit.
+Sprint 27 — Tri-state Bulk Selection and Responsive Review Layout.
+
+- Reusable `ALL` tri-state selection is complete in Cleaner, Custom Clean, Large File Finder, and Duplicate File Finder.
+- Responsive visual corrections are complete for selected navigation, Custom Clean review cards, preview-table headers, hero alignment, and taskbar-safe maximization.
+- Release build succeeded, all 111 tests passed, and the affected manual verification matrix passed.
 
 ## Next milestone
 
-Sprint 27 — Bulk Selection Toggle, only after Sprint 26 is committed, pushed, and the working tree is clean.
+Sprint 28 — Windows Release Readiness, only after Sprint 27 is committed, pushed, and the working tree is clean.
 
-- Add one reusable tri-state Select All / Deselect All control to Cleaner, Custom Clean, Large File Finder, and Duplicate File Finder.
-- Preserve manual review, confirmation, current safety boundaries, and Duplicate Finder's at-least-one-confirmed-copy rule.
-- Windows Release Readiness follows after this requested usability sprint.
+- Confirm the exact Windows publish and distribution scope before modifying files.
+- Verify Release metadata, publish output, first launch, upgrade/replacement workflow, and the existing functional and safety matrix.
+- Do not add new cleanup rules, automatic system changes, cloud services, licensing, or unrelated features.
 
 ## Compact AI handoff
 

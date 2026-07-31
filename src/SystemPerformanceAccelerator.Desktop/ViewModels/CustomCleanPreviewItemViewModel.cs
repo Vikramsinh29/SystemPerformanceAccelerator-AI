@@ -1,9 +1,15 @@
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using SystemPerformanceAccelerator.Core.Models;
 
 namespace SystemPerformanceAccelerator.Desktop.ViewModels;
 
-public sealed class CustomCleanPreviewItemViewModel
+public sealed class CustomCleanPreviewItemViewModel :
+    INotifyPropertyChanged,
+    ISelectableItem
 {
+    private bool _isSelected = true;
+
     public CustomCleanPreviewItemViewModel(CustomCleanPreviewItem model)
     {
         Model = model;
@@ -15,4 +21,24 @@ public sealed class CustomCleanPreviewItemViewModel
     public string FullPath => Model.FullPath;
     public string Size => MainWindowViewModel.FormatBytes(Model.SizeBytes);
     public DateTime LastModified => Model.LastWriteTimeUtc.ToLocalTime();
+
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set
+        {
+            if (_isSelected == value)
+            {
+                return;
+            }
+
+            _isSelected = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged([CallerMemberName] string? name = null) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 }

@@ -8,6 +8,8 @@
         Height="780"
         MinWidth="1000"
         MinHeight="650"
+        MaxWidth="{x:Static SystemParameters.MaximizedPrimaryScreenWidth}"
+        MaxHeight="{x:Static SystemParameters.MaximizedPrimaryScreenHeight}"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         ResizeMode="CanResize"
@@ -64,6 +66,105 @@
         <Style x:Key="InputComboBoxStyle"
                TargetType="ComboBox"
                BasedOn="{StaticResource FluentComboBoxStyle}" />
+
+        <Style x:Key="BulkSelectionHeaderCheckBoxStyle"
+               TargetType="CheckBox">
+            <Setter Property="IsThreeState" Value="True" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="IsTabStop" Value="False" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="ToolTip" Value="Select all or deselect all displayed files" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="18" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="HeaderCheckBorder"
+                                    Width="18"
+                                    Height="18"
+                                    Background="{DynamicResource InputBackgroundBrush}"
+                                    BorderBrush="{DynamicResource InputBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    VerticalAlignment="Center">
+                                <Grid>
+                                    <TextBlock x:Name="HeaderCheckGlyph"
+                                               Text="&#xE73E;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="11"
+                                               Foreground="White"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Visibility="Collapsed" />
+                                    <TextBlock x:Name="HeaderIndeterminateGlyph"
+                                               Text="&#x2212;"
+                                               FontFamily="Segoe UI"
+                                               FontSize="13"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Visibility="Collapsed" />
+                                </Grid>
+                            </Border>
+                            <TextBlock Grid.Column="1"
+                                       Margin="7,0,0,0"
+                                       Text="ALL"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       FontSize="10"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="HeaderCheckBorder"
+                                        Property="BorderBrush"
+                                        Value="{DynamicResource AccentBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="HeaderCheckBorder"
+                                        Property="Background"
+                                        Value="{DynamicResource AccentBrush}" />
+                                <Setter TargetName="HeaderCheckBorder"
+                                        Property="BorderBrush"
+                                        Value="{DynamicResource AccentBrush}" />
+                                <Setter TargetName="HeaderCheckGlyph"
+                                        Property="Visibility"
+                                        Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="{x:Null}">
+                                <Setter TargetName="HeaderCheckBorder"
+                                        Property="Background"
+                                        Value="{DynamicResource AccentBrush}" />
+                                <Setter TargetName="HeaderCheckBorder"
+                                        Property="BorderBrush"
+                                        Value="{DynamicResource AccentBrush}" />
+                                <Setter TargetName="HeaderIndeterminateGlyph"
+                                        Property="Visibility"
+                                        Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="HeaderCheckBorder"
+                                        Property="BorderBrush"
+                                        Value="{DynamicResource FocusBrush}" />
+                                <Setter TargetName="HeaderCheckBorder"
+                                        Property="BorderThickness"
+                                        Value="2" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5" />
+                                <Setter Property="Cursor" Value="Arrow" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
         <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource FluentDataGridColumnHeaderStyle}" />
 
@@ -158,6 +259,21 @@
             <Setter Property="FontSize" Value="24" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <Style x:Key="ResponsiveSummaryCardStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource FluentCardStyle}">
+            <Setter Property="Margin" Value="4" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="MinHeight" Value="96" />
+        </Style>
+
+        <Style x:Key="ResponsiveSummaryCardCaptionStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource FluentCaptionStyle}">
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="TextTrimming" Value="None" />
         </Style>
 
         <Style x:Key="SummaryMetricCompactValueStyle" TargetType="TextBlock">
@@ -846,6 +962,7 @@
                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                            FontSize="12"
                                            TextWrapping="Wrap"
+                                           HorizontalAlignment="Left"
                                            MaxWidth="620" />
 
                                 <Border Margin="0,10,0,0"
@@ -902,36 +1019,29 @@
                         </Grid>
                     </Border>
 
-                    <Grid Grid.Row="1" Margin="0,0,0,14">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="10" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="10" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="10" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-
-                        <Border Grid.Column="0" Style="{StaticResource FluentCardStyle}" Padding="18,15">
+                    <UniformGrid Grid.Row="1"
+                                 Margin="-4,-4,-4,9"
+                                 Columns="4">
+                        <Border Style="{StaticResource ResponsiveSummaryCardStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel>
-                                    <TextBlock Text="OVERALL" Style="{StaticResource FluentCaptionStyle}" />
+                                    <TextBlock Text="OVERALL" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" />
                                     <TextBlock Text="{Binding OverallStatusText}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" />
                                     <TextBlock Margin="0,3,0,0"
                                                Text="Current health state"
                                                Foreground="{DynamicResource TextSecondaryBrush}"
-                                               FontSize="10.5" />
+                                               FontSize="10.5"
+                                               TextWrapping="Wrap" />
                                 </StackPanel>
                                 <Border Grid.Column="1"
-                                        Width="40"
-                                        Height="40"
+                                        Width="34"
+                                        Height="34"
                                         Background="{DynamicResource AccentSoftBrush}"
-                                        CornerRadius="12">
+                                        CornerRadius="10">
                                     <TextBlock Text="&#xE9D9;"
                                                FontFamily="Segoe MDL2 Assets"
                                                FontSize="16"
@@ -942,25 +1052,26 @@
                             </Grid>
                         </Border>
 
-                        <Border Grid.Column="2" Style="{StaticResource FluentCardStyle}" Padding="18,15">
+                        <Border Style="{StaticResource ResponsiveSummaryCardStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel>
-                                    <TextBlock Text="GOOD" Style="{StaticResource FluentCaptionStyle}" />
+                                    <TextBlock Text="GOOD" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" />
                                     <TextBlock Text="{Binding GoodCount}" Foreground="{DynamicResource SuccessBrush}" Style="{StaticResource SummaryMetricValueStyle}" />
                                     <TextBlock Margin="0,3,0,0"
                                                Text="No attention required"
                                                Foreground="{DynamicResource TextSecondaryBrush}"
-                                               FontSize="10.5" />
+                                               FontSize="10.5"
+                                               TextWrapping="Wrap" />
                                 </StackPanel>
                                 <Border Grid.Column="1"
-                                        Width="40"
-                                        Height="40"
+                                        Width="34"
+                                        Height="34"
                                         Background="{DynamicResource SuccessSoftBrush}"
-                                        CornerRadius="12">
+                                        CornerRadius="10">
                                     <TextBlock Text="&#xE73E;"
                                                FontFamily="Segoe MDL2 Assets"
                                                FontSize="16"
@@ -971,25 +1082,26 @@
                             </Grid>
                         </Border>
 
-                        <Border Grid.Column="4" Style="{StaticResource FluentCardStyle}" Padding="18,15">
+                        <Border Style="{StaticResource ResponsiveSummaryCardStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel>
-                                    <TextBlock Text="ATTENTION" Style="{StaticResource FluentCaptionStyle}" />
+                                    <TextBlock Text="ATTENTION" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" />
                                     <TextBlock Text="{Binding AttentionCount}" Foreground="{DynamicResource WarningBrush}" Style="{StaticResource SummaryMetricValueStyle}" />
                                     <TextBlock Margin="0,3,0,0"
                                                Text="Review recommended"
                                                Foreground="{DynamicResource TextSecondaryBrush}"
-                                               FontSize="10.5" />
+                                               FontSize="10.5"
+                                               TextWrapping="Wrap" />
                                 </StackPanel>
                                 <Border Grid.Column="1"
-                                        Width="40"
-                                        Height="40"
+                                        Width="34"
+                                        Height="34"
                                         Background="{DynamicResource WarningSoftBrush}"
-                                        CornerRadius="12">
+                                        CornerRadius="10">
                                     <TextBlock Text="&#xE7BA;"
                                                FontFamily="Segoe MDL2 Assets"
                                                FontSize="16"
@@ -1000,25 +1112,26 @@
                             </Grid>
                         </Border>
 
-                        <Border Grid.Column="6" Style="{StaticResource FluentCardStyle}" Padding="18,15">
+                        <Border Style="{StaticResource ResponsiveSummaryCardStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel>
-                                    <TextBlock Text="UNKNOWN" Style="{StaticResource FluentCaptionStyle}" />
+                                    <TextBlock Text="UNKNOWN" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" />
                                     <TextBlock Text="{Binding UnknownCount}" Foreground="{DynamicResource TextSecondaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" />
                                     <TextBlock Margin="0,3,0,0"
                                                Text="Not available"
                                                Foreground="{DynamicResource TextSecondaryBrush}"
-                                               FontSize="10.5" />
+                                               FontSize="10.5"
+                                               TextWrapping="Wrap" />
                                 </StackPanel>
                                 <Border Grid.Column="1"
-                                        Width="40"
-                                        Height="40"
+                                        Width="34"
+                                        Height="34"
                                         Background="{DynamicResource SurfaceMutedBrush}"
-                                        CornerRadius="12">
+                                        CornerRadius="10">
                                     <TextBlock Text="&#xE897;"
                                                FontFamily="Segoe MDL2 Assets"
                                                FontSize="16"
@@ -1028,7 +1141,7 @@
                                 </Border>
                             </Grid>
                         </Border>
-                    </Grid>
+                    </UniformGrid>
 
                     <Border Grid.Row="2"
                             Style="{StaticResource FluentElevatedCardStyle}"
@@ -1607,6 +1720,7 @@
                                        Foreground="{DynamicResource TextSecondaryBrush}"
                                        FontSize="12"
                                        TextWrapping="Wrap"
+                                       HorizontalAlignment="Left"
                                        MaxWidth="570" />
 
                             <Border Margin="0,10,0,0"
@@ -1863,7 +1977,11 @@
                                       EnableRowVirtualization="True"
                                       EnableColumnVirtualization="True">
                                 <DataGrid.Columns>
-                                    <DataGridTemplateColumn Header="SELECT" Width="74">
+                                    <DataGridTemplateColumn Width="86">
+                                        <DataGridTemplateColumn.Header>
+                                            <CheckBox IsChecked="{Binding DataContext.AreAllCandidatesSelected, RelativeSource={RelativeSource AncestorType=DataGrid}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      Style="{StaticResource BulkSelectionHeaderCheckBoxStyle}" />
+                                        </DataGridTemplateColumn.Header>
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -2039,10 +2157,11 @@
                                        FontSize="18"
                                        FontWeight="SemiBold" />
                             <TextBlock Margin="0,4,0,0"
-                                       Text="Choose cleanup categories, preview every matching file, and clean only after explicit confirmation. Nothing is selected or removed automatically."
+                                       Text="Choose cleanup categories, preview every matching file, adjust the selection, and clean only after explicit confirmation. Preview results begin selected to preserve current cleanup behaviour; nothing is removed automatically."
                                        Foreground="{DynamicResource TextSecondaryBrush}"
                                        FontSize="12"
                                        TextWrapping="Wrap"
+                                       HorizontalAlignment="Left"
                                        MaxWidth="570" />
 
                             <Border Margin="0,10,0,0"
@@ -2099,7 +2218,7 @@
                                                    FontSize="13"
                                                    VerticalAlignment="Center" />
                                         <TextBlock Margin="7,0,0,0"
-                                                   Text="Clean previewed"
+                                                   Text="Clean selected"
                                                    VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
@@ -2122,48 +2241,25 @@
                     </Grid>
                 </Border>
 
-                <Grid Grid.Row="1"
-                      Margin="0,0,0,14">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1.25*" />
-                        <ColumnDefinition Width="12" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="12" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="12" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-
-                    <Border Grid.Column="0"
-                            Style="{StaticResource FluentCardStyle}">
+                <UniformGrid Grid.Row="1"
+                             Margin="-4,-4,-4,9"
+                             Columns="4">
+                    <Border Style="{StaticResource ResponsiveSummaryCardStyle}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="44" />
+                                <ColumnDefinition Width="38" />
                             </Grid.ColumnDefinitions>
 
                             <StackPanel>
                                 <TextBlock Text="CLEANUP CATEGORY"
-                                           Style="{StaticResource FluentCaptionStyle}" />
-                                <CheckBox Margin="0,7,0,0"
-                                          IsChecked="{Binding IncludeTemporaryFiles, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                          Content="Current-user temporary files"
-                                          Foreground="{DynamicResource TextPrimaryBrush}"
-                                          FontSize="12.5"
-                                          FontWeight="SemiBold"
-                                          Cursor="Hand">
-                                    <CheckBox.Style>
-                                        <Style TargetType="CheckBox"
-                                               BasedOn="{StaticResource FluentCheckBoxStyle}">
-                                            <Setter Property="IsEnabled" Value="True" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsBusy}" Value="True">
-                                                    <Setter Property="IsEnabled" Value="False" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </CheckBox.Style>
-                                </CheckBox>
+                                           Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" />
+                                <TextBlock Margin="0,5,0,0"
+                                           Text="Current-user temporary files"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                           FontSize="12.5"
+                                           FontWeight="SemiBold"
+                                           TextWrapping="Wrap" />
                                 <TextBlock Margin="0,5,0,0"
                                            Text="Uses the existing safe Cleaner scanner."
                                            Foreground="{DynamicResource TextSecondaryBrush}"
@@ -2172,10 +2268,10 @@
                             </StackPanel>
 
                             <Border Grid.Column="1"
-                                    Width="40"
-                                    Height="40"
+                                    Width="34"
+                                    Height="34"
                                     Background="{DynamicResource AccentSoftBrush}"
-                                    CornerRadius="12"
+                                    CornerRadius="10"
                                     VerticalAlignment="Top">
                                 <TextBlock Text="&#xE8EF;"
                                            FontFamily="Segoe MDL2 Assets"
@@ -2187,29 +2283,29 @@
                         </Grid>
                     </Border>
 
-                    <Border Grid.Column="2"
-                            Style="{StaticResource FluentCardStyle}">
+                    <Border Style="{StaticResource ResponsiveSummaryCardStyle}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="44" />
+                                <ColumnDefinition Width="38" />
                             </Grid.ColumnDefinitions>
 
                             <StackPanel>
                                 <TextBlock Text="CATEGORIES SELECTED"
-                                           Style="{StaticResource FluentCaptionStyle}" />
+                                           Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" />
                                 <TextBlock Text="{Binding SelectedCategoriesText}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" />
                                 <TextBlock Margin="0,3,0,0"
                                            Text="Included in the next preview"
                                            Foreground="{DynamicResource TextSecondaryBrush}"
-                                           FontSize="10.5" />
+                                           FontSize="10.5"
+                                           TextWrapping="Wrap" />
                             </StackPanel>
 
                             <Border Grid.Column="1"
-                                    Width="40"
-                                    Height="40"
+                                    Width="34"
+                                    Height="34"
                                     Background="{DynamicResource AccentSoftBrush}"
-                                    CornerRadius="12"
+                                    CornerRadius="10"
                                     VerticalAlignment="Top">
                                 <TextBlock Text="&#xE73E;"
                                            FontFamily="Segoe MDL2 Assets"
@@ -2221,29 +2317,29 @@
                         </Grid>
                     </Border>
 
-                    <Border Grid.Column="4"
-                            Style="{StaticResource FluentCardStyle}">
+                    <Border Style="{StaticResource ResponsiveSummaryCardStyle}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="44" />
+                                <ColumnDefinition Width="38" />
                             </Grid.ColumnDefinitions>
 
                             <StackPanel>
                                 <TextBlock Text="FILES FOUND"
-                                           Style="{StaticResource FluentCaptionStyle}" />
+                                           Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" />
                                 <TextBlock Text="{Binding FilesFound}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" />
                                 <TextBlock Margin="0,3,0,0"
                                            Text="Available for review"
                                            Foreground="{DynamicResource TextSecondaryBrush}"
-                                           FontSize="10.5" />
+                                           FontSize="10.5"
+                                           TextWrapping="Wrap" />
                             </StackPanel>
 
                             <Border Grid.Column="1"
-                                    Width="40"
-                                    Height="40"
+                                    Width="34"
+                                    Height="34"
                                     Background="{DynamicResource WarningSoftBrush}"
-                                    CornerRadius="12"
+                                    CornerRadius="10"
                                     VerticalAlignment="Top">
                                 <TextBlock Text="&#xE8A5;"
                                            FontFamily="Segoe MDL2 Assets"
@@ -2255,29 +2351,29 @@
                         </Grid>
                     </Border>
 
-                    <Border Grid.Column="6"
-                            Style="{StaticResource FluentCardStyle}">
+                    <Border Style="{StaticResource ResponsiveSummaryCardStyle}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="44" />
+                                <ColumnDefinition Width="38" />
                             </Grid.ColumnDefinitions>
 
                             <StackPanel>
                                 <TextBlock Text="RECLAIMABLE SPACE"
-                                           Style="{StaticResource FluentCaptionStyle}" />
+                                           Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" />
                                 <TextBlock Text="{Binding ReclaimableSpace}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" />
                                 <TextBlock Margin="0,3,0,0"
                                            Text="From the current preview"
                                            Foreground="{DynamicResource TextSecondaryBrush}"
-                                           FontSize="10.5" />
+                                           FontSize="10.5"
+                                           TextWrapping="Wrap" />
                             </StackPanel>
 
                             <Border Grid.Column="1"
-                                    Width="40"
-                                    Height="40"
+                                    Width="34"
+                                    Height="34"
                                     Background="{DynamicResource SuccessSoftBrush}"
-                                    CornerRadius="12"
+                                    CornerRadius="10"
                                     VerticalAlignment="Top">
                                 <TextBlock Text="&#xE74D;"
                                            FontFamily="Segoe MDL2 Assets"
@@ -2288,7 +2384,7 @@
                             </Border>
                         </Grid>
                     </Border>
-                </Grid>
+                </UniformGrid>
 
                 <Border Grid.Row="2"
                         Padding="0"
@@ -2312,7 +2408,7 @@
                                            FontSize="15"
                                            FontWeight="SemiBold" />
                                 <TextBlock Margin="0,3,0,0"
-                                           Text="Review category, file name, size, modified date, and full location before requesting cleanup."
+                                           Text="Previewed files begin selected. Review every row and deselect anything you do not want included before requesting cleanup."
                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                            FontSize="10.5"
                                            TextWrapping="Wrap" />
@@ -2334,7 +2430,7 @@
                             <DataGrid x:Name="CustomCleanResultsGrid"
                                       ItemsSource="{Binding Results}"
                                       Style="{StaticResource FluentDataGridStyle}"
-                                      behaviors:DataGridSelectionBehavior.IsEnabled="False"
+                                      behaviors:DataGridSelectionBehavior.IsEnabled="True"
                                       AutoGenerateColumns="False"
                                       IsReadOnly="True"
                                       CanUserAddRows="False"
@@ -2349,34 +2445,53 @@
                                       EnableRowVirtualization="True"
                                       EnableColumnVirtualization="True">
                                 <DataGrid.Columns>
+                                    <DataGridTemplateColumn Width="86">
+                                        <DataGridTemplateColumn.Header>
+                                            <CheckBox IsChecked="{Binding DataContext.AreAllResultsSelected, RelativeSource={RelativeSource AncestorType=DataGrid}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      Style="{StaticResource BulkSelectionHeaderCheckBoxStyle}" />
+                                        </DataGridTemplateColumn.Header>
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                          HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"
+                                                          Focusable="False"
+                                                          IsTabStop="False"
+                                                          Cursor="Hand" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                     <DataGridTextColumn Header="CATEGORY"
                                                         Binding="{Binding Category}"
                                                         ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
                                                         IsReadOnly="True"
-                                                        Width="1.4*"
-                                                        MinWidth="150" />
+                                                        Width="1.1*"
+                                                        MinWidth="118" />
                                     <DataGridTextColumn Header="FILE NAME"
                                                         Binding="{Binding Name}"
                                                         ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
                                                         IsReadOnly="True"
-                                                        Width="1.6*"
-                                                        MinWidth="160" />
+                                                        Width="1.5*"
+                                                        MinWidth="145" />
                                     <DataGridTextColumn Header="SIZE"
                                                         Binding="{Binding Size}"
                                                         ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
                                                         IsReadOnly="True"
-                                                        Width="100" />
+                                                        Width="74"
+                                                        MinWidth="74"
+                                                        MaxWidth="82" />
                                     <DataGridTextColumn Header="MODIFIED"
                                                         Binding="{Binding LastModified, StringFormat={}{0:dd MMM yyyy  HH:mm}}"
                                                         ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
                                                         IsReadOnly="True"
-                                                        Width="165" />
+                                                        Width="130"
+                                                        MinWidth="126" />
                                     <DataGridTextColumn Header="LOCATION"
                                                         Binding="{Binding FullPath}"
                                                         ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
                                                         IsReadOnly="True"
-                                                        Width="2.6*"
-                                                        MinWidth="240" />
+                                                        Width="1.7*"
+                                                        MinWidth="155" />
                                 </DataGrid.Columns>
                             </DataGrid>
 
@@ -3225,7 +3340,11 @@
                               EnableRowVirtualization="True"
                               EnableColumnVirtualization="True">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="SELECT" Width="72">
+                            <DataGridTemplateColumn Width="86">
+                                <DataGridTemplateColumn.Header>
+                                    <CheckBox IsChecked="{Binding DataContext.AreAllResultsSelected, RelativeSource={RelativeSource AncestorType=DataGrid}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                              Style="{StaticResource BulkSelectionHeaderCheckBoxStyle}" />
+                                </DataGridTemplateColumn.Header>
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -3569,10 +3688,14 @@
                             </GroupStyle>
                         </DataGrid.GroupStyle>
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="SELECT"
-                                                    Width="58"
-                                                    MinWidth="58"
-                                                    MaxWidth="58">
+                            <DataGridTemplateColumn Width="86"
+                                                    MinWidth="86"
+                                                    MaxWidth="86">
+                                <DataGridTemplateColumn.Header>
+                                    <CheckBox IsChecked="{Binding DataContext.AreAllRemovableCopiesSelected, RelativeSource={RelativeSource AncestorType=DataGrid}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                              Style="{StaticResource BulkSelectionHeaderCheckBoxStyle}"
+                                              ToolTip="Select every removable copy while keeping one verified copy in each group" />
+                                </DataGridTemplateColumn.Header>
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
