@@ -17,6 +17,7 @@
                 <ResourceDictionary Source="Resources/ScrollBars.xaml" />
                 <ResourceDictionary Source="Resources/Icons.xaml" />
                 <ResourceDictionary Source="Resources/WindowChrome.xaml" />
+                <ResourceDictionary Source="Resources/Branding.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />

@@ -4,7 +4,7 @@
         xmlns:behaviors="clr-namespace:SystemPerformanceAccelerator.Desktop.Behaviors"
         xmlns:models="clr-namespace:SystemPerformanceAccelerator.Core.Models;assembly=SystemPerformanceAccelerator.Core"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
-        Title="System Performance Accelerator"
+        Title="PC-SPA — System Performance Accelerator"
         Width="1240"
         Height="780"
         MinWidth="1000"
@@ -556,8 +556,22 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Column="0"
-                            Background="{DynamicResource TitleBarBrush}" />
+                    <StackPanel Grid.Column="0"
+                                Margin="14,0,0,0"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                IsHitTestVisible="False">
+                        <Image Width="24"
+                               Height="24"
+                               Source="{DynamicResource BrandPhoenixSource}"
+                               Style="{StaticResource BrandImageStyle}" />
+                        <TextBlock Margin="8,0,0,0"
+                                   Text="PC-SPA"
+                                   Foreground="{DynamicResource TitleBarForegroundBrush}"
+                                   FontSize="12.5"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
 
                     <StackPanel Grid.Column="1"
                                 Orientation="Horizontal"
@@ -601,31 +615,49 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <Border Height="80"
-                        Padding="20,0,16,0"
+                <Border Height="112"
+                        Padding="10,6"
+                        Background="{DynamicResource SidebarBrush}"
                         BorderBrush="{DynamicResource SidebarDividerBrush}"
                         BorderThickness="0,0,0,1">
-                    <Grid>
+                    <Grid ToolTip="PC-SPA — System Performance Accelerator">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="42" />
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="1.1*" />
                         </Grid.ColumnDefinitions>
-                        <Border Width="34" Height="34"
-                                Background="{DynamicResource AccentGradientBrush}"
-                                BorderBrush="{DynamicResource GoldHighlightBrush}"
-                                BorderThickness="1"
-                                CornerRadius="10"
-                                Effect="{StaticResource SubtleGoldGlowEffect}">
-                            <TextBlock Text="SPA"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       Foreground="{DynamicResource AccentForegroundBrush}"
-                                       FontSize="11"
-                                       FontWeight="Bold" />
-                        </Border>
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Text="SYSTEM PERFORMANCE" Foreground="{DynamicResource SidebarTextBrush}" FontSize="10" FontWeight="Bold" />
-                            <TextBlock Text="ACCELERATOR" Foreground="{DynamicResource SidebarMutedTextBrush}" FontSize="10" FontWeight="SemiBold" />
+
+                        <Image Grid.Column="0"
+                               Width="104"
+                               Height="104"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Source="{DynamicResource BrandPhoenixSource}"
+                               Style="{StaticResource BrandImageStyle}" />
+
+                        <StackPanel Grid.Column="2"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Center">
+                            <Image Width="116"
+                                   Height="44"
+                                   HorizontalAlignment="Left"
+                                   Source="{DynamicResource BrandWordmarkSource}"
+                                   Style="{StaticResource BrandImageStyle}" />
+                            <TextBlock Margin="1,5,0,0"
+                                       Text="SYSTEM"
+                                       Foreground="{DynamicResource SidebarTextBrush}"
+                                       FontSize="8"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Margin="1,0,0,0"
+                                       Text="PERFORMANCE"
+                                       Foreground="{DynamicResource SidebarTextBrush}"
+                                       FontSize="8"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Margin="1,2,0,0"
+                                       Text="A C C E L E R A T O R"
+                                       Foreground="{DynamicResource AccentBrush}"
+                                       FontSize="7.2"
+                                       FontWeight="SemiBold" />
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -953,7 +985,7 @@
                     <StackPanel>
                         <TextBlock Text="OFFLINE &amp; SAFE" Foreground="{DynamicResource AccentBrush}" FontSize="10" FontWeight="Bold" />
                         <TextBlock Margin="0,4,0,0"
-                                   Text="No cloud services. Review every file before cleanup."
+                                   Text="PC-SPA runs locally. Review every file before cleanup."
                                    Foreground="{DynamicResource SidebarMutedTextBrush}"
                                    FontSize="11"
                                    TextWrapping="Wrap" />
@@ -964,7 +996,7 @@
 
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="80" />
+                <RowDefinition Height="112" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
@@ -4678,10 +4710,85 @@
                                               Foreground="{DynamicResource TextPrimaryBrush}"
                                               FontWeight="SemiBold" />
                                     <TextBlock Margin="0,7,0,0"
-                                               Text="This safety setting is mandatory and cannot be disabled. System Performance Accelerator never deletes or recycles files without explicit confirmation."
+                                               Text="This safety setting is mandatory and cannot be disabled. PC-SPA never deletes or recycles files without explicit confirmation."
                                                Foreground="{DynamicResource TextSecondaryBrush}"
                                                FontSize="11"
                                                TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Margin="0,14,0,0"
+                                Style="{StaticResource BrandAboutCardStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="204" />
+                                    <ColumnDefinition Width="28" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Image Width="190"
+                                       Height="190"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Source="{DynamicResource BrandPhoenixSource}"
+                                       Style="{StaticResource BrandImageStyle}"
+                                       ToolTip="PC-SPA phoenix emblem" />
+
+                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                    <TextBlock Text="ABOUT PC-SPA"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               FontSize="10"
+                                               FontWeight="Bold" />
+                                    <Image Margin="0,8,0,0"
+                                           Width="320"
+                                           Height="116"
+                                           HorizontalAlignment="Left"
+                                           Source="{DynamicResource BrandWordmarkSource}"
+                                           Style="{StaticResource BrandImageStyle}" />
+                                    <TextBlock Margin="2,2,0,0"
+                                               Text="SYSTEM PERFORMANCE"
+                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                               FontSize="11.5"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Margin="2,3,0,0"
+                                               Text="A C C E L E R A T O R"
+                                               Foreground="{DynamicResource AccentBrush}"
+                                               FontSize="10.5"
+                                               FontWeight="SemiBold" />
+
+                                    <WrapPanel Margin="0,12,0,0">
+                                        <Border Margin="0,0,8,6" Style="{StaticResource OperationMetaChipStyle}">
+                                            <TextBlock Text="{Binding DataContext.ApplicationVersion, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                       Foreground="{DynamicResource MetaTextBrush}"
+                                                       FontSize="10.5"
+                                                       FontWeight="SemiBold" />
+                                        </Border>
+                                        <Border Margin="0,0,8,6" Style="{StaticResource OperationMetaChipStyle}">
+                                            <TextBlock Text="Windows 10/11 desktop"
+                                                       Foreground="{DynamicResource MetaTextBrush}"
+                                                       FontSize="10.5"
+                                                       FontWeight="SemiBold" />
+                                        </Border>
+                                        <Border Margin="0,0,0,6" Style="{StaticResource OperationMetaChipStyle}">
+                                            <TextBlock Text="Offline-first"
+                                                       Foreground="{DynamicResource MetaTextBrush}"
+                                                       FontSize="10.5"
+                                                       FontWeight="SemiBold" />
+                                        </Border>
+                                    </WrapPanel>
+
+                                    <TextBlock Margin="0,5,0,0"
+                                               Text="A local system utility with no cloud account, telemetry, or automatic deletion. Every cleanup remains review-first and confirmation-required."
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               FontSize="11"
+                                               TextWrapping="Wrap" />
+                                    <TextBlock Margin="0,7,0,0"
+                                               Text="github.com/Vikramsinh29/SystemPerformanceAccelerator-AI"
+                                               Foreground="{DynamicResource TextTertiaryBrush}"
+                                               FontSize="10.5"
+                                               TextTrimming="CharacterEllipsis"
+                                               ToolTip="https://github.com/Vikramsinh29/SystemPerformanceAccelerator-AI" />
                                 </StackPanel>
                             </Grid>
                         </Border>

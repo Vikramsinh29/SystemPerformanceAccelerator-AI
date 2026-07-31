@@ -185,6 +185,17 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public bool IsLockedFeatureActive =>
         CurrentFeatureAccess.IsVisible && !CurrentFeatureAccess.IsAvailable;
 
+    public string ApplicationVersion
+    {
+        get
+        {
+            var version = typeof(MainWindowViewModel).Assembly.GetName().Version;
+            return version is null
+                ? "Version 1.0.0"
+                : $"Version {version.Major}.{version.Minor}.{version.Build}";
+        }
+    }
+
     public string EditionStatusText
     {
         get
@@ -208,7 +219,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ApplicationModule.StartupManager => "Startup Manager",
         ApplicationModule.SystemMonitor => "System Monitor",
         ApplicationModule.Settings => "Settings",
-        _ => "System Performance Accelerator"
+        _ => "PC-SPA"
     };
 
     public string ModuleSubtitle => _currentModule switch

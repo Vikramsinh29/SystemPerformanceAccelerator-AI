@@ -1,8 +1,8 @@
-# System Performance Accelerator
+# PC-SPA — System Performance Accelerator
 
 ## Purpose
 
-System Performance Accelerator is a safe, offline Windows 10/11 desktop utility for system cleaning and storage analysis. It uses a compact CCleaner-style WPF interface and keeps all processing local to the computer.
+PC-SPA (System Performance Accelerator) is a safe, offline Windows 10/11 desktop utility for system cleaning and storage analysis. It uses a compact CCleaner-style WPF interface and keeps all processing local to the computer.
 
 ## Product direction
 
@@ -761,3 +761,19 @@ Sprint 33A establishes a reusable commercial-quality visual foundation while pre
 - Light and Dark theme switching continues through the local ThemeManager without cloud services, telemetry, or external dependencies.
 - No Cleaner, Custom Clean, Large File Finder, Duplicate Finder, Startup Manager, System Monitor, Health Check, Auto Clean, safety, command, service, or persistence behaviour is changed.
 - Final PC-SPA phoenix assets, executable renaming, splash branding, module-by-module layout migration, and launch asset packaging remain outside this foundation sprint.
+
+
+## Sprint 33B - PC-SPA shell branding and commercial identity
+
+Sprint 33B integrates the approved PC-SPA phoenix identity into the premium design-system foundation without changing feature behaviour.
+
+- The supplied compact phoenix and PC-SPA wordmark are treated as the authoritative visual references.
+- High-resolution theme-aware assets preserve the approved proportions, outer ring, circuit details, metallic gold treatment, and wordmark shape.
+- The custom title bar now displays the PC-SPA phoenix and product name.
+- The sidebar header replaces the temporary SPA tile with a larger phoenix and a clear PC-SPA / System Performance / Accelerator hierarchy.
+- Settings includes a commercial About PC-SPA card with product identity, application version, supported Windows family, offline-first status, safety positioning, and repository reference.
+- Product metadata and the Windows application icon use PC-SPA branding while internal namespaces, project names, architecture, and release-output names remain unchanged.
+- ThemeManager switches between dark-optimized and light-optimized gold logo assets so Light theme does not show a black logo background.
+- Images use WPF high-quality scaling and preserve aspect ratio; important descriptive text remains real WPF text for DPI clarity.
+- Cleaner, Health Check, Custom Clean, Auto Clean, Large File Finder, Duplicate Finder, Startup Manager, System Monitor, Settings persistence, feature access, cleanup safety, and all service logic remain unchanged.
+- Splash-screen branding, final launch asset master pack, executable/package renaming, multi-architecture publishing, and installer work remain for Sprint 33C.

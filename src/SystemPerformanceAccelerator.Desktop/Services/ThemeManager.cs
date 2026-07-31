@@ -173,6 +173,17 @@ public static class ThemeManager
             palette.Brushes["GoldHighlightBrush"],
             new Point(0, 0),
             new Point(1, 0));
+
+        SetBrandImageResources(useDarkPalette);
+    }
+
+    private static void SetBrandImageResources(bool useDarkPalette)
+    {
+        var resources = Application.Current.Resources;
+        resources["BrandPhoenixSource"] = resources[
+            useDarkPalette ? "BrandPhoenixDarkSource" : "BrandPhoenixLightSource"];
+        resources["BrandWordmarkSource"] = resources[
+            useDarkPalette ? "BrandWordmarkDarkSource" : "BrandWordmarkLightSource"];
     }
 
     private static bool IsSystemDarkTheme()
