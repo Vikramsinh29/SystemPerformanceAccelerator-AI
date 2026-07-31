@@ -777,3 +777,17 @@ Sprint 33B integrates the approved PC-SPA phoenix identity into the premium desi
 - Images use WPF high-quality scaling and preserve aspect ratio; important descriptive text remains real WPF text for DPI clarity.
 - Cleaner, Health Check, Custom Clean, Auto Clean, Large File Finder, Duplicate Finder, Startup Manager, System Monitor, Settings persistence, feature access, cleanup safety, and all service logic remain unchanged.
 - Splash-screen branding, final launch asset master pack, executable/package renaming, multi-architecture publishing, and installer work remain for Sprint 33C.
+
+## Sprint 33C - Launch identity, splash screen, and portable package naming
+
+Sprint 33C completes the PC-SPA launch identity using the already approved brand assets without changing feature behaviour.
+
+- The desktop assembly now publishes as `PC-SPA.exe` while the existing project names, namespaces, architecture, and repository structure remain unchanged.
+- Windows executable metadata, UAC identity, taskbar identity, and Explorer file details use the PC-SPA product name and approved multi-resolution icon.
+- Application startup now shows a borderless PC-SPA splash window using the approved full lockup at its original proportions and high-quality WPF scaling.
+- The splash has no fake progress indicator and no artificial delay; it closes as soon as the verified main window is ready.
+- The Windows x64 portable publish script now creates `PC-SPA-1.0.0-win-x64-portable.zip` and validates `PC-SPA.exe`, its runtime configuration, dependency manifest, and runtime files.
+- Portable release notes instruct users to launch `PC-SPA.exe` and retain the existing offline, unsigned, administrator-elevation, and no-telemetry disclosures.
+- Cleaner, Health Check, Custom Clean, Auto Clean, Large File Finder, Duplicate Finder, Startup Manager, System Monitor, Settings, safety rules, services, commands, persistence, and feature access remain unchanged.
+- The repository contains approved raster launch assets and a multi-resolution ICO. A true editable vector/8K master must come from original design artwork and is not fabricated by this sprint.
+

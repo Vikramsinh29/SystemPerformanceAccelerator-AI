@@ -1,27 +1,27 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <BitmapImage x:Key="BrandPhoenixDarkSource"
-                 UriSource="pack://application:,,,/SystemPerformanceAccelerator.Desktop;component/Assets/Branding/PC-SPA-Phoenix-Dark.png"
+                 UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Phoenix-Dark.png"
                  CacheOption="OnLoad" />
     <BitmapImage x:Key="BrandPhoenixLightSource"
-                 UriSource="pack://application:,,,/SystemPerformanceAccelerator.Desktop;component/Assets/Branding/PC-SPA-Phoenix-Light.png"
+                 UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Phoenix-Light.png"
                  CacheOption="OnLoad" />
     <BitmapImage x:Key="BrandWordmarkDarkSource"
-                 UriSource="pack://application:,,,/SystemPerformanceAccelerator.Desktop;component/Assets/Branding/PC-SPA-Wordmark-Dark.png"
+                 UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Wordmark-Dark.png"
                  CacheOption="OnLoad" />
     <BitmapImage x:Key="BrandWordmarkLightSource"
-                 UriSource="pack://application:,,,/SystemPerformanceAccelerator.Desktop;component/Assets/Branding/PC-SPA-Wordmark-Light.png"
+                 UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Wordmark-Light.png"
                  CacheOption="OnLoad" />
     <BitmapImage x:Key="BrandFullLockupDarkSource"
-                 UriSource="pack://application:,,,/SystemPerformanceAccelerator.Desktop;component/Assets/Branding/PC-SPA-Full-Lockup-Dark.png"
+                 UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Full-Lockup-Dark.png"
                  CacheOption="OnLoad" />
 
     <!-- Runtime aliases are replaced by ThemeManager whenever the theme changes. -->
     <BitmapImage x:Key="BrandPhoenixSource"
-                 UriSource="pack://application:,,,/SystemPerformanceAccelerator.Desktop;component/Assets/Branding/PC-SPA-Phoenix-Dark.png"
+                 UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Phoenix-Dark.png"
                  CacheOption="OnLoad" />
     <BitmapImage x:Key="BrandWordmarkSource"
-                 UriSource="pack://application:,,,/SystemPerformanceAccelerator.Desktop;component/Assets/Branding/PC-SPA-Wordmark-Dark.png"
+                 UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Wordmark-Dark.png"
                  CacheOption="OnLoad" />
 
     <Style x:Key="BrandImageStyle" TargetType="Image">

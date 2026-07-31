@@ -11,7 +11,7 @@ $desktopProject = Join-Path $repo "src\SystemPerformanceAccelerator.Desktop\Syst
 
 $version = "1.0.0"
 $runtimeIdentifier = "win-x64"
-$releaseName = "SystemPerformanceAccelerator-$version-$runtimeIdentifier-portable"
+$releaseName = "PC-SPA-$version-$runtimeIdentifier-portable"
 
 $publishDirectory = Join-Path $repo "artifacts\publish\$runtimeIdentifier"
 $releaseRoot = Join-Path $repo "artifacts\releases"
@@ -19,6 +19,10 @@ $stagingRoot = Join-Path $releaseRoot "_staging"
 $releaseFolder = Join-Path $stagingRoot $releaseName
 $zipPath = Join-Path $releaseRoot "$releaseName.zip"
 $hashPath = "$zipPath.sha256"
+$desktopDirectory = [Environment]::GetFolderPath(
+    [Environment+SpecialFolder]::DesktopDirectory)
+$desktopZipPath = Join-Path $desktopDirectory (Split-Path -Leaf $zipPath)
+$desktopHashPath = Join-Path $desktopDirectory (Split-Path -Leaf $hashPath)
 
 Set-Location $repo
 
@@ -41,7 +45,7 @@ if ([string]::IsNullOrWhiteSpace($commit)) {
     throw "Unable to determine the current Git commit."
 }
 
-Get-Process SystemPerformanceAccelerator.Desktop -ErrorAction SilentlyContinue |
+Get-Process -Name "PC-SPA", "SystemPerformanceAccelerator.Desktop" -ErrorAction SilentlyContinue |
     Stop-Process -Force
 
 Remove-Item -LiteralPath $publishDirectory -Recurse -Force -ErrorAction SilentlyContinue
@@ -87,9 +91,9 @@ if ($LASTEXITCODE -ne 0) {
     throw "Windows x64 publish failed."
 }
 
-$executable = Join-Path $publishDirectory "SystemPerformanceAccelerator.Desktop.exe"
-$runtimeConfig = Join-Path $publishDirectory "SystemPerformanceAccelerator.Desktop.runtimeconfig.json"
-$dependencyManifest = Join-Path $publishDirectory "SystemPerformanceAccelerator.Desktop.deps.json"
+$executable = Join-Path $publishDirectory "PC-SPA.exe"
+$runtimeConfig = Join-Path $publishDirectory "PC-SPA.runtimeconfig.json"
+$dependencyManifest = Join-Path $publishDirectory "PC-SPA.deps.json"
 $coreRuntime = Join-Path $publishDirectory "coreclr.dll"
 
 foreach ($requiredFile in @(
@@ -143,7 +147,7 @@ Copy-Item `
     -Force
 
 $releaseNotes = @"
-System Performance Accelerator $version
+PC-SPA $version
 
 Package:
 - Windows 10/11 x64
@@ -156,7 +160,7 @@ Package:
 Launch:
 1. Extract the complete ZIP.
 2. Keep all extracted files together.
-3. Run SystemPerformanceAccelerator.Desktop.exe.
+3. Run PC-SPA.exe.
 
 Windows may display an Unknown Publisher or SmartScreen warning because this
 release is intentionally unsigned.
@@ -203,9 +207,9 @@ try {
     )
 
     $requiredArchiveEntries = @(
-        "$releaseName/SystemPerformanceAccelerator.Desktop.exe",
-        "$releaseName/SystemPerformanceAccelerator.Desktop.runtimeconfig.json",
-        "$releaseName/SystemPerformanceAccelerator.Desktop.deps.json",
+        "$releaseName/PC-SPA.exe",
+        "$releaseName/PC-SPA.runtimeconfig.json",
+        "$releaseName/PC-SPA.deps.json",
         "$releaseName/coreclr.dll",
         "$releaseName/RELEASE-NOTES.txt"
     )
@@ -222,6 +226,20 @@ finally {
 
 Remove-Item -LiteralPath $stagingRoot -Recurse -Force
 
+if ([string]::IsNullOrWhiteSpace($desktopDirectory) -or
+    -not (Test-Path -LiteralPath $desktopDirectory -PathType Container)) {
+    throw "Windows Desktop folder could not be resolved: $desktopDirectory"
+}
+
+Copy-Item -LiteralPath $zipPath -Destination $desktopZipPath -Force
+Copy-Item -LiteralPath $hashPath -Destination $desktopHashPath -Force
+
+foreach ($desktopCopy in @($desktopZipPath, $desktopHashPath)) {
+    if (-not (Test-Path -LiteralPath $desktopCopy -PathType Leaf)) {
+        throw "Desktop release copy was not created: $desktopCopy"
+    }
+}
+
 $signature = Get-AuthenticodeSignature -LiteralPath $executable
 
 Write-Host ""
@@ -232,5 +250,7 @@ Write-Host "Executable signature: $($signature.Status)" -ForegroundColor Yellow
 Write-Host "ZIP: $zipPath" -ForegroundColor Green
 Write-Host "SHA-256: $zipHash" -ForegroundColor Green
 Write-Host "Hash file: $hashPath" -ForegroundColor Green
+Write-Host "Desktop ZIP: $desktopZipPath" -ForegroundColor Green
+Write-Host "Desktop hash: $desktopHashPath" -ForegroundColor Green
 Write-Host ""
-Write-Host "Expected automated-test result for Sprint 28 validation: 111 passed, 0 failed." -ForegroundColor Cyan
+Write-Host "Full automated test suite passed before packaging." -ForegroundColor Cyan

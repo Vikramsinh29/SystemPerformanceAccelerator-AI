@@ -3,7 +3,10 @@
     <OutputType>WinExe</OutputType>
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>Assets\Branding\PC-SPA.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\Branding\PC-SPA-Taskbar.ico</ApplicationIcon>
+    <AssemblyName>PC-SPA</AssemblyName>
+    <RootNamespace>SystemPerformanceAccelerator.Desktop</RootNamespace>
+    <Title>PC-SPA</Title>
 
     <Version>1.0.0</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>

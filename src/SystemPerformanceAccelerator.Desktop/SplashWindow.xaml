@@ -1,0 +1,53 @@
+<Window x:Class="SystemPerformanceAccelerator.Desktop.SplashWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="PC-SPA"
+        Width="760"
+        Height="470"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="False"
+        AllowsTransparency="True"
+        Background="Transparent"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
+    <Border Background="#07090C"
+            BorderBrush="#B88A19"
+            BorderThickness="1"
+            CornerRadius="16">
+        <Grid Margin="28">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Image Source="Assets/Branding/PC-SPA-Full-Lockup-Dark.png"
+                   Stretch="Uniform"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Stretch"
+                   RenderOptions.BitmapScalingMode="HighQuality" />
+
+            <Grid Grid.Row="1" Margin="10,12,10,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="OFFLINE  •  LOCAL  •  SAFE"
+                           Foreground="#D7B347"
+                           FontFamily="Segoe UI"
+                           FontSize="10.5"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
+
+                <TextBlock Grid.Column="1"
+                           Text="VERSION 1.0.0"
+                           Foreground="#AEB4BE"
+                           FontFamily="Segoe UI"
+                           FontSize="10"
+                           VerticalAlignment="Center" />
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
