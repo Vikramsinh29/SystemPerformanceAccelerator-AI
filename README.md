@@ -204,7 +204,7 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Trial, Locked, and Hidden behaviour is exercised without adding billing or real licensing
 - No payment gateway, subscription, account, product key, hardware fingerprint, licence server, or permanent commercial assignment
 
-### Auto Clean Schedule foundation
+### Auto Clean Schedule
 
 - Local schedule plans are stored under `%LOCALAPPDATA%\SystemPerformanceAccelerator\auto-clean-schedules.json`
 - Create separate Daily, Weekly, and Monthly schedule plans
@@ -216,11 +216,16 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Existing schedules remain visible and are not replaced when a new schedule is created
 - Editing updates only the explicitly selected schedule
 - Multiple distinct schedules persist safely across application restarts
-- Manual `Preview now` scans selected categories and reports files, reclaimable space, and issues
-- Preview remains read-only and does not delete or modify files
+- Manual `Preview now` in the editor scans selected categories and reports files, reclaimable space, and issues without changing files
+- `Run now` is available for one explicitly selected saved schedule, including a disabled schedule
+- Every manual run performs a completely fresh scan from the schedule's saved categories
+- Fresh run previews begin with no files selected and show individual file details and scan issues
+- Cleanup starts only after the user selects reviewed files and accepts an explicit confirmation
+- Cleanup reuses the existing Custom Clean service, including stale-file revalidation, progress, cancellation, and honest partial-failure reporting
+- Latest completed manual-run totals are stored locally with the schedule and remain backward compatible with older schedule JSON
 - Maximum schedule count and malformed local-data handling fail safely
 - Integrated with the central Sprint 17 feature-access system
-- Planning foundation only: no automatic execution, Windows Task Scheduler, background service, registry change, or unattended cleanup
+- Manual execution only: no automatic execution, Windows Task Scheduler, background service, registry change, or unattended cleanup
 
 ### Premium visual design system
 
@@ -266,7 +271,7 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 
 ### Remaining modules premium UI migration
 
-- Auto Clean Schedule uses the shared premium cards, buttons, text boxes, ComboBoxes, editor hierarchy, overview, and status presentation while remaining planning-only
+- Auto Clean Schedule uses the shared premium cards, buttons, text boxes, ComboBoxes, editor hierarchy, overview, fresh-run review table, and status presentation while remaining manual-only
 - Large File Finder uses a premium safety hero, summary cards, scan controls, results table, selection actions, and shared status presentation
 - Duplicate File Finder uses a premium hash-confirmed safety hero, duplicate summaries, folder controls, grouped results, recycle actions, and shared status presentation
 - Startup Manager uses a premium read-only inventory hero, summary cards, scan controls, results table, and shared status presentation
@@ -299,7 +304,7 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Shared DataGrid row and cell backgrounds remain theme-aware, preventing light table bodies with unreadable light text in Dark mode
 - Cleaner and Large File Finder stale-result protection were manually verified with controlled files, including successful processing only after a fresh scan
 - Custom Clean, Duplicate File Finder, Health Check, Auto Clean Schedule, Startup Manager, System Monitor, Settings, feature access, confirmation, cancellation, persistence, and read-only boundaries were regression verified
-- Auto Clean Schedule remains planning-only; Startup Manager and System Monitor remain read-only
+- Auto Clean Schedule remains manual-only with explicit preview and confirmation; System Monitor remains read-only
 - No background service, automatic cleanup, registry writing, startup modification, process termination, payment, subscription, cloud service, or unrelated system-changing behaviour was added
 
 ### Responsive layout
@@ -435,7 +440,7 @@ All selectable result tables must use the same application-wide behaviour:
 - Release build succeeded and the xUnit suite remained at 103 passed, 0 failed after Sprint 23.
 - No Custom Clean service, view-model, command, cleanup category, cleanup rule, confirmation, safety, or system-modification behaviour changed.
 - The combined Sprint 24 premium UI migration was manually verified across Auto Clean Schedule, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, and Settings.
-- Auto Clean Schedule overview, create/edit page, Back navigation, create, edit, remove, preview, cancel, save, enable/disable, and multiple-schedule behaviour remained functional and planning-only.
+- Auto Clean Schedule overview, create/edit page, Back navigation, create, edit, remove, preview, cancel, save, enable/disable, and multiple-schedule behaviour remained functional; later manual Run now execution still requires a fresh review and confirmation.
 - Large File Finder folder selection, minimum-size input, scan, cancellation, result columns, selection, confirmation, and safe Recycle Bin cleanup behaviour remained functional.
 - Duplicate File Finder folder selection, scan, grouping, selection summary, result columns, cancellation, final-copy protection, confirmation, and safe Recycle Bin cleanup behaviour remained functional.
 - Startup Manager scan, cancellation, totals, five-column inventory, and strictly read-only behaviour remained functional; no disable, delete, edit, or registry-writing action was added.
@@ -461,7 +466,7 @@ All selectable result tables must use the same application-wide behaviour:
 - The shared DataGrid style now sets a theme-aware row background and transparent cell background; Cleaner and Large File Finder table bodies were manually verified readable in both Dark and Light modes.
 - Confirmation-No, confirmation-Yes, cancellation, empty, success, warning, failure, and partial-result paths were regression checked where applicable.
 - Duplicate Finder retained its content verification, confirmation, Recycle Bin cleanup, and at-least-one-copy protection.
-- Auto Clean Schedule remained planning-only with no unattended execution, Windows Task Scheduler integration, or background service.
+- Auto Clean Schedule remains manual-only with no unattended execution, Windows Task Scheduler integration, or background service.
 - Startup Manager and System Monitor remained strictly read-only with no startup modification, registry writing, process termination, or optimization action.
 - Settings theme switching, Save, Restore Defaults, restart persistence, mandatory cleanup confirmation, and local-only storage remained functional.
 - Release build succeeded and the xUnit suite increased to 107 passed, 0 failed after Sprint 26.

@@ -7,6 +7,7 @@ using System.Windows;
 using SystemPerformanceAccelerator.Core.Interfaces;
 using SystemPerformanceAccelerator.Core.Models;
 using SystemPerformanceAccelerator.Desktop.Commands;
+using SystemPerformanceAccelerator.Desktop.Services;
 
 namespace SystemPerformanceAccelerator.Desktop.ViewModels;
 
@@ -20,11 +21,15 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
 
     private readonly IAutoCleanScheduleService _scheduleService;
     private readonly ICustomCleanService _customCleanService;
+    private readonly IAutoCleanRunConfirmationService _runConfirmationService;
     private readonly Func<DateTime> _nowProvider;
     private CancellationTokenSource? _cancellationTokenSource;
     private AutoCleanScheduleItemViewModel? _selectedSchedule;
     private Guid? _editingScheduleId;
     private bool _isEditorOpen;
+    private bool _isRunReviewOpen;
+    private AutoCleanSchedule? _runScheduleSnapshot;
+    private bool _isRunPreviewFresh;
     private string _scheduleName = "Auto Clean Schedule";
     private AutoCleanScheduleFrequency _frequency = AutoCleanScheduleFrequency.Daily;
     private string _runAtLocalTimeText = "09:00";
@@ -40,17 +45,40 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
     private string _previewFilesFound = "0";
     private string _previewReclaimableSpace = "0 B";
     private string _previewIssues = "0";
+    private int _runProgress;
+    private string _runPreviewStatus = "Not started";
+    private string _runIssueCount = "0";
+    private string _runFirstIssue = string.Empty;
+    private OperationResultPresentation _runOperationResult =
+        OperationResultPresentation.Hidden;
 
     public AutoCleanScheduleViewModel(
         IAutoCleanScheduleService scheduleService,
         ICustomCleanService customCleanService,
         IFeatureAccessGuard featureAccessGuard,
         Func<DateTime>? nowProvider = null)
+        : this(
+            scheduleService,
+            customCleanService,
+            featureAccessGuard,
+            new AutoCleanRunConfirmationService(),
+            nowProvider)
+    {
+    }
+
+    public AutoCleanScheduleViewModel(
+        IAutoCleanScheduleService scheduleService,
+        ICustomCleanService customCleanService,
+        IFeatureAccessGuard featureAccessGuard,
+        IAutoCleanRunConfirmationService runConfirmationService,
+        Func<DateTime>? nowProvider = null)
     {
         _scheduleService = scheduleService ??
             throw new ArgumentNullException(nameof(scheduleService));
         _customCleanService = customCleanService ??
             throw new ArgumentNullException(nameof(customCleanService));
+        _runConfirmationService = runConfirmationService ??
+            throw new ArgumentNullException(nameof(runConfirmationService));
         ArgumentNullException.ThrowIfNull(featureAccessGuard);
         _nowProvider = nowProvider ?? (() => DateTime.Now);
 
@@ -62,13 +90,13 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
             featureAccessGuard,
             ApplicationFeature.AutoCleanSchedule,
             FeatureAccessRequirement.Execute,
-            () => !IsBusy && !IsEditorOpen);
+            () => !IsBusy && !IsEditorOpen && !IsRunReviewOpen);
         EditSelectedScheduleCommand = new RelayCommand(
             EditSelectedSchedule,
             featureAccessGuard,
             ApplicationFeature.AutoCleanSchedule,
             FeatureAccessRequirement.Execute,
-            () => !IsBusy && !IsEditorOpen && SelectedSchedule is not null);
+            () => !IsBusy && !IsEditorOpen && !IsRunReviewOpen && SelectedSchedule is not null);
         BackToSchedulesCommand = new RelayCommand(
             BackToSchedules,
             () => !IsBusy && IsEditorOpen);
@@ -83,7 +111,7 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
             featureAccessGuard,
             ApplicationFeature.AutoCleanSchedule,
             FeatureAccessRequirement.Execute,
-            () => !IsBusy && !IsEditorOpen && SelectedSchedule is not null);
+            () => !IsBusy && !IsEditorOpen && !IsRunReviewOpen && SelectedSchedule is not null);
         PreviewNowCommand = new AsyncRelayCommand(
             PreviewNowAsync,
             featureAccessGuard,
@@ -91,13 +119,32 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
             FeatureAccessRequirement.Execute,
             () => !IsBusy && IsEditorOpen && IncludeTemporaryFiles);
         CancelPreviewCommand = new RelayCommand(
-            CancelPreview,
-            () => IsBusy);
+            CancelCurrentOperation,
+            () => IsBusy && IsEditorOpen);
+        RunSelectedScheduleCommand = new AsyncParameterCommand(
+            RunSelectedScheduleAsync,
+            featureAccessGuard,
+            ApplicationFeature.AutoCleanSchedule,
+            FeatureAccessRequirement.Execute,
+            CanRunSelectedSchedule);
+        CleanRunPreviewCommand = new AsyncParameterCommand(
+            CleanRunPreviewAsync,
+            featureAccessGuard,
+            ApplicationFeature.AutoCleanSchedule,
+            FeatureAccessRequirement.Execute,
+            _ => CanCleanRunPreview());
+        BackFromRunReviewCommand = new RelayCommand(
+            BackFromRunReview,
+            () => !IsBusy && IsRunReviewOpen);
+        CancelRunCommand = new RelayCommand(
+            CancelCurrentOperation,
+            () => IsBusy && IsRunReviewOpen);
 
         LoadSchedules();
     }
 
     public ObservableCollection<AutoCleanScheduleItemViewModel> Schedules { get; } = [];
+    public ObservableCollection<AutoCleanRunPreviewItemViewModel> RunResults { get; } = [];
     public IReadOnlyList<AutoCleanScheduleFrequency> Frequencies { get; }
     public IReadOnlyList<DayOfWeek> WeekDays { get; }
     public RelayCommand NewScheduleCommand { get; }
@@ -107,6 +154,10 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
     public RelayCommand RemoveScheduleCommand { get; }
     public AsyncRelayCommand PreviewNowCommand { get; }
     public RelayCommand CancelPreviewCommand { get; }
+    public AsyncParameterCommand RunSelectedScheduleCommand { get; }
+    public AsyncParameterCommand CleanRunPreviewCommand { get; }
+    public RelayCommand BackFromRunReviewCommand { get; }
+    public RelayCommand CancelRunCommand { get; }
 
     public string SchedulesPath => _scheduleService.SchedulesPath;
     public string ScheduleCountText => Schedules.Count.ToString("N0");
@@ -114,8 +165,9 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
         Schedules.Count(item => item.IsEnabled).ToString("N0");
     public bool HasSchedules => Schedules.Count > 0;
     public bool IsEmptyStateVisible => !HasSchedules;
-    public bool IsOverviewVisible => !IsEditorOpen;
+    public bool IsOverviewVisible => !IsEditorOpen && !IsRunReviewOpen;
     public bool IsEditorVisible => IsEditorOpen;
+    public bool IsRunReviewVisible => IsRunReviewOpen;
     public string NextPlannedRunText
     {
         get
@@ -152,7 +204,7 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
     }
 
     public string SelectedScheduleSummary => SelectedSchedule is null
-        ? "Select a schedule card to edit or remove it."
+        ? "Select a schedule card to run, edit, or remove it."
         : $"Selected: {SelectedSchedule.Name}";
 
     public string ScheduleName
@@ -328,6 +380,80 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
         private set => SetField(ref _previewIssues, value);
     }
 
+    public int RunProgress
+    {
+        get => _runProgress;
+        private set => SetField(ref _runProgress, value);
+    }
+
+    public string RunPreviewStatus
+    {
+        get => _runPreviewStatus;
+        private set => SetField(ref _runPreviewStatus, value);
+    }
+
+    public string RunIssueCount
+    {
+        get => _runIssueCount;
+        private set => SetField(ref _runIssueCount, value);
+    }
+
+    public string RunFirstIssue
+    {
+        get => _runFirstIssue;
+        private set
+        {
+            if (SetField(ref _runFirstIssue, value))
+            {
+                OnPropertyChanged(nameof(HasRunFirstIssue));
+            }
+        }
+    }
+
+    public bool HasRunFirstIssue => !string.IsNullOrWhiteSpace(RunFirstIssue);
+
+    public OperationResultPresentation RunOperationResult
+    {
+        get => _runOperationResult;
+        private set => SetField(ref _runOperationResult, value);
+    }
+
+    public string RunScheduleName => _runScheduleSnapshot?.Name ?? "Manual Auto Clean run";
+    public string RunScheduleStateText => _runScheduleSnapshot is null
+        ? string.Empty
+        : _runScheduleSnapshot.IsEnabled
+            ? "Enabled schedule • manual run requested"
+            : "Disabled schedule • manual run requested";
+    public string RunFilesFound => RunResults.Count.ToString("N0");
+    public string RunSelectedFiles => RunResults.Count(item => item.IsSelected).ToString("N0");
+    public string RunReclaimableSpace => MainWindowViewModel.FormatBytes(
+        RunResults.Sum(item => item.Model.SizeBytes));
+    public string RunSelectedSpace => MainWindowViewModel.FormatBytes(
+        RunResults.Where(item => item.IsSelected).Sum(item => item.Model.SizeBytes));
+    public bool IsRunPreviewFresh => _isRunPreviewFresh;
+
+    public bool? AreAllRunResultsSelected
+    {
+        get => BulkSelection.GetState(RunResults, item => item.IsSelected);
+        set
+        {
+            var targetSelection = BulkSelection.ResolveTarget(
+                value,
+                AreAllRunResultsSelected);
+            if (targetSelection is null)
+            {
+                return;
+            }
+
+            BulkSelection.SetAll(
+                RunResults,
+                targetSelection.Value,
+                static (item, isSelected) => item.IsSelected = isSelected);
+            RefreshRunSummary();
+            CleanRunPreviewCommand.RaiseCanExecuteChanged();
+        }
+    }
+
     private bool IsEditorOpen
     {
         get => _isEditorOpen;
@@ -338,9 +464,21 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
                 return;
             }
 
-            OnPropertyChanged(nameof(IsOverviewVisible));
-            OnPropertyChanged(nameof(IsEditorVisible));
-            RaiseCommandStates();
+            RaisePageVisibilityChanged();
+        }
+    }
+
+    private bool IsRunReviewOpen
+    {
+        get => _isRunReviewOpen;
+        set
+        {
+            if (!SetField(ref _isRunReviewOpen, value))
+            {
+                return;
+            }
+
+            RaisePageVisibilityChanged();
         }
     }
 
@@ -358,7 +496,9 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
 
         SelectedSchedule = Schedules.FirstOrDefault();
         ResetEditor();
+        ResetRunReview();
         IsEditorOpen = false;
+        IsRunReviewOpen = false;
 
         Status = result.HasWarning
             ? result.Warning
@@ -404,6 +544,21 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
             : "Schedule overview ready.";
     }
 
+    private void BackFromRunReview()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        var scheduleName = _runScheduleSnapshot?.Name;
+        ResetRunReview();
+        IsRunReviewOpen = false;
+        Status = string.IsNullOrWhiteSpace(scheduleName)
+            ? "Schedule overview ready."
+            : $"Closed the manual run review for '{scheduleName}'.";
+    }
+
     private void SaveSchedule()
     {
         if (!TryBuildEditorSchedule(out var schedule, out var error))
@@ -424,6 +579,10 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
                 return;
             }
 
+            schedule = schedule with
+            {
+                LastManualRun = existing.Model.LastManualRun
+            };
             proposedSchedules = Schedules
                 .Select(item => item == existing ? schedule : item.Model)
                 .ToArray();
@@ -440,12 +599,7 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
         {
             _scheduleService.Save(proposedSchedules);
         }
-        catch (Exception ex) when (
-            ex is IOException or
-            UnauthorizedAccessException or
-            ArgumentException or
-            InvalidOperationException or
-            NotSupportedException)
+        catch (Exception ex) when (IsScheduleStorageException(ex))
         {
             Status = $"The schedule could not be saved locally. {ex.Message}";
             return;
@@ -512,12 +666,7 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
         {
             _scheduleService.Save(proposedSchedules);
         }
-        catch (Exception ex) when (
-            ex is IOException or
-            UnauthorizedAccessException or
-            ArgumentException or
-            InvalidOperationException or
-            NotSupportedException)
+        catch (Exception ex) when (IsScheduleStorageException(ex))
         {
             Status = $"The updated schedule list could not be saved locally. {ex.Message}";
             return;
@@ -541,7 +690,7 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
             return;
         }
 
-        BeginPreview();
+        BeginEditorPreview();
         try
         {
             var result = await _customCleanService.PreviewAsync(
@@ -574,8 +723,229 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
         }
         finally
         {
-            EndPreview();
+            EndOperation();
         }
+    }
+
+    private async Task RunSelectedScheduleAsync(object? parameter)
+    {
+        if (parameter is not AutoCleanScheduleItemViewModel requestedSchedule ||
+            !Schedules.Contains(requestedSchedule))
+        {
+            Status = "Select a saved schedule before using Run now.";
+            return;
+        }
+
+        if (requestedSchedule.Model.Categories.Count == 0)
+        {
+            Status = "This schedule has no supported Cleaner categories. Edit it before running.";
+            return;
+        }
+
+        SelectedSchedule = requestedSchedule;
+        ResetRunReview();
+        _runScheduleSnapshot = requestedSchedule.Model;
+        IsRunReviewOpen = true;
+        OnPropertyChanged(nameof(RunScheduleName));
+        OnPropertyChanged(nameof(RunScheduleStateText));
+        BeginRunOperation(
+            "Scanning fresh files...",
+            $"Running a fresh read-only scan for '{requestedSchedule.Name}'. Nothing is selected or deleted automatically.");
+
+        try
+        {
+            var result = await _customCleanService.PreviewAsync(
+                _runScheduleSnapshot.Categories,
+                new Progress<int>(value =>
+                    RunProgress = Math.Clamp(value, 0, 100)),
+                _cancellationTokenSource!.Token);
+
+            foreach (var item in result.Items)
+            {
+                var row = new AutoCleanRunPreviewItemViewModel(item);
+                row.PropertyChanged += OnRunResultPropertyChanged;
+                RunResults.Add(row);
+            }
+
+            _isRunPreviewFresh = true;
+            RunProgress = 100;
+            RunIssueCount = result.Errors.Count.ToString("N0");
+            RunFirstIssue = result.Errors.FirstOrDefault() ?? string.Empty;
+            RunPreviewStatus = result.Errors.Count == 0
+                ? "Fresh preview ready"
+                : "Fresh preview ready with issues";
+            Status = result.Errors.Count == 0
+                ? $"Fresh preview complete for '{requestedSchedule.Name}'. Review the files and select only what you want to clean."
+                : $"Fresh preview complete with {result.Errors.Count:N0} issue(s). Review the available files before continuing.";
+            RefreshRunSummary();
+        }
+        catch (OperationCanceledException)
+        {
+            _isRunPreviewFresh = false;
+            RunPreviewStatus = "Preview cancelled";
+            Status = "Manual Auto Clean preview cancelled. No files were selected, deleted, or changed.";
+        }
+        catch (Exception ex)
+        {
+            _isRunPreviewFresh = false;
+            RunPreviewStatus = "Preview failed";
+            Status = $"Manual Auto Clean preview failed safely. No files were changed. {ex.Message}";
+        }
+        finally
+        {
+            OnPropertyChanged(nameof(IsRunPreviewFresh));
+            EndOperation();
+        }
+    }
+
+    private async Task CleanRunPreviewAsync(object? parameter)
+    {
+        _ = parameter;
+        if (!_isRunPreviewFresh || _runScheduleSnapshot is null)
+        {
+            Status = "Run a fresh preview before requesting cleanup.";
+            return;
+        }
+
+        var selectedItems = RunResults
+            .Where(item => item.IsSelected)
+            .Select(item => item.Model)
+            .ToArray();
+        if (selectedItems.Length == 0)
+        {
+            Status = "Select at least one previewed file before cleaning.";
+            return;
+        }
+
+        var selectedBytes = selectedItems.Sum(item => item.SizeBytes);
+        if (!_runConfirmationService.ConfirmCleanup(
+                _runScheduleSnapshot,
+                selectedItems.Length,
+                selectedBytes))
+        {
+            Status = "Manual Auto Clean cleanup not started.";
+            return;
+        }
+
+        BeginRunOperation(
+            "Cleaning selected files...",
+            $"Revalidating and cleaning {selectedItems.Length:N0} selected previewed file(s) from '{_runScheduleSnapshot.Name}'...");
+
+        try
+        {
+            var result = await _customCleanService.CleanAsync(
+                _runScheduleSnapshot.Categories,
+                selectedItems,
+                new Progress<int>(value =>
+                    RunProgress = Math.Clamp(value, 0, 100)),
+                _cancellationTokenSource!.Token);
+
+            RemoveDeletedRunResults();
+            _isRunPreviewFresh = false;
+            RunProgress = 100;
+            var elapsed = FormatElapsed(result.Elapsed);
+            RunPreviewStatus = result.CompletedWithoutIssues
+                ? $"Cleanup complete • {elapsed}"
+                : $"Cleanup complete with issues • {elapsed}";
+            RunOperationResult = new OperationResultPresentation(
+                true,
+                "DELETED",
+                result.DeletedCount.ToString("N0"),
+                result.SkippedCount.ToString("N0"),
+                result.FailedCount.ToString("N0"),
+                MainWindowViewModel.FormatBytes(result.ReclaimedBytes),
+                elapsed,
+                result.Errors.FirstOrDefault() ?? string.Empty);
+
+            var summary = new AutoCleanManualRunSummary(
+                _nowProvider(),
+                result.RequestedCount,
+                result.DeletedCount,
+                result.SkippedCount,
+                result.FailedCount,
+                result.ReclaimedBytes,
+                result.Elapsed,
+                result.Errors.FirstOrDefault() ?? string.Empty);
+            var summarySaved = TrySaveManualRunSummary(summary, out var saveError);
+            Status = result.CompletedWithoutIssues
+                ? summarySaved
+                    ? "Manual Auto Clean run completed successfully. The latest run summary was saved locally."
+                    : $"Manual Auto Clean run completed, but its summary could not be saved locally. {saveError}"
+                : summarySaved
+                    ? "Manual Auto Clean run completed with skipped or failed items. Review the result below; the summary was saved locally."
+                    : $"Manual Auto Clean run completed with issues, but its summary could not be saved locally. {saveError}";
+            RefreshRunSummary();
+        }
+        catch (OperationCanceledException)
+        {
+            RemoveDeletedRunResults();
+            _isRunPreviewFresh = false;
+            RunPreviewStatus = "Cleanup cancelled • fresh preview required";
+            Status = "Manual Auto Clean cleanup cancelled. Files already deleted remain deleted; run a fresh preview before another cleanup.";
+            RefreshRunSummary();
+        }
+        catch (Exception ex)
+        {
+            RemoveDeletedRunResults();
+            _isRunPreviewFresh = false;
+            RunPreviewStatus = "Cleanup failed • fresh preview required";
+            Status = $"Manual Auto Clean stopped unexpectedly. Files already deleted remain deleted; run a fresh preview before trying again. {ex.Message}";
+            RefreshRunSummary();
+        }
+        finally
+        {
+            OnPropertyChanged(nameof(IsRunPreviewFresh));
+            EndOperation();
+        }
+    }
+
+    private bool TrySaveManualRunSummary(
+        AutoCleanManualRunSummary summary,
+        out string error)
+    {
+        error = string.Empty;
+        if (_runScheduleSnapshot is null)
+        {
+            error = "The schedule is no longer available.";
+            return false;
+        }
+
+        var item = Schedules.FirstOrDefault(
+            schedule => schedule.Id == _runScheduleSnapshot.Id);
+        if (item is null)
+        {
+            error = "The schedule is no longer available.";
+            return false;
+        }
+
+        var updatedSchedule = item.Model with
+        {
+            LastManualRun = summary
+        };
+        var proposedSchedules = Schedules
+            .Select(schedule => schedule == item
+                ? updatedSchedule
+                : schedule.Model)
+            .ToArray();
+
+        try
+        {
+            _scheduleService.Save(proposedSchedules);
+        }
+        catch (Exception ex) when (IsScheduleStorageException(ex))
+        {
+            error = ex.Message;
+            return false;
+        }
+
+        item.Update(
+            updatedSchedule,
+            _scheduleService.CalculateNextRun(updatedSchedule, _nowProvider()));
+        _runScheduleSnapshot = updatedSchedule;
+        OnPropertyChanged(nameof(RunScheduleName));
+        OnPropertyChanged(nameof(RunScheduleStateText));
+        RefreshScheduleSummary();
+        return true;
     }
 
     private bool TryBuildEditorSchedule(
@@ -725,27 +1095,42 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
         RaiseCommandStates();
     }
 
-    private void BeginPreview()
+    private void BeginEditorPreview()
     {
-        _cancellationTokenSource?.Dispose();
-        _cancellationTokenSource = new CancellationTokenSource();
+        BeginOperation();
         PreviewProgress = 0;
         PreviewStatus = "Previewing...";
         PreviewFilesFound = "0";
         PreviewReclaimableSpace = "0 B";
         PreviewIssues = "0";
         Status = "Running a read-only preview of the selected Cleaner categories...";
+    }
+
+    private void BeginRunOperation(
+        string runPreviewStatus,
+        string status)
+    {
+        BeginOperation();
+        RunProgress = 0;
+        RunPreviewStatus = runPreviewStatus;
+        Status = status;
+    }
+
+    private void BeginOperation()
+    {
+        _cancellationTokenSource?.Dispose();
+        _cancellationTokenSource = new CancellationTokenSource();
         IsBusy = true;
     }
 
-    private void EndPreview()
+    private void EndOperation()
     {
         IsBusy = false;
         _cancellationTokenSource?.Dispose();
         _cancellationTokenSource = null;
     }
 
-    private void CancelPreview() => _cancellationTokenSource?.Cancel();
+    private void CancelCurrentOperation() => _cancellationTokenSource?.Cancel();
 
     private void ResetPreview(string previewStatus)
     {
@@ -754,6 +1139,63 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
         PreviewFilesFound = "0";
         PreviewReclaimableSpace = "0 B";
         PreviewIssues = "0";
+    }
+
+    private void ResetRunReview()
+    {
+        ClearRunResults();
+        _runScheduleSnapshot = null;
+        _isRunPreviewFresh = false;
+        RunProgress = 0;
+        RunPreviewStatus = "Not started";
+        RunIssueCount = "0";
+        RunFirstIssue = string.Empty;
+        RunOperationResult = OperationResultPresentation.Hidden;
+        OnPropertyChanged(nameof(RunScheduleName));
+        OnPropertyChanged(nameof(RunScheduleStateText));
+        OnPropertyChanged(nameof(IsRunPreviewFresh));
+        RefreshRunSummary();
+    }
+
+    private void OnRunResultPropertyChanged(
+        object? sender,
+        PropertyChangedEventArgs args)
+    {
+        if (args.PropertyName == nameof(AutoCleanRunPreviewItemViewModel.IsSelected))
+        {
+            RefreshRunSummary();
+            CleanRunPreviewCommand.RaiseCanExecuteChanged();
+        }
+    }
+
+    private void ClearRunResults()
+    {
+        foreach (var result in RunResults)
+        {
+            result.PropertyChanged -= OnRunResultPropertyChanged;
+        }
+
+        RunResults.Clear();
+    }
+
+    private void RemoveDeletedRunResults()
+    {
+        foreach (var item in RunResults
+            .Where(item => !File.Exists(item.FullPath))
+            .ToArray())
+        {
+            item.PropertyChanged -= OnRunResultPropertyChanged;
+            RunResults.Remove(item);
+        }
+    }
+
+    private void RefreshRunSummary()
+    {
+        OnPropertyChanged(nameof(RunFilesFound));
+        OnPropertyChanged(nameof(RunSelectedFiles));
+        OnPropertyChanged(nameof(RunReclaimableSpace));
+        OnPropertyChanged(nameof(RunSelectedSpace));
+        OnPropertyChanged(nameof(AreAllRunResultsSelected));
     }
 
     private void RefreshAllNextRuns()
@@ -778,6 +1220,28 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(IsEmptyStateVisible));
     }
 
+    private bool CanRunSelectedSchedule(object? parameter) =>
+        !IsBusy &&
+        !IsEditorOpen &&
+        !IsRunReviewOpen &&
+        parameter is AutoCleanScheduleItemViewModel schedule &&
+        Schedules.Contains(schedule) &&
+        schedule.Model.Categories.Count > 0;
+
+    private bool CanCleanRunPreview() =>
+        !IsBusy &&
+        IsRunReviewOpen &&
+        _isRunPreviewFresh &&
+        RunResults.Any(item => item.IsSelected);
+
+    private void RaisePageVisibilityChanged()
+    {
+        OnPropertyChanged(nameof(IsOverviewVisible));
+        OnPropertyChanged(nameof(IsEditorVisible));
+        OnPropertyChanged(nameof(IsRunReviewVisible));
+        RaiseCommandStates();
+    }
+
     private void RaiseCommandStates()
     {
         NewScheduleCommand.RaiseCanExecuteChanged();
@@ -787,6 +1251,32 @@ public sealed class AutoCleanScheduleViewModel : INotifyPropertyChanged
         RemoveScheduleCommand.RaiseCanExecuteChanged();
         PreviewNowCommand.RaiseCanExecuteChanged();
         CancelPreviewCommand.RaiseCanExecuteChanged();
+        RunSelectedScheduleCommand.RaiseCanExecuteChanged();
+        CleanRunPreviewCommand.RaiseCanExecuteChanged();
+        BackFromRunReviewCommand.RaiseCanExecuteChanged();
+        CancelRunCommand.RaiseCanExecuteChanged();
+    }
+
+    private static bool IsScheduleStorageException(Exception ex) =>
+        ex is IOException or
+        UnauthorizedAccessException or
+        ArgumentException or
+        InvalidOperationException or
+        NotSupportedException;
+
+    private static string FormatElapsed(TimeSpan elapsed)
+    {
+        if (elapsed.TotalMilliseconds < 1)
+        {
+            return "<1 ms";
+        }
+
+        if (elapsed.TotalSeconds < 1)
+        {
+            return $"{elapsed.TotalMilliseconds:0} ms";
+        }
+
+        return $"{elapsed.TotalSeconds:0.0} s";
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

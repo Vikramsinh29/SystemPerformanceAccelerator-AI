@@ -174,6 +174,9 @@ public sealed class AutoCleanScheduleService : IAutoCleanScheduleService
                 .ToArray();
             var isEnabled = schedule.IsEnabled && categories.Length > 0;
 
+            var lastManualRun = NormalizeManualRun(
+                schedule.LastManualRun,
+                out var manualRunChanged);
             var normalizedSchedule = new AutoCleanSchedule(
                 identifier,
                 name,
@@ -182,9 +185,13 @@ public sealed class AutoCleanScheduleService : IAutoCleanScheduleService
                 schedule.RunAtLocalTime,
                 weeklyDay,
                 monthlyDay,
-                categories);
+                categories)
+            {
+                LastManualRun = lastManualRun
+            };
 
-            if (identifier != schedule.Id ||
+            if (manualRunChanged ||
+                identifier != schedule.Id ||
                 name != schedule.Name ||
                 isEnabled != schedule.IsEnabled ||
                 frequency != schedule.Frequency ||
@@ -203,6 +210,43 @@ public sealed class AutoCleanScheduleService : IAutoCleanScheduleService
             changed = true;
         }
 
+        return normalized;
+    }
+
+    private static AutoCleanManualRunSummary? NormalizeManualRun(
+        AutoCleanManualRunSummary? summary,
+        out bool changed)
+    {
+        changed = false;
+        if (summary is null)
+        {
+            return null;
+        }
+
+        var requestedCount = Math.Max(0, summary.RequestedCount);
+        var deletedCount = Math.Max(0, summary.DeletedCount);
+        var skippedCount = Math.Max(0, summary.SkippedCount);
+        var failedCount = Math.Max(0, summary.FailedCount);
+        var reclaimedBytes = Math.Max(0, summary.ReclaimedBytes);
+        var elapsed = summary.Elapsed < TimeSpan.Zero
+            ? TimeSpan.Zero
+            : summary.Elapsed;
+        var firstIssue = (summary.FirstIssue ?? string.Empty).Trim();
+        if (firstIssue.Length > AutoCleanManualRunSummary.MaximumFirstIssueLength)
+        {
+            firstIssue = firstIssue[..AutoCleanManualRunSummary.MaximumFirstIssueLength];
+        }
+
+        var normalized = new AutoCleanManualRunSummary(
+            summary.CompletedAtLocal,
+            requestedCount,
+            deletedCount,
+            skippedCount,
+            failedCount,
+            reclaimedBytes,
+            elapsed,
+            firstIssue);
+        changed = normalized != summary;
         return normalized;
     }
 

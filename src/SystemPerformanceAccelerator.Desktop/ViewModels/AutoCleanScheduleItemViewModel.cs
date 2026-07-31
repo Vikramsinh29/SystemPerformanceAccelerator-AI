@@ -43,6 +43,13 @@ public sealed class AutoCleanScheduleItemViewModel : INotifyPropertyChanged
     public string NextRunCaption => _nextRun.HasValue
         ? "Next planned run"
         : "Schedule state";
+    public bool HasLastManualRun => _model.LastManualRun is not null;
+    public string LastManualRunText => _model.LastManualRun is { } result
+        ? result.CompletedAtLocal.ToString("dd MMM yyyy, hh:mm tt")
+        : "Never run manually";
+    public string LastManualRunDetail => _model.LastManualRun is { } result
+        ? $"{result.DeletedCount:N0} deleted • {MainWindowViewModel.FormatBytes(result.ReclaimedBytes)} reclaimed"
+        : "Use Run now for a reviewed, confirmed cleanup.";
 
     public void Update(
         AutoCleanSchedule model,
@@ -60,6 +67,9 @@ public sealed class AutoCleanScheduleItemViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(CategoriesText));
         OnPropertyChanged(nameof(NextRunText));
         OnPropertyChanged(nameof(NextRunCaption));
+        OnPropertyChanged(nameof(HasLastManualRun));
+        OnPropertyChanged(nameof(LastManualRunText));
+        OnPropertyChanged(nameof(LastManualRunDetail));
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

@@ -11,4 +11,6 @@ public sealed record AutoCleanSchedule(
     IReadOnlyCollection<CustomCleanCategory> Categories)
 {
     public const int MaximumNameLength = 80;
+
+    public AutoCleanManualRunSummary? LastManualRun { get; init; }
 }

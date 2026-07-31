@@ -93,6 +93,73 @@ public sealed class AutoCleanScheduleServiceTests
     }
 
     [Fact]
+    public void Load_LegacyScheduleWithoutManualRunSummary_RemainsBackwardCompatible()
+    {
+        using var location = new TemporaryScheduleLocation();
+        Directory.CreateDirectory(Path.GetDirectoryName(location.SchedulesPath)!);
+        var identifier = Guid.NewGuid();
+        File.WriteAllText(
+            location.SchedulesPath,
+            $$"""
+            [
+              {
+                "Id": "{{identifier}}",
+                "Name": "Legacy daily plan",
+                "IsEnabled": true,
+                "Frequency": "Daily",
+                "RunAtLocalTime": "09:00:00",
+                "WeeklyDay": "Monday",
+                "MonthlyDay": 1,
+                "Categories": ["TemporaryFiles"]
+              }
+            ]
+            """);
+        var service = new AutoCleanScheduleService(location.SchedulesPath);
+
+        var result = service.Load();
+
+        var schedule = Assert.Single(result.Schedules);
+        Assert.Equal(identifier, schedule.Id);
+        Assert.Null(schedule.LastManualRun);
+        Assert.False(result.HasWarning);
+    }
+
+    [Fact]
+    public void SaveAndLoad_RoundTripsLatestManualRunSummary()
+    {
+        using var location = new TemporaryScheduleLocation();
+        var service = new AutoCleanScheduleService(location.SchedulesPath);
+        var completedAt = new DateTime(2026, 7, 31, 14, 30, 0);
+        var expectedSummary = new AutoCleanManualRunSummary(
+            completedAt,
+            4,
+            2,
+            1,
+            1,
+            4096,
+            TimeSpan.FromSeconds(1.5),
+            "One file was locked.");
+        var schedule = CreateSchedule(
+            Guid.NewGuid(),
+            "Manual result plan",
+            false,
+            AutoCleanScheduleFrequency.Daily,
+            new TimeOnly(9, 0),
+            DayOfWeek.Monday,
+            1) with
+        {
+            LastManualRun = expectedSummary
+        };
+
+        service.Save([schedule]);
+        var result = service.Load();
+
+        var actual = Assert.Single(result.Schedules);
+        Assert.Equal(expectedSummary, actual.LastManualRun);
+        Assert.False(result.HasWarning);
+    }
+
+    [Fact]
     public void Load_WhenJsonIsMalformed_ReturnsEmptyWithWarning()
     {
         using var location = new TemporaryScheduleLocation();

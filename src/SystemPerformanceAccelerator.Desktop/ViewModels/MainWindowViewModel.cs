@@ -216,7 +216,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ApplicationModule.Cleaner => "Safely review and remove temporary files",
         ApplicationModule.HealthCheck => "Review key system conditions without changing Windows",
         ApplicationModule.CustomClean => "Preview and safely clean selected existing Cleaner categories",
-        ApplicationModule.AutoCleanSchedule => "Plan local cleanup schedules and preview them without automatic execution",
+        ApplicationModule.AutoCleanSchedule => "Plan local cleanup schedules and run a reviewed cleanup manually",
         ApplicationModule.LargeFileFinder => "Find and safely move selected large files to the Windows Recycle Bin",
         ApplicationModule.DuplicateFileFinder => "Find content-confirmed duplicates and safely recycle selected copies",
         ApplicationModule.StartupManager => "Safely enable or disable Windows startup entries without deleting them",

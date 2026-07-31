@@ -2805,12 +2805,12 @@
                                            VerticalAlignment="Center" />
                             </Border>
                             <StackPanel Grid.Column="1" Margin="11,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="Planning only — you remain in control"
+                                <TextBlock Text="Manual execution only — you remain in control"
                                            Foreground="{DynamicResource TextPrimaryBrush}"
                                            FontSize="12"
                                            FontWeight="SemiBold" />
                                 <TextBlock Margin="0,3,0,0"
-                                           Text="Schedules are stored locally. They calculate future run times and support manual previews only; nothing runs or deletes files automatically."
+                                           Text="Schedules are stored locally. Run now always performs a fresh preview, starts with nothing selected, and requires explicit confirmation. No cleanup runs unattended."
                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                            FontSize="11"
                                            TextWrapping="Wrap" />
@@ -2881,6 +2881,16 @@
                                                                Text="{Binding CategoriesText}"
                                                                Foreground="{DynamicResource TextSecondaryBrush}"
                                                                FontSize="11" />
+                                                    <TextBlock Margin="0,7,0,0"
+                                                               Text="{Binding LastManualRunText, StringFormat='Last manual run: {0}'}"
+                                                               Foreground="{DynamicResource AccentBrush}"
+                                                               FontSize="10.5"
+                                                               FontWeight="SemiBold" />
+                                                    <TextBlock Margin="0,2,0,0"
+                                                               Text="{Binding LastManualRunDetail}"
+                                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                                               FontSize="10"
+                                                               TextTrimming="CharacterEllipsis" />
                                                 </StackPanel>
 
                                                 <StackPanel Grid.Column="3" VerticalAlignment="Center">
@@ -2976,6 +2986,10 @@
                                                FontSize="11"
                                                VerticalAlignment="Center" />
                                     <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <Button Command="{Binding RunSelectedScheduleCommand}"
+                                                CommandParameter="{Binding SelectedSchedule}"
+                                                Style="{StaticResource FluentPrimaryButtonStyle}"
+                                                Margin="0,0,8,0"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE768;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Run now" VerticalAlignment="Center" /></StackPanel></Button>
                                         <Button Command="{Binding EditSelectedScheduleCommand}"
                                                 Style="{StaticResource FluentSecondaryButtonStyle}"
                                                 Margin="0,0,8,0" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE70F;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Edit selected" VerticalAlignment="Center" /></StackPanel></Button>
@@ -3003,6 +3017,144 @@
                                 <TextBlock Margin="0,3,0,0"
                                            Text="{Binding Status}"
                                            Style="{StaticResource OperationStatusMessageStyle}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- Fresh preview and confirmed manual run page -->
+                <Grid Visibility="{Binding IsRunReviewVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="14" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Button Command="{Binding BackFromRunReviewCommand}"
+                                Style="{StaticResource FluentSecondaryButtonStyle}"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE72B;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Back to schedules" VerticalAlignment="Center" /></StackPanel></Button>
+                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding RunScheduleName}"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                       FontSize="20"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Margin="0,3,0,0"
+                                       Text="Fresh manual cleanup review — no file begins selected"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       FontSize="11" />
+                        </StackPanel>
+                        <Border Grid.Column="3" Style="{StaticResource FluentBadgeStyle}" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding RunScheduleStateText}"
+                                       Foreground="{DynamicResource AccentBrush}"
+                                       FontSize="10.5"
+                                       FontWeight="SemiBold" />
+                        </Border>
+                    </Grid>
+
+                    <UniformGrid Grid.Row="1" Margin="-4,-4,-4,9" Columns="4">
+                        <Border Style="{StaticResource ResponsiveSummaryCardStyle}">
+                            <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="38" /></Grid.ColumnDefinitions>
+                                <StackPanel><TextBlock Text="FILES FOUND" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" /><TextBlock Margin="0,5,0,0" Text="{Binding RunFilesFound}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /><TextBlock Margin="0,3,0,0" Text="Fresh preview inventory" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10.5" /></StackPanel>
+                                <Border Grid.Column="1" Width="34" Height="34" Background="{DynamicResource AccentSoftBrush}" CornerRadius="10"><TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" Foreground="{DynamicResource AccentBrush}" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource ResponsiveSummaryCardStyle}">
+                            <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="38" /></Grid.ColumnDefinitions>
+                                <StackPanel><TextBlock Text="SELECTED" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" /><TextBlock Margin="0,5,0,0" Text="{Binding RunSelectedFiles}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /><TextBlock Margin="0,3,0,0" Text="{Binding RunSelectedSpace}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10.5" /></StackPanel>
+                                <Border Grid.Column="1" Width="34" Height="34" Background="{DynamicResource SuccessSoftBrush}" CornerRadius="10"><TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" Foreground="{DynamicResource SuccessBrush}" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource ResponsiveSummaryCardStyle}">
+                            <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="38" /></Grid.ColumnDefinitions>
+                                <StackPanel><TextBlock Text="RECLAIMABLE" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" /><TextBlock Margin="0,5,0,0" Text="{Binding RunReclaimableSpace}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="20" FontWeight="SemiBold" /><TextBlock Margin="0,3,0,0" Text="Across all previewed files" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10.5" /></StackPanel>
+                                <Border Grid.Column="1" Width="34" Height="34" Background="{DynamicResource WarningSoftBrush}" CornerRadius="10"><TextBlock Text="&#xE7C3;" FontFamily="Segoe MDL2 Assets" Foreground="{DynamicResource WarningBrush}" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource ResponsiveSummaryCardStyle}">
+                            <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="38" /></Grid.ColumnDefinitions>
+                                <StackPanel><TextBlock Text="SCAN ISSUES" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" /><TextBlock Margin="0,5,0,0" Text="{Binding RunIssueCount}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /><TextBlock Margin="0,3,0,0" Text="Skipped or inaccessible locations" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10.5" /></StackPanel>
+                                <Border Grid.Column="1" Width="34" Height="34" Background="{DynamicResource DangerSoftBrush}" CornerRadius="10"><TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" Foreground="{DynamicResource DangerBrush}" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+                            </Grid>
+                        </Border>
+                    </UniformGrid>
+
+                    <Border Grid.Row="2" Padding="0" Style="{StaticResource ScheduleSurfaceCardStyle}" ClipToBounds="True">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid Margin="20,16,20,12">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Fresh preview files" Style="{StaticResource ScheduleSectionTitleStyle}" />
+                                    <TextBlock Margin="0,3,0,0" Text="Select only files you reviewed. Cleanup revalidates every selected file immediately before deletion." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10.5" TextWrapping="Wrap" />
+                                </StackPanel>
+                                <Border Grid.Column="1" Style="{StaticResource FluentBadgeStyle}" Margin="16,0,0,0" VerticalAlignment="Center"><TextBlock Text="{Binding RunPreviewStatus}" Foreground="{DynamicResource AccentBrush}" FontSize="10.5" FontWeight="SemiBold" MaxWidth="230" TextTrimming="CharacterEllipsis" /></Border>
+                            </Grid>
+                            <ProgressBar Grid.Row="1" Height="5" Minimum="0" Maximum="100" Value="{Binding RunProgress, Mode=OneWay}" Foreground="{DynamicResource AccentBrush}" Background="{DynamicResource ProgressTrackBrush}" />
+                            <Grid Grid.Row="2">
+                                <DataGrid x:Name="AutoCleanRunResultsGrid"
+                                          ItemsSource="{Binding RunResults}"
+                                          Style="{StaticResource FluentDataGridStyle}"
+                                          behaviors:DataGridSelectionBehavior.IsEnabled="True"
+                                          AutoGenerateColumns="False"
+                                          IsReadOnly="True"
+                                          CanUserAddRows="False"
+                                          CanUserDeleteRows="False"
+                                          CanUserReorderColumns="False"
+                                          BorderThickness="0"
+                                          SelectionMode="Single"
+                                          SelectionUnit="FullRow"
+                                          AlternationCount="2"
+                                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                          EnableRowVirtualization="True"
+                                          EnableColumnVirtualization="True">
+                                    <DataGrid.Columns>
+                                        <DataGridTemplateColumn Width="86">
+                                            <DataGridTemplateColumn.Header><CheckBox IsChecked="{Binding DataContext.AreAllRunResultsSelected, RelativeSource={RelativeSource AncestorType=DataGrid}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource BulkSelectionHeaderCheckBoxStyle}" /></DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate><DataTemplate><CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center" Focusable="False" IsTabStop="False" Cursor="Hand" /></DataTemplate></DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTextColumn Header="CATEGORY" Binding="{Binding Category}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="1.1*" MinWidth="118" />
+                                        <DataGridTextColumn Header="FILE NAME" Binding="{Binding Name}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="1.5*" MinWidth="145" />
+                                        <DataGridTextColumn Header="SIZE" Binding="{Binding Size}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="74" MinWidth="74" MaxWidth="82" />
+                                        <DataGridTextColumn Header="MODIFIED" Binding="{Binding LastModified, StringFormat={}{0:dd MMM yyyy  HH:mm}}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="130" MinWidth="126" />
+                                        <DataGridTextColumn Header="LOCATION" Binding="{Binding FullPath}" ElementStyle="{StaticResource ResponsiveDataGridTextStyle}" IsReadOnly="True" Width="1.7*" MinWidth="155" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <Border Background="{DynamicResource SurfaceBrush}" IsHitTestVisible="False">
+                                    <Border.Style><Style TargetType="Border"><Setter Property="Visibility" Value="Collapsed" /><Style.Triggers><DataTrigger Binding="{Binding ElementName=AutoCleanRunResultsGrid, Path=HasItems}" Value="False"><Setter Property="Visibility" Value="Visible" /></DataTrigger></Style.Triggers></Style></Border.Style>
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="430">
+                                        <Border Width="58" Height="58" Background="{DynamicResource AccentSoftBrush}" CornerRadius="18"><TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" Foreground="{DynamicResource AccentBrush}" FontSize="23" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+                                        <TextBlock Margin="0,16,0,0" Text="{Binding RunPreviewStatus}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                        <TextBlock Margin="0,6,0,0" Text="No files are selected or deleted automatically. A preview with zero files is also a valid safe result." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" TextAlignment="Center" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                            <Border Grid.Row="3" Margin="16,10,16,0" Padding="12,9" Background="{DynamicResource WarningSoftBrush}" CornerRadius="8" Visibility="{Binding HasRunFirstIssue, Converter={StaticResource BooleanToVisibilityConverter}}"><TextBlock Text="{Binding RunFirstIssue, StringFormat='First scan issue: {0}'}" Foreground="{DynamicResource WarningBrush}" FontSize="10.5" TextWrapping="Wrap" /></Border>
+                            <ContentControl Grid.Row="4" Margin="16,10,16,14" Content="{Binding RunOperationResult}" ContentTemplate="{StaticResource OperationResultSummaryTemplate}" Visibility="{Binding RunOperationResult.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Row="3" Margin="0,12,0,0" Style="{StaticResource OperationStatusPanelStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource OperationStatusIconStyle}"><TextBlock Text="&#xE946;" Style="{StaticResource OperationStatusGlyphStyle}" /></Border>
+                            <StackPanel Grid.Column="1" Margin="12,0,18,0" VerticalAlignment="Center"><TextBlock Text="MANUAL AUTO CLEAN STATUS" Style="{StaticResource OperationStatusLabelStyle}" /><TextBlock Margin="0,3,0,0" Text="{Binding Status}" ToolTip="{Binding Status}" Style="{StaticResource OperationStatusMessageStyle}" /></StackPanel>
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Button Command="{Binding CancelRunCommand}" Style="{StaticResource FluentSecondaryButtonStyle}" Margin="0,0,8,0"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE711;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Cancel operation" VerticalAlignment="Center" /></StackPanel></Button>
+                                <Button Command="{Binding CleanRunPreviewCommand}" Style="{StaticResource CleanButtonStyle}"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74D;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Clean selected" VerticalAlignment="Center" /></StackPanel></Button>
                             </StackPanel>
                         </Grid>
                     </Border>
