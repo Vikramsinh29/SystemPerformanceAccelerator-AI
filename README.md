@@ -744,3 +744,20 @@ Sprint 29 — Version 1.0.0 Release Publication, only after Sprint 28 is committ
 ## Compact AI handoff
 
 Work in this repository. Read this README, inspect Git status and the exact current files, preserve the CCleaner-style WPF/MVVM architecture, and implement only the requested narrow sprint. For failures, follow the mandatory troubleshooting protocol: reproduce, inspect, identify the root cause, make one evidence-based change, clean-build, run all tests, verify every affected module, and stop before commit.
+
+## Sprint 33A - Premium design system foundation
+
+Sprint 33A establishes a reusable commercial-quality visual foundation while preserving the existing CCleaner-style WPF/MVVM application structure and all feature behaviour.
+
+- Central premium Light and Dark palettes use matte black, carbon black, gunmetal, warm light surfaces, metallic gold, rich gold hover states, premium white, and neutral gray.
+- Green, amber, and red remain reserved for success, warning, and danger semantics.
+- Shared design tokens now define typography, spacing, corner radii, padding, elevation, and restrained gold glow effects.
+- Reusable resource dictionaries cover typography, cards, buttons, inputs, tables, progress indicators, scrollbars, icons, and window chrome.
+- Existing Fluent style keys remain compatible so current modules continue to resolve their styles while later sprints migrate layouts incrementally.
+- Primary actions use a metallic gold treatment; secondary and danger actions retain clear visual hierarchy and disabled states.
+- Text boxes, combo boxes, checkboxes, radio buttons, and switch foundations share one premium control language.
+- Data grids, progress indicators, tooltips, title-bar controls, navigation states, and scrollbars use the same commercial visual system.
+- Sidebar selection uses a restrained gold surface, readable selected text, and a clear selection rail.
+- Light and Dark theme switching continues through the local ThemeManager without cloud services, telemetry, or external dependencies.
+- No Cleaner, Custom Clean, Large File Finder, Duplicate Finder, Startup Manager, System Monitor, Health Check, Auto Clean, safety, command, service, or persistence behaviour is changed.
+- Final PC-SPA phoenix assets, executable renaming, splash branding, module-by-module layout migration, and launch asset packaging remain outside this foundation sprint.

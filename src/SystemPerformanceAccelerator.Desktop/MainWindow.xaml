@@ -378,6 +378,61 @@
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
 
+        <Style x:Key="HeaderStatusBadgeStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource FluentBadgeStyle}">
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="MinWidth" Value="88" />
+            <Setter Property="MaxWidth" Value="220" />
+            <Setter Property="Padding" Value="11,4" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="HeaderStatusBadgeTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="FontSize" Value="10.5" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="CompletionStatusChipStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource FluentBadgeStyle}">
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="MaxWidth" Value="280" />
+            <Setter Property="Padding" Value="12,5" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+        </Style>
+
+        <Style x:Key="CompletionStatusChipTextStyle" TargetType="TextBlock">
+            <Setter Property="MaxWidth" Value="254" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="FontSize" Value="10.5" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="StartupNameHeaderStyle"
+               TargetType="DataGridColumnHeader"
+               BasedOn="{StaticResource FluentDataGridColumnHeaderStyle}">
+            <Setter Property="Padding" Value="20,0,12,0" />
+        </Style>
+
+        <Style x:Key="StartupNameCellTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource ResponsiveDataGridTextStyle}">
+            <Setter Property="Margin" Value="8,0,0,0" />
+        </Style>
+
         <Style x:Key="ResultMetricCardStyle"
                TargetType="Border"
                BasedOn="{StaticResource FluentCardStyle}">
@@ -555,11 +610,16 @@
                             <ColumnDefinition Width="42" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Border Width="34" Height="34" Background="{DynamicResource AccentBrush}" CornerRadius="10">
+                        <Border Width="34" Height="34"
+                                Background="{DynamicResource AccentGradientBrush}"
+                                BorderBrush="{DynamicResource GoldHighlightBrush}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Effect="{StaticResource SubtleGoldGlowEffect}">
                             <TextBlock Text="SPA"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"
-                                       Foreground="White"
+                                       Foreground="{DynamicResource AccentForegroundBrush}"
                                        FontSize="11"
                                        FontWeight="Bold" />
                         </Border>
@@ -582,7 +642,7 @@
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsCleanerActive}" Value="True">
                                         <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}" />
-                                        <Setter Property="Foreground" Value="White" />
+                                        <Setter Property="Foreground" Value="{DynamicResource SidebarSelectedForegroundBrush}" />
                                         <Setter Property="FontWeight" Value="SemiBold" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -617,7 +677,7 @@
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsHealthCheckActive}" Value="True">
                                         <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}" />
-                                        <Setter Property="Foreground" Value="White" />
+                                        <Setter Property="Foreground" Value="{DynamicResource SidebarSelectedForegroundBrush}" />
                                         <Setter Property="FontWeight" Value="SemiBold" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -652,7 +712,7 @@
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsCustomCleanActive}" Value="True">
                                         <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}" />
-                                        <Setter Property="Foreground" Value="White" />
+                                        <Setter Property="Foreground" Value="{DynamicResource SidebarSelectedForegroundBrush}" />
                                         <Setter Property="FontWeight" Value="SemiBold" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -687,7 +747,7 @@
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsAutoCleanScheduleActive}" Value="True">
                                         <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}" />
-                                        <Setter Property="Foreground" Value="White" />
+                                        <Setter Property="Foreground" Value="{DynamicResource SidebarSelectedForegroundBrush}" />
                                         <Setter Property="FontWeight" Value="SemiBold" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -722,7 +782,7 @@
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsLargeFileFinderActive}" Value="True">
                                         <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}" />
-                                        <Setter Property="Foreground" Value="White" />
+                                        <Setter Property="Foreground" Value="{DynamicResource SidebarSelectedForegroundBrush}" />
                                         <Setter Property="FontWeight" Value="SemiBold" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -757,7 +817,7 @@
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsDuplicateFileFinderActive}" Value="True">
                                         <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}" />
-                                        <Setter Property="Foreground" Value="White" />
+                                        <Setter Property="Foreground" Value="{DynamicResource SidebarSelectedForegroundBrush}" />
                                         <Setter Property="FontWeight" Value="SemiBold" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -792,7 +852,7 @@
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsStartupManagerActive}" Value="True">
                                         <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}" />
-                                        <Setter Property="Foreground" Value="White" />
+                                        <Setter Property="Foreground" Value="{DynamicResource SidebarSelectedForegroundBrush}" />
                                         <Setter Property="FontWeight" Value="SemiBold" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -827,7 +887,7 @@
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsSystemMonitorActive}" Value="True">
                                         <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}" />
-                                        <Setter Property="Foreground" Value="White" />
+                                        <Setter Property="Foreground" Value="{DynamicResource SidebarSelectedForegroundBrush}" />
                                         <Setter Property="FontWeight" Value="SemiBold" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -862,7 +922,7 @@
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsSettingsActive}" Value="True">
                                         <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}" />
-                                        <Setter Property="Foreground" Value="White" />
+                                        <Setter Property="Foreground" Value="{DynamicResource SidebarSelectedForegroundBrush}" />
                                         <Setter Property="FontWeight" Value="SemiBold" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -1240,14 +1300,11 @@
                                                    TextWrapping="Wrap" />
                                     </StackPanel>
                                     <Border Grid.Column="1"
-                                            Padding="10,5"
-                                            Background="{DynamicResource AccentSoftBrush}"
-                                            CornerRadius="12"
-                                            VerticalAlignment="Center">
-                                        <TextBlock Text="Findings first"
-                                                   Foreground="{DynamicResource AccentBrush}"
-                                                   FontSize="10.5"
-                                                   FontWeight="SemiBold" />
+                                            Margin="16,0,0,0"
+                                            Style="{StaticResource HeaderStatusBadgeStyle}"
+                                            ToolTip="{Binding FindingsHeaderStatus}">
+                                        <TextBlock Text="{Binding FindingsHeaderStatus}"
+                                                   Style="{StaticResource HeaderStatusBadgeTextStyle}" />
                                     </Border>
                                 </Grid>
                             </Border>
@@ -2016,14 +2073,10 @@
 
                             <Border Grid.Column="1"
                                     Margin="16,0,0,0"
-                                    Style="{StaticResource FluentBadgeStyle}">
+                                    Style="{StaticResource HeaderStatusBadgeStyle}"
+                                    ToolTip="{Binding ScanStatus}">
                                 <TextBlock Text="{Binding ScanStatus}"
-                                           Foreground="{DynamicResource AccentBrush}"
-                                           FontSize="10.5"
-                                           FontWeight="SemiBold"
-                                           TextTrimming="CharacterEllipsis"
-                                           MaxWidth="180"
-                                           ToolTip="{Binding ScanStatus}" />
+                                           Style="{StaticResource HeaderStatusBadgeTextStyle}" />
                             </Border>
                         </Grid>
 
@@ -2483,13 +2536,10 @@
 
                             <Border Grid.Column="1"
                                     Margin="16,0,0,0"
-                                    Style="{StaticResource FluentBadgeStyle}">
+                                    Style="{StaticResource CompletionStatusChipStyle}"
+                                    ToolTip="{Binding PreviewStatus}">
                                 <TextBlock Text="{Binding PreviewStatus}"
-                                           Foreground="{DynamicResource AccentBrush}"
-                                           FontSize="10.5"
-                                           FontWeight="SemiBold"
-                                           TextTrimming="CharacterEllipsis"
-                                           MaxWidth="190" />
+                                           Style="{StaticResource CompletionStatusChipTextStyle}" />
                             </Border>
                         </Grid>
 
@@ -4152,10 +4202,11 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="NAME"
                                                 Binding="{Binding Name}"
-                                                ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
+                                                HeaderStyle="{StaticResource StartupNameHeaderStyle}"
+                                                ElementStyle="{StaticResource StartupNameCellTextStyle}"
                                                 IsReadOnly="True"
-                                                Width="1.2*"
-                                                MinWidth="90" />
+                                                Width="1.35*"
+                                                MinWidth="160" />
                             <DataGridTextColumn Header="COMMAND / PATH"
                                                 Binding="{Binding Command}"
                                                 ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"

@@ -1,0 +1,79 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:presentationOptions="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options">
+    <!-- Initial values use the premium dark palette. ThemeManager replaces them before MainWindow loads. -->
+    <SolidColorBrush x:Key="AppBackgroundBrush" presentationOptions:Freeze="False" Color="#0A0B0D" />
+    <SolidColorBrush x:Key="SurfaceBrush" presentationOptions:Freeze="False" Color="#121417" />
+    <SolidColorBrush x:Key="SurfaceMutedBrush" presentationOptions:Freeze="False" Color="#181B1F" />
+    <SolidColorBrush x:Key="SurfaceRaisedBrush" presentationOptions:Freeze="False" Color="#1B1F24" />
+    <SolidColorBrush x:Key="InputBackgroundBrush" presentationOptions:Freeze="False" Color="#0E1013" />
+    <SolidColorBrush x:Key="InputBorderBrush" presentationOptions:Freeze="False" Color="#52472A" />
+    <SolidColorBrush x:Key="TextPrimaryBrush" presentationOptions:Freeze="False" Color="#F6F2E8" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" presentationOptions:Freeze="False" Color="#C4BDAF" />
+    <SolidColorBrush x:Key="TextTertiaryBrush" presentationOptions:Freeze="False" Color="#938D83" />
+    <SolidColorBrush x:Key="BorderBrush" presentationOptions:Freeze="False" Color="#363229" />
+    <SolidColorBrush x:Key="BorderStrongBrush" presentationOptions:Freeze="False" Color="#705D31" />
+    <SolidColorBrush x:Key="PremiumDividerBrush" presentationOptions:Freeze="False" Color="#403825" />
+    <SolidColorBrush x:Key="OverlayBrush" presentationOptions:Freeze="False" Color="#AA000000" />
+
+    <SolidColorBrush x:Key="DataGridHeaderBrush" presentationOptions:Freeze="False" Color="#181B1F" />
+    <SolidColorBrush x:Key="DataGridRowHoverBrush" presentationOptions:Freeze="False" Color="#201E19" />
+    <SolidColorBrush x:Key="DataGridRowSelectedBrush" presentationOptions:Freeze="False" Color="#30291A" />
+    <SolidColorBrush x:Key="SecondaryButtonForegroundBrush" presentationOptions:Freeze="False" Color="#EEE8D9" />
+    <SolidColorBrush x:Key="SecondaryButtonBorderBrush" presentationOptions:Freeze="False" Color="#625330" />
+    <SolidColorBrush x:Key="SecondaryButtonHoverBrush" presentationOptions:Freeze="False" Color="#201E19" />
+    <SolidColorBrush x:Key="ProgressTrackBrush" presentationOptions:Freeze="False" Color="#292C31" />
+    <SolidColorBrush x:Key="MetaTextBrush" presentationOptions:Freeze="False" Color="#C1BAAD" />
+
+    <SolidColorBrush x:Key="TitleBarBrush" presentationOptions:Freeze="False" Color="#08090B" />
+    <SolidColorBrush x:Key="TitleBarForegroundBrush" presentationOptions:Freeze="False" Color="#F6F2E8" />
+    <SolidColorBrush x:Key="TitleBarMutedTextBrush" presentationOptions:Freeze="False" Color="#B1AA9B" />
+    <SolidColorBrush x:Key="TitleBarBorderBrush" presentationOptions:Freeze="False" Color="#403825" />
+    <SolidColorBrush x:Key="CaptionButtonHoverBrush" presentationOptions:Freeze="False" Color="#201E19" />
+    <SolidColorBrush x:Key="CaptionButtonPressedBrush" presentationOptions:Freeze="False" Color="#312A1B" />
+    <SolidColorBrush x:Key="CaptionCloseHoverBrush" presentationOptions:Freeze="False" Color="#C42B1C" />
+    <SolidColorBrush x:Key="CaptionClosePressedBrush" presentationOptions:Freeze="False" Color="#A4262C" />
+
+    <SolidColorBrush x:Key="AccentBrush" presentationOptions:Freeze="False" Color="#D3AE47" />
+    <SolidColorBrush x:Key="AccentHoverBrush" presentationOptions:Freeze="False" Color="#E2BF5A" />
+    <SolidColorBrush x:Key="AccentPressedBrush" presentationOptions:Freeze="False" Color="#AA8427" />
+    <SolidColorBrush x:Key="AccentSoftBrush" presentationOptions:Freeze="False" Color="#2C2518" />
+    <SolidColorBrush x:Key="AccentForegroundBrush" presentationOptions:Freeze="False" Color="#17130B" />
+    <SolidColorBrush x:Key="GoldHighlightBrush" presentationOptions:Freeze="False" Color="#E8CB74" />
+    <SolidColorBrush x:Key="GoldMutedBrush" presentationOptions:Freeze="False" Color="#836B34" />
+    <SolidColorBrush x:Key="FocusBrush" presentationOptions:Freeze="False" Color="#E2C068" />
+
+    <SolidColorBrush x:Key="SuccessBrush" presentationOptions:Freeze="False" Color="#42B883" />
+    <SolidColorBrush x:Key="SuccessSoftBrush" presentationOptions:Freeze="False" Color="#15352A" />
+    <SolidColorBrush x:Key="WarningBrush" presentationOptions:Freeze="False" Color="#F0A543" />
+    <SolidColorBrush x:Key="WarningSoftBrush" presentationOptions:Freeze="False" Color="#392B19" />
+    <SolidColorBrush x:Key="DangerBrush" presentationOptions:Freeze="False" Color="#ED6A63" />
+    <SolidColorBrush x:Key="DangerSoftBrush" presentationOptions:Freeze="False" Color="#392020" />
+    <SolidColorBrush x:Key="DisabledBrush" presentationOptions:Freeze="False" Color="#2B2E33" />
+    <SolidColorBrush x:Key="DisabledForegroundBrush" presentationOptions:Freeze="False" Color="#8B8780" />
+
+    <SolidColorBrush x:Key="SidebarBrush" presentationOptions:Freeze="False" Color="#080A0C" />
+    <SolidColorBrush x:Key="SidebarHoverBrush" presentationOptions:Freeze="False" Color="#1C1B17" />
+    <SolidColorBrush x:Key="SidebarSelectedBrush" presentationOptions:Freeze="False" Color="#372E1B" />
+    <SolidColorBrush x:Key="SidebarSelectedForegroundBrush" presentationOptions:Freeze="False" Color="#F2D580" />
+    <SolidColorBrush x:Key="SidebarTextBrush" presentationOptions:Freeze="False" Color="#F2EEE5" />
+    <SolidColorBrush x:Key="SidebarMutedTextBrush" presentationOptions:Freeze="False" Color="#B0A99C" />
+    <SolidColorBrush x:Key="SidebarDividerBrush" presentationOptions:Freeze="False" Color="#393222" />
+    <SolidColorBrush x:Key="SidebarPanelBrush" presentationOptions:Freeze="False" Color="#101316" />
+
+    <LinearGradientBrush x:Key="AccentGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Offset="0" Color="#E8CB74" />
+        <GradientStop Offset="0.46" Color="#D3AE47" />
+        <GradientStop Offset="1" Color="#AA8427" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="AccentHoverGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Offset="0" Color="#F0D98A" />
+        <GradientStop Offset="0.5" Color="#E2BF5A" />
+        <GradientStop Offset="1" Color="#B38B2C" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="ProgressGradientBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Offset="0" Color="#AA8427" />
+        <GradientStop Offset="0.5" Color="#E2BF5A" />
+        <GradientStop Offset="1" Color="#E8CB74" />
+    </LinearGradientBrush>
+</ResourceDictionary>

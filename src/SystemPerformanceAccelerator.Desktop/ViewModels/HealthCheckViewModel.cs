@@ -78,6 +78,7 @@ public sealed class HealthCheckViewModel : INotifyPropertyChanged
             RunCheckCommand.RaiseCanExecuteChanged();
             CancelCommand.RaiseCanExecuteChanged();
             OnPropertyChanged(nameof(CheckState));
+            OnPropertyChanged(nameof(FindingsHeaderStatus));
         }
     }
 
@@ -112,6 +113,15 @@ public sealed class HealthCheckViewModel : INotifyPropertyChanged
         };
 
     public string CheckState => IsBusy ? "Checking" : "Ready";
+
+    public string FindingsHeaderStatus => IsBusy
+        ? "Health check running"
+        : !_hasResults
+            ? "Awaiting health check"
+            : Results.Count == 0
+                ? "No findings"
+                : "Findings ready for review";
+
     public string WarningText => $"{_warningCount:N0} warning(s)";
 
     private async Task RunCheckAsync()
@@ -212,6 +222,7 @@ public sealed class HealthCheckViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(AttentionCount));
         OnPropertyChanged(nameof(UnknownCount));
         OnPropertyChanged(nameof(OverallStatusText));
+        OnPropertyChanged(nameof(FindingsHeaderStatus));
         OnPropertyChanged(nameof(WarningText));
     }
 
