@@ -26,6 +26,7 @@
     <sys:Double x:Key="Space32">32</sys:Double>
 
     <Thickness x:Key="ControlPadding">14,0</Thickness>
+    <Thickness x:Key="ActionButtonSpacing">0,0,8,8</Thickness>
     <Thickness x:Key="CardPadding">18,16</Thickness>
     <Thickness x:Key="ElevatedCardPadding">20,18</Thickness>
     <Thickness x:Key="PageContentPadding">24,22</Thickness>

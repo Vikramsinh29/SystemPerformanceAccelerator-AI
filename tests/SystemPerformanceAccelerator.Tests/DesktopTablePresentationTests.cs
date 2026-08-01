@@ -94,6 +94,62 @@ public sealed class DesktopTablePresentationTests
         }
     }
 
+    [Fact]
+    public void SafeCleanupAndFileActionGroups_UseSharedButtonPresentation()
+    {
+        var mainWindow = XDocument.Load(FindRepositoryFile(
+            "src",
+            "SystemPerformanceAccelerator.Desktop",
+            "MainWindow.xaml"));
+        XNamespace xaml = "http://schemas.microsoft.com/winfx/2006/xaml";
+
+        var successButtons = mainWindow
+            .Descendants()
+            .Where(element => element.Name.LocalName == "Button" &&
+                              ((string?)element.Attribute("Style"))?.Contains(
+                                  "FluentSuccessButtonStyle",
+                                  StringComparison.Ordinal) == true)
+            .ToArray();
+
+        Assert.Equal(3, successButtons.Length);
+        Assert.DoesNotContain(
+            mainWindow.Descendants(),
+            element => ((string?)element.Attribute("Style"))?.Contains(
+                "CleanButtonStyle",
+                StringComparison.Ordinal) == true);
+
+        foreach (var panelName in new[]
+                 {
+                     "LargeFileActionPanel",
+                     "DuplicateFileActionPanel"
+                 })
+        {
+            var panel = Assert.Single(
+                mainWindow.Descendants(),
+                element => element.Name.LocalName == "WrapPanel" &&
+                           (string?)element.Attribute(xaml + "Name") == panelName);
+
+            Assert.All(
+                panel.Elements().Where(element => element.Name.LocalName == "Button"),
+                button => Assert.Contains(
+                    "ActionButtonSpacing",
+                    (string)button.Attribute("Margin")!));
+        }
+
+        var buttons = XDocument.Load(FindRepositoryFile(
+            "src",
+            "SystemPerformanceAccelerator.Desktop",
+            "Resources",
+            "Buttons.xaml"));
+        var successStyle = Assert.Single(
+            buttons.Descendants(),
+            element => element.Name.LocalName == "Style" &&
+                       (string?)element.Attribute(xaml + "Key") ==
+                       "FluentSuccessButtonStyle");
+
+        AssertSetter(successStyle, "Background", "{DynamicResource SuccessBrush}");
+    }
+
     private static void AssertSetter(XElement style, string property, string value)
     {
         Assert.Contains(

@@ -47,13 +47,6 @@
                TargetType="Button"
                BasedOn="{StaticResource FluentPrimaryButtonStyle}" />
 
-        <Style x:Key="CleanButtonStyle"
-               TargetType="Button"
-               BasedOn="{StaticResource FluentPrimaryButtonStyle}">
-            <Setter Property="Background" Value="{DynamicResource SuccessBrush}" />
-            <Setter Property="MinWidth" Value="132" />
-        </Style>
-
         <Style x:Key="SecondaryButtonStyle"
                TargetType="Button"
                BasedOn="{StaticResource FluentSecondaryButtonStyle}" />
@@ -1976,7 +1969,7 @@
 
                                 <Button Grid.Column="2"
                                         Command="{Binding CleanCommand}"
-                                        Style="{StaticResource CleanButtonStyle}">
+                                        Style="{StaticResource FluentSuccessButtonStyle}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE74D;"
                                                    FontFamily="Segoe MDL2 Assets"
@@ -2414,7 +2407,7 @@
 
                                 <Button Grid.Column="2"
                                         Command="{Binding CleanCommand}"
-                                        Style="{StaticResource CleanButtonStyle}">
+                                        Style="{StaticResource FluentSuccessButtonStyle}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE74D;"
                                                    FontFamily="Segoe MDL2 Assets"
@@ -3288,7 +3281,7 @@
                             <StackPanel Grid.Column="1" Margin="12,0,18,0" VerticalAlignment="Center"><TextBlock Text="MANUAL AUTO CLEAN STATUS" Style="{StaticResource OperationStatusLabelStyle}" /><TextBlock Margin="0,3,0,0" Text="{Binding Status}" ToolTip="{Binding Status}" Style="{StaticResource OperationStatusMessageStyle}" /></StackPanel>
                             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                                 <Button Command="{Binding CancelRunCommand}" Style="{StaticResource FluentSecondaryButtonStyle}" Margin="0,0,8,0"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE711;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Cancel operation" VerticalAlignment="Center" /></StackPanel></Button>
-                                <Button Command="{Binding CleanRunPreviewCommand}" Style="{StaticResource CleanButtonStyle}"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74D;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Clean selected" VerticalAlignment="Center" /></StackPanel></Button>
+                                <Button Command="{Binding CleanRunPreviewCommand}" Style="{StaticResource FluentSuccessButtonStyle}"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74D;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Clean selected" VerticalAlignment="Center" /></StackPanel></Button>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -3663,11 +3656,14 @@
                                 <TextBox Margin="0,7,0,0" Text="{Binding MinimumSizeText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FluentTextBoxStyle}" HorizontalContentAlignment="Right" />
                             </StackPanel>
                         </Grid>
-                        <StackPanel Grid.Row="1" Margin="0,11,0,0" Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Command="{Binding ScanCommand}" Style="{StaticResource FluentPrimaryButtonStyle}" Margin="0,0,8,0" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE72C;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Scan files" VerticalAlignment="Center" /></StackPanel></Button>
-                            <Button Command="{Binding CancelCommand}" Style="{StaticResource FluentSecondaryButtonStyle}" Margin="0,0,8,0" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE711;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Cancel" VerticalAlignment="Center" /></StackPanel></Button>
-                            <Button Command="{Binding DeleteSelectedCommand}" Style="{StaticResource FluentDangerButtonStyle}" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74D;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Delete selected" VerticalAlignment="Center" /></StackPanel></Button>
-                        </StackPanel>
+                        <WrapPanel x:Name="LargeFileActionPanel"
+                                   Grid.Row="1"
+                                   Margin="0,11,-8,-8"
+                                   HorizontalAlignment="Right">
+                            <Button Command="{Binding ScanCommand}" Style="{StaticResource FluentPrimaryButtonStyle}" Margin="{StaticResource ActionButtonSpacing}" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE72C;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Scan files" VerticalAlignment="Center" /></StackPanel></Button>
+                            <Button Command="{Binding CancelCommand}" Style="{StaticResource FluentSecondaryButtonStyle}" Margin="{StaticResource ActionButtonSpacing}" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE711;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Cancel" VerticalAlignment="Center" /></StackPanel></Button>
+                            <Button Command="{Binding DeleteSelectedCommand}" Style="{StaticResource FluentDangerButtonStyle}" Margin="{StaticResource ActionButtonSpacing}" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74D;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Delete selected" VerticalAlignment="Center" /></StackPanel></Button>
+                        </WrapPanel>
                     </Grid>
                 </Border>
 
@@ -3859,13 +3855,16 @@
                                 <Button Grid.Column="2" Command="{Binding BrowseCommand}" Style="{StaticResource FluentSecondaryButtonStyle}" MinWidth="90" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE838;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Browse" VerticalAlignment="Center" /></StackPanel></Button>
                             </Grid>
                         </StackPanel>
-                        <Grid Grid.Row="1" Margin="0,11,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="12" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <Grid Grid.Row="1" Margin="0,11,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="12" /><ColumnDefinition Width="2*" /></Grid.ColumnDefinitions>
                             <TextBlock Text="{Binding SelectionSummary}" ToolTip="{Binding SelectionSummary}" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                <Button Command="{Binding ScanCommand}" Style="{StaticResource FluentPrimaryButtonStyle}" Margin="0,0,8,0" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE72C;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Scan duplicates" VerticalAlignment="Center" /></StackPanel></Button>
-                                <Button Command="{Binding CancelCommand}" Style="{StaticResource FluentSecondaryButtonStyle}" Margin="0,0,8,0" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE711;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Cancel" VerticalAlignment="Center" /></StackPanel></Button>
-                                <Button Command="{Binding RecycleSelectedCommand}" Style="{StaticResource FluentDangerButtonStyle}" MinWidth="145" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74D;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Recycle selected" VerticalAlignment="Center" /></StackPanel></Button>
-                            </StackPanel>
+                            <WrapPanel x:Name="DuplicateFileActionPanel"
+                                       Grid.Column="2"
+                                       Margin="0,0,-8,-8"
+                                       HorizontalAlignment="Right">
+                                <Button Command="{Binding ScanCommand}" Style="{StaticResource FluentPrimaryButtonStyle}" Margin="{StaticResource ActionButtonSpacing}" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE72C;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Scan duplicates" VerticalAlignment="Center" /></StackPanel></Button>
+                                <Button Command="{Binding CancelCommand}" Style="{StaticResource FluentSecondaryButtonStyle}" Margin="{StaticResource ActionButtonSpacing}" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE711;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Cancel" VerticalAlignment="Center" /></StackPanel></Button>
+                                <Button Command="{Binding RecycleSelectedCommand}" Style="{StaticResource FluentDangerButtonStyle}" Margin="{StaticResource ActionButtonSpacing}" MinWidth="145" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE74D;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="Recycle selected" VerticalAlignment="Center" /></StackPanel></Button>
+                            </WrapPanel>
                         </Grid>
                     </Grid>
                 </Border>
