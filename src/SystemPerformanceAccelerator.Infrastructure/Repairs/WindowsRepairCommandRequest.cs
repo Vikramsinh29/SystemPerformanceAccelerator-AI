@@ -56,6 +56,7 @@ public sealed record WindowsRepairCommandRequest(
             FileName = ExecutablePath,
             UseShellExecute = false,
             CreateNoWindow = true,
+            WindowStyle = ProcessWindowStyle.Hidden,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             WorkingDirectory = Path.GetDirectoryName(ExecutablePath) ??

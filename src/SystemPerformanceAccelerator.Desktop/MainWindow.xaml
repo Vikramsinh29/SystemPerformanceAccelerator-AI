@@ -4446,6 +4446,16 @@
                                    VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
+                <Button Command="{Binding PreviewRepairPlanCommand}"
+                        Style="{StaticResource FluentSecondaryButtonStyle}"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE9D9;" Style="{StaticResource ActionButtonGlyphStyle}" />
+                        <TextBlock Margin="8,0,0,0"
+                                   Text="Preview repair readiness"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
                 <Button Command="{Binding StopAfterCurrentCheckCommand}"
                         Style="{StaticResource FluentSecondaryButtonStyle}">
                     <StackPanel Orientation="Horizontal">
@@ -4829,12 +4839,6 @@
                                                 Width="1.75*"
                                                 MinWidth="155" />
                         </DataGrid.Columns>
-                        <DataGrid.RowStyle>
-                            <Style TargetType="DataGridRow"
-                                   BasedOn="{StaticResource FluentDataGridRowStyle}">
-                                <Setter Property="ToolTip" Value="{Binding Details}" />
-                            </Style>
-                        </DataGrid.RowStyle>
                     </DataGrid>
 
                     <Border Background="{DynamicResource SurfaceBrush}"
@@ -4893,13 +4897,63 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <ProgressBar Height="5"
-                         Minimum="0"
-                         Maximum="100"
-                         Value="{Binding Progress, Mode=OneWay}"
-                         IsIndeterminate="{Binding IsAssessmentRunning}"
-                         Foreground="{DynamicResource AccentBrush}"
-                         Background="{DynamicResource ProgressTrackBrush}" />
+            <Grid Height="5"
+                  ClipToBounds="True">
+                <ProgressBar Height="5"
+                             Minimum="0"
+                             Maximum="100"
+                             Value="{Binding Progress, Mode=OneWay}"
+                             IsIndeterminate="False"
+                             Foreground="{DynamicResource AccentBrush}"
+                             Background="{DynamicResource ProgressTrackBrush}" />
+
+                <Border Background="{DynamicResource ProgressTrackBrush}"
+                        CornerRadius="3"
+                        Visibility="{Binding IsAssessmentRunning, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Border Background="{DynamicResource AccentBrush}"
+                            CornerRadius="3">
+                        <Border.OpacityMask>
+                            <LinearGradientBrush StartPoint="0,0.5"
+                                                 EndPoint="1,0.5">
+                                <LinearGradientBrush.RelativeTransform>
+                                    <TranslateTransform X="-0.425" />
+                                </LinearGradientBrush.RelativeTransform>
+                                <GradientStop Color="Transparent"
+                                              Offset="0.35" />
+                                <GradientStop Color="White"
+                                              Offset="0.425" />
+                                <GradientStop Color="White"
+                                              Offset="0.575" />
+                                <GradientStop Color="Transparent"
+                                              Offset="0.65" />
+                            </LinearGradientBrush>
+                        </Border.OpacityMask>
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsAssessmentRunning}"
+                                                 Value="True">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard x:Name="WindowsRepairFullTrackActivityStoryboard">
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.OpacityMask).(Brush.RelativeTransform).(TranslateTransform.X)"
+                                                                     From="-0.425"
+                                                                     To="0.425"
+                                                                     Duration="0:0:1.8"
+                                                                     RepeatBehavior="Forever" />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                        <DataTrigger.ExitActions>
+                                            <RemoveStoryboard BeginStoryboardName="WindowsRepairFullTrackActivityStoryboard" />
+                                        </DataTrigger.ExitActions>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                    </Border>
+                </Border>
+            </Grid>
 
             <Grid Grid.Row="1" Margin="0,10,0,0">
                 <Grid.ColumnDefinitions>
@@ -4965,6 +5019,315 @@
             </Grid>
         </Grid>
     </Border>
+
+    <Grid Grid.RowSpan="4"
+          Panel.ZIndex="50"
+          Visibility="{Binding IsRepairPlanPreviewVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Border Background="#B8000000" />
+
+        <Border Margin="24"
+                MaxWidth="1160"
+                MaxHeight="780"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Style="{StaticResource FluentElevatedCardStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid Margin="22,18,22,14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Width="44"
+                            Height="44"
+                            Background="{DynamicResource WarningSoftBrush}"
+                            CornerRadius="13">
+                        <TextBlock Text="&#xE9D9;"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   FontSize="18"
+                                   Foreground="{DynamicResource WarningBrush}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </Border>
+
+                    <StackPanel Grid.Column="1"
+                                Margin="14,0,18,0"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="Guided repair readiness preview"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   FontSize="19"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Margin="0,3,0,0"
+                                   Text="Safety planning only — no repair command is available in this sprint."
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   FontSize="12"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <Button Grid.Column="2"
+                            Command="{Binding CloseRepairPlanPreviewCommand}"
+                            Style="{StaticResource FluentSecondaryButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE711;"
+                                       Style="{StaticResource ActionButtonGlyphStyle}" />
+                            <TextBlock Margin="7,0,0,0"
+                                       Text="Close preview" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <Border Grid.Row="1"
+                        Margin="22,0,22,14"
+                        Padding="16,13"
+                        Background="{DynamicResource WarningSoftBrush}"
+                        BorderBrush="{DynamicResource WarningBrush}"
+                        BorderThickness="1"
+                        CornerRadius="10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="{Binding RepairPlanDecisionTitle}"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                       FontSize="16"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Margin="0,5,0,0"
+                                       Text="{Binding RepairPlanSummary}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       FontSize="12"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1"
+                                    Margin="22,0,0,0"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="{Binding RepairPlanReference, StringFormat='Plan: {0}'}"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                       FontSize="11.5"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Right" />
+                            <TextBlock Margin="0,3,0,0"
+                                       Text="{Binding RepairPlanAssessmentReference, StringFormat='Assessment: {0}'}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       FontSize="11"
+                                       HorizontalAlignment="Right" />
+                            <TextBlock Margin="0,3,0,0"
+                                       Text="{Binding RepairPlanCreatedText}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       FontSize="11"
+                                       HorizontalAlignment="Right" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <ScrollViewer Grid.Row="2"
+                              Margin="22,0,22,0"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.05*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="0.95*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0"
+                                Padding="16"
+                                Style="{StaticResource FluentCardStyle}">
+                            <StackPanel>
+                                <TextBlock Text="READ-ONLY PREFLIGHT"
+                                           Style="{StaticResource FluentCaptionStyle}"
+                                           FontSize="11.5" />
+                                <TextBlock Margin="0,5,0,12"
+                                           Text="Every blocked or unknown safety state fails closed."
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           FontSize="11.5"
+                                           TextWrapping="Wrap" />
+
+                                <ItemsControl ItemsSource="{Binding RepairPlanPreflight}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Margin="0,0,0,8"
+                                                    Padding="13,11"
+                                                    Background="{DynamicResource SurfaceMutedBrush}"
+                                                    BorderBrush="{DynamicResource BorderBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="8">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="28" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <Border Width="24"
+                                                            Height="24"
+                                                            Background="{DynamicResource AccentSoftBrush}"
+                                                            CornerRadius="8">
+                                                        <TextBlock Text="{Binding StatusGlyph}"
+                                                                   FontFamily="Segoe MDL2 Assets"
+                                                                   FontSize="11"
+                                                                   Foreground="{DynamicResource AccentBrush}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center" />
+                                                    </Border>
+
+                                                    <StackPanel Grid.Column="1"
+                                                                Margin="8,0,10,0">
+                                                        <TextBlock Text="{Binding Title}"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                   FontSize="12.5"
+                                                                   FontWeight="SemiBold"
+                                                                   TextWrapping="Wrap" />
+                                                        <TextBlock Margin="0,3,0,0"
+                                                                   Text="{Binding Detail}"
+                                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                                   FontSize="11.5"
+                                                                   TextWrapping="Wrap" />
+                                                    </StackPanel>
+
+                                                    <Border Grid.Column="2"
+                                                            Padding="9,5"
+                                                            Background="{DynamicResource AccentSoftBrush}"
+                                                            CornerRadius="10"
+                                                            VerticalAlignment="Top">
+                                                        <TextBlock Text="{Binding StatusText}"
+                                                                   Foreground="{DynamicResource AccentBrush}"
+                                                                   FontSize="10.5"
+                                                                   FontWeight="SemiBold" />
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="2"
+                                Padding="16"
+                                Style="{StaticResource FluentCardStyle}">
+                            <StackPanel>
+                                <TextBlock Text="POSSIBLE FUTURE SEQUENCE"
+                                           Style="{StaticResource FluentCaptionStyle}"
+                                           FontSize="11.5" />
+                                <TextBlock Margin="0,5,0,12"
+                                           Text="Displayed for transparency only. No step can be started here."
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           FontSize="11.5"
+                                           TextWrapping="Wrap" />
+
+                                <ItemsControl ItemsSource="{Binding RepairPlanSteps}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Margin="0,0,0,8"
+                                                    Padding="13,11"
+                                                    Background="{DynamicResource SurfaceMutedBrush}"
+                                                    BorderBrush="{DynamicResource BorderBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="8">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="32" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <Border Width="27"
+                                                            Height="27"
+                                                            Background="{DynamicResource WarningSoftBrush}"
+                                                            CornerRadius="9"
+                                                            VerticalAlignment="Top">
+                                                        <TextBlock Text="{Binding SequenceText}"
+                                                                   Foreground="{DynamicResource WarningBrush}"
+                                                                   FontSize="11"
+                                                                   FontWeight="Bold"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center" />
+                                                    </Border>
+
+                                                    <StackPanel Grid.Column="1"
+                                                                Margin="8,0,0,0">
+                                                        <TextBlock Text="{Binding Title}"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                   FontSize="12.5"
+                                                                   FontWeight="SemiBold"
+                                                                   TextWrapping="Wrap" />
+                                                        <TextBlock Margin="0,3,0,0"
+                                                                   Text="{Binding Purpose}"
+                                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                                   FontSize="11.5"
+                                                                   TextWrapping="Wrap" />
+                                                        <TextBlock Margin="0,5,0,0"
+                                                                   Text="{Binding StateText}"
+                                                                   Foreground="{DynamicResource WarningBrush}"
+                                                                   FontSize="10.5"
+                                                                   FontWeight="SemiBold" />
+                                                        <TextBlock Margin="0,2,0,0"
+                                                                   Text="{Binding SafetyText}"
+                                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                                   FontSize="10.5"
+                                                                   TextWrapping="Wrap" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </ScrollViewer>
+
+                <Border Grid.Row="3"
+                        Margin="22,14,22,20"
+                        Padding="13,10"
+                        Background="{DynamicResource DangerSoftBrush}"
+                        BorderBrush="{DynamicResource DangerBrush}"
+                        BorderThickness="1"
+                        CornerRadius="9">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="&#xE72E;"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   FontSize="14"
+                                   Foreground="{DynamicResource DangerBrush}"
+                                   VerticalAlignment="Top" />
+
+                        <TextBlock Grid.Column="1"
+                                   Margin="9,0,18,0"
+                                   Text="{Binding RepairPlanDisclosure}"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   FontSize="11.5"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center" />
+
+                        <Button Grid.Column="2"
+                                Command="{Binding CloseRepairPlanPreviewCommand}"
+                                Style="{StaticResource FluentPrimaryButtonStyle}"
+                                Content="Understood — close"
+                                VerticalAlignment="Center" />
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
 </Grid>
 
 

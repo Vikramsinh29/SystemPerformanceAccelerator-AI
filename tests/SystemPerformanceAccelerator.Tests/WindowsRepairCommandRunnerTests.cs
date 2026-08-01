@@ -73,6 +73,24 @@ public sealed class WindowsRepairCommandRunnerTests
     }
 
     [Fact]
+    public void CreateStartInfo_UsesDefenseInDepthConsoleSuppression()
+    {
+        var request =
+            WindowsRepairCommandRequest.CreateSfcVerifyOnly(
+                @"C:\Windows");
+
+        var startInfo = request.CreateStartInfo();
+
+        Assert.False(startInfo.UseShellExecute);
+        Assert.True(startInfo.CreateNoWindow);
+        Assert.Equal(
+            System.Diagnostics.ProcessWindowStyle.Hidden,
+            startInfo.WindowStyle);
+        Assert.True(startInfo.RedirectStandardOutput);
+        Assert.True(startInfo.RedirectStandardError);
+    }
+
+    [Fact]
     public async Task RunAsync_BlocksUnapprovedArgumentsBeforeStarting()
     {
         var request = new WindowsRepairCommandRequest(

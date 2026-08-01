@@ -55,7 +55,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         IDiagnosticInteractionService? diagnosticInteractionService = null,
         IWindowsRepairAssessmentService? windowsRepairAssessmentService = null,
         IWindowsRepairAssessmentHistoryService? windowsRepairAssessmentHistoryService = null,
-        IWindowsRepairAssessmentInteractionService? windowsRepairAssessmentInteractionService = null)
+        IWindowsRepairAssessmentInteractionService? windowsRepairAssessmentInteractionService = null,
+        IWindowsRepairPlanService? windowsRepairPlanService = null,
+        IWindowsRepairPlanHistoryService? windowsRepairPlanHistoryService = null)
     {
         _temporaryFileService = temporaryFileService;
         _featureAccessGuard = featureAccessGuard ??
@@ -70,6 +72,10 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             new DisabledWindowsRepairAssessmentHistoryService();
         windowsRepairAssessmentInteractionService ??=
             new NonInteractiveWindowsRepairAssessmentInteractionService();
+        windowsRepairPlanService ??=
+            new DisabledWindowsRepairPlanService();
+        windowsRepairPlanHistoryService ??=
+            new DisabledWindowsRepairPlanHistoryService();
 
         CleanerAccess = CreateAccess(ApplicationFeature.Cleaner);
         HealthCheckAccess = CreateAccess(ApplicationFeature.HealthCheck);
@@ -118,7 +124,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 windowsRepairAssessmentHistoryService,
                 featureAccessGuard,
                 _diagnosticService,
-                windowsRepairAssessmentInteractionService);
+                windowsRepairAssessmentInteractionService,
+                windowsRepairPlanService,
+                windowsRepairPlanHistoryService);
         WindowsRepairAssessment.PropertyChanged +=
             OnChildModulePropertyChanged;
         SystemMonitor = new SystemMonitorViewModel(

@@ -76,3 +76,17 @@ Do not approve the release if any of these are true:
 - [ ] Exported reports contain sanitized evidence only.
 - [ ] Windows 10 physical smoke test completed.
 - [ ] Windows 11 physical smoke test completed or marked blocked.
+
+## Sprint 35B1 guided-repair safety preview
+
+- [ ] Healthy assessments show `Repair is not recommended`.
+- [ ] Attention assessments require a fresh, complete, non-blocked preflight.
+- [ ] Inconclusive, failed, unsupported, skipped, stale, and future-dated
+      assessments fail closed.
+- [ ] Pending-restart detection is read-only and blocks planning when detected
+      or unavailable.
+- [ ] The preview visibly states that it is not consent and cannot execute a
+      repair.
+- [ ] No repair action, automatic restart, CHKDSK, registry repair, component
+      cleanup, or background download is available.
+- [ ] Deleting Windows Repair history also removes saved repair-plan previews.

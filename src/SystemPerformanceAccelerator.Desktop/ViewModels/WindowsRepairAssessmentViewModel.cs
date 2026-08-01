@@ -17,6 +17,10 @@ public sealed class WindowsRepairAssessmentViewModel :
         _assessmentService;
     private readonly IWindowsRepairAssessmentHistoryService
         _historyService;
+    private readonly IWindowsRepairPlanService
+        _repairPlanService;
+    private readonly IWindowsRepairPlanHistoryService
+        _repairPlanHistoryService;
     private readonly IWindowsRepairAssessmentInteractionService
         _interactionService;
     private readonly IDiagnosticService _diagnosticService;
@@ -36,6 +40,18 @@ public sealed class WindowsRepairAssessmentViewModel :
     private string _currentCheckText = "Ready for assessment";
     private string _elapsedText = "Elapsed: --";
     private string _latestReference = "None";
+    private bool _isRepairPlanPreviewVisible;
+    private WindowsRepairPlanDecision _repairPlanDecision =
+        WindowsRepairPlanDecision.Blocked;
+    private string _repairPlanDecisionTitle =
+        "No repair preview";
+    private string _repairPlanSummary =
+        "Run a read-only assessment before previewing repair readiness.";
+    private string _repairPlanReference = "None";
+    private string _repairPlanAssessmentReference = "None";
+    private string _repairPlanCreatedText = "Not created";
+    private string _repairPlanDisclosure =
+        "No repair is authorized or executed.";
     private WindowsRepairAssessmentResult? _latestResult;
 
     public WindowsRepairAssessmentViewModel(
@@ -43,12 +59,18 @@ public sealed class WindowsRepairAssessmentViewModel :
         IWindowsRepairAssessmentHistoryService historyService,
         IFeatureAccessGuard featureAccessGuard,
         IDiagnosticService diagnosticService,
-        IWindowsRepairAssessmentInteractionService interactionService)
+        IWindowsRepairAssessmentInteractionService interactionService,
+        IWindowsRepairPlanService? repairPlanService = null,
+        IWindowsRepairPlanHistoryService? repairPlanHistoryService = null)
     {
         _assessmentService = assessmentService ??
             throw new ArgumentNullException(nameof(assessmentService));
         _historyService = historyService ??
             throw new ArgumentNullException(nameof(historyService));
+        _repairPlanService = repairPlanService ??
+            new DisabledWindowsRepairPlanService();
+        _repairPlanHistoryService = repairPlanHistoryService ??
+            new DisabledWindowsRepairPlanHistoryService();
         _diagnosticService = diagnosticService ??
             throw new ArgumentNullException(nameof(diagnosticService));
         _interactionService = interactionService ??
@@ -80,6 +102,14 @@ public sealed class WindowsRepairAssessmentViewModel :
             ApplicationFeature.WindowsRepairAssessment,
             FeatureAccessRequirement.Execute,
             () => !IsBusy && HasLatestAssessment);
+        PreviewRepairPlanCommand = new AsyncRelayCommand(
+            PreviewRepairPlanAsync,
+            featureAccessGuard,
+            ApplicationFeature.WindowsRepairAssessment,
+            FeatureAccessRequirement.Execute,
+            () => !IsBusy && HasLatestAssessment);
+        CloseRepairPlanPreviewCommand = new RelayCommand(
+            CloseRepairPlanPreview);
         OpenAssessmentFolderCommand = new RelayCommand(
             OpenAssessmentFolder,
             featureAccessGuard,
@@ -99,11 +129,23 @@ public sealed class WindowsRepairAssessmentViewModel :
     public ObservableCollection<
         WindowsRepairCheckResultViewModel> Results { get; } = [];
 
+    public ObservableCollection<
+        WindowsRepairPlanPreflightItemViewModel>
+        RepairPlanPreflight { get; } = [];
+
+    public ObservableCollection<
+        WindowsRepairPlanStepViewModel>
+        RepairPlanSteps { get; } = [];
+
     public AsyncRelayCommand RunAssessmentCommand { get; }
 
     public RelayCommand StopAfterCurrentCheckCommand { get; }
 
     public AsyncRelayCommand ExportLatestReportCommand { get; }
+
+    public AsyncRelayCommand PreviewRepairPlanCommand { get; }
+
+    public RelayCommand CloseRepairPlanPreviewCommand { get; }
 
     public RelayCommand OpenAssessmentFolderCommand { get; }
 
@@ -238,6 +280,70 @@ public sealed class WindowsRepairAssessmentViewModel :
     public bool HasLatestAssessment =>
         _latestResult is not null;
 
+    public bool IsRepairPlanPreviewVisible
+    {
+        get => _isRepairPlanPreviewVisible;
+        private set => SetField(
+            ref _isRepairPlanPreviewVisible,
+            value);
+    }
+
+    public WindowsRepairPlanDecision RepairPlanDecision
+    {
+        get => _repairPlanDecision;
+        private set => SetField(
+            ref _repairPlanDecision,
+            value);
+    }
+
+    public string RepairPlanDecisionTitle
+    {
+        get => _repairPlanDecisionTitle;
+        private set => SetField(
+            ref _repairPlanDecisionTitle,
+            value);
+    }
+
+    public string RepairPlanSummary
+    {
+        get => _repairPlanSummary;
+        private set => SetField(
+            ref _repairPlanSummary,
+            value);
+    }
+
+    public string RepairPlanReference
+    {
+        get => _repairPlanReference;
+        private set => SetField(
+            ref _repairPlanReference,
+            value);
+    }
+
+    public string RepairPlanAssessmentReference
+    {
+        get => _repairPlanAssessmentReference;
+        private set => SetField(
+            ref _repairPlanAssessmentReference,
+            value);
+    }
+
+    public string RepairPlanCreatedText
+    {
+        get => _repairPlanCreatedText;
+        private set => SetField(
+            ref _repairPlanCreatedText,
+            value);
+    }
+
+    public string RepairPlanDisclosure
+    {
+        get => _repairPlanDisclosure;
+        private set => SetField(
+            ref _repairPlanDisclosure,
+            value);
+    }
+
     public string CompletedChecks =>
         Results.Count(item =>
                 item.Outcome !=
@@ -293,6 +399,7 @@ public sealed class WindowsRepairAssessmentViewModel :
             return;
         }
 
+        IsRepairPlanPreviewVisible = false;
         IsBusy = true;
         IsAssessmentRunning = true;
         StopAfterCurrentRequested = false;
@@ -449,6 +556,71 @@ public sealed class WindowsRepairAssessmentViewModel :
             "Waiting for the current read-only check to finish before skipping any remaining selected checks...";
     }
 
+    private async Task PreviewRepairPlanAsync()
+    {
+        if (_latestResult is null)
+        {
+            Status =
+                "Run a read-only assessment before previewing repair readiness.";
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            var plan = _repairPlanService.CreatePlan(
+                _latestResult);
+            await _repairPlanHistoryService.SaveAsync(plan);
+            ApplyRepairPlan(plan);
+            IsRepairPlanPreviewVisible = true;
+            Status =
+                "Repair readiness preview created. No repair command was run or authorized.";
+        }
+        catch (Exception ex)
+        {
+            Status =
+                "The repair readiness preview could not be created. No repair command was run.";
+            await TryRecordUnexpectedExceptionAsync(ex);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void ApplyRepairPlan(
+        WindowsRepairPlan plan)
+    {
+        RepairPlanDecision = plan.Decision;
+        RepairPlanDecisionTitle = plan.DecisionTitle;
+        RepairPlanSummary = plan.Summary;
+        RepairPlanReference = plan.ReferenceId;
+        RepairPlanAssessmentReference =
+            plan.AssessmentReferenceId;
+        RepairPlanCreatedText =
+            plan.CreatedUtc.ToLocalTime()
+                .ToString("dd MMM yyyy  HH:mm");
+        RepairPlanDisclosure = plan.Disclosure;
+
+        RepairPlanPreflight.Clear();
+        foreach (var item in plan.Preflight)
+        {
+            RepairPlanPreflight.Add(
+                new WindowsRepairPlanPreflightItemViewModel(
+                    item));
+        }
+
+        RepairPlanSteps.Clear();
+        foreach (var step in plan.Steps)
+        {
+            RepairPlanSteps.Add(
+                new WindowsRepairPlanStepViewModel(step));
+        }
+    }
+
+    private void CloseRepairPlanPreview() =>
+        IsRepairPlanPreviewVisible = false;
+
     private async Task ExportLatestReportAsync()
     {
         if (_latestResult is null)
@@ -541,7 +713,19 @@ public sealed class WindowsRepairAssessmentViewModel :
         }
 
         _historyService.DeleteHistory();
+        _repairPlanHistoryService.DeleteHistory();
         _latestResult = null;
+        IsRepairPlanPreviewVisible = false;
+        RepairPlanPreflight.Clear();
+        RepairPlanSteps.Clear();
+        RepairPlanReference = "None";
+        RepairPlanAssessmentReference = "None";
+        RepairPlanCreatedText = "Not created";
+        RepairPlanDecisionTitle = "No repair preview";
+        RepairPlanSummary =
+            "Run a read-only assessment before previewing repair readiness.";
+        RepairPlanDisclosure =
+            "No repair is authorized or executed.";
         Results.Clear();
         LatestReference = "None";
         AssessmentState = "Not assessed";
@@ -582,6 +766,9 @@ public sealed class WindowsRepairAssessmentViewModel :
         WindowsRepairAssessmentResult result)
     {
         _latestResult = result;
+        IsRepairPlanPreviewVisible = false;
+        RepairPlanPreflight.Clear();
+        RepairPlanSteps.Clear();
         Results.Clear();
 
         foreach (var check in result.Checks)
@@ -662,6 +849,8 @@ public sealed class WindowsRepairAssessmentViewModel :
             .RaiseCanExecuteChanged();
         ExportLatestReportCommand
             .RaiseCanExecuteChanged();
+        PreviewRepairPlanCommand
+            .RaiseCanExecuteChanged();
         OpenAssessmentFolderCommand
             .RaiseCanExecuteChanged();
         DeleteAssessmentHistoryCommand
@@ -723,6 +912,97 @@ public sealed class WindowsRepairAssessmentViewModel :
         PropertyChanged?.Invoke(
             this,
             new PropertyChangedEventArgs(name));
+}
+
+public sealed class WindowsRepairPlanPreflightItemViewModel
+{
+    public WindowsRepairPlanPreflightItemViewModel(
+        WindowsRepairPlanPreflightItem model)
+    {
+        Model = model ??
+            throw new ArgumentNullException(nameof(model));
+    }
+
+    public WindowsRepairPlanPreflightItem Model { get; }
+
+    public string Title => Model.Title;
+
+    public WindowsRepairPlanItemStatus Status =>
+        Model.Status;
+
+    public string Detail => Model.Detail;
+
+    public string StatusText => Model.Status switch
+    {
+        WindowsRepairPlanItemStatus.Passed => "Passed",
+        WindowsRepairPlanItemStatus.Information => "Information",
+        WindowsRepairPlanItemStatus.Attention => "Attention",
+        WindowsRepairPlanItemStatus.Blocked => "Blocked",
+        _ => "Unknown"
+    };
+
+    public string StatusGlyph => Model.Status switch
+    {
+        WindowsRepairPlanItemStatus.Passed => "\uE73E",
+        WindowsRepairPlanItemStatus.Information => "\uE946",
+        WindowsRepairPlanItemStatus.Attention => "\uE7BA",
+        WindowsRepairPlanItemStatus.Blocked => "\uE711",
+        _ => "\uE897"
+    };
+}
+
+public sealed class WindowsRepairPlanStepViewModel
+{
+    public WindowsRepairPlanStepViewModel(
+        WindowsRepairPlanStep model)
+    {
+        Model = model ??
+            throw new ArgumentNullException(nameof(model));
+    }
+
+    public WindowsRepairPlanStep Model { get; }
+
+    public string SequenceText =>
+        Model.Sequence.ToString("N0");
+
+    public string Title => Model.Title;
+
+    public string Purpose => Model.Purpose;
+
+    public string StateText =>
+        Model.IsProposed
+            ? "Proposed for future review"
+            : "Not proposed";
+
+    public string SafetyText
+    {
+        get
+        {
+            var notes = new List<string>();
+
+            notes.Add(
+                Model.ChangesWindows
+                    ? "Would change Windows"
+                    : "Read-only step");
+
+            if (Model.MayUseWindowsUpdate)
+            {
+                notes.Add("May use Windows Update");
+            }
+
+            if (Model.RequiresFreshConsent)
+            {
+                notes.Add("Fresh consent required");
+            }
+
+            notes.Add(
+                Model.AutomaticRestart
+                    ? "Automatic restart"
+                    : "No automatic restart");
+
+            return string.Join(" • ", notes);
+        }
+    }
 }
 
 public sealed class WindowsRepairCheckResultViewModel

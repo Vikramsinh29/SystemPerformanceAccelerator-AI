@@ -37,6 +37,9 @@ public sealed class WindowsRepairAssessmentViewModelTests
             viewModel.RunAssessmentCommand.CanExecute(null));
         Assert.False(
             viewModel.StopAfterCurrentCheckCommand.CanExecute(null));
+        Assert.False(viewModel.IsRepairPlanPreviewVisible);
+        Assert.False(
+            viewModel.PreviewRepairPlanCommand.CanExecute(null));
     }
 
     [Fact]

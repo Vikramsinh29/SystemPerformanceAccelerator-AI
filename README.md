@@ -824,3 +824,25 @@ only Microsoft DISM CheckHealth and SFC VerifyOnly assessment commands.
   uploaded automatically.
 - Existing cleanup, startup, health, diagnostics, settings, edition, and
   packaging behaviour remains unchanged.
+
+## Sprint 35B1 - Guided Repair Safety Plan
+
+Sprint 35B1 adds a read-only guided-repair readiness preview without adding any
+repair execution capability.
+
+- A preview is created only from the latest saved Windows Repair assessment.
+- PC-SPA applies a 24-hour assessment-freshness policy for repair planning.
+- Healthy evidence produces `Repair is not recommended`.
+- Inconclusive, failed, unsupported, skipped, stale, future-dated, or
+  issue-bearing evidence fails closed.
+- Current Windows, elevation, Microsoft-tool availability, pending-restart
+  state, and readable Windows-drive free-space evidence are reviewed.
+- The preview explains a possible future component-store repair,
+  protected-file repair, and read-only verification sequence.
+- Microsoft servicing may use Windows Update; PC-SPA does not claim that a
+  repair source is available.
+- A preview never authorizes repair and always requires fresh execution-time
+  preflight and explicit consent.
+- No repair command, process execution, automatic restart, CHKDSK, registry
+  repair, component cleanup, or download is added.
+- Sanitized preview records are local and bounded to 20 records and 90 days.

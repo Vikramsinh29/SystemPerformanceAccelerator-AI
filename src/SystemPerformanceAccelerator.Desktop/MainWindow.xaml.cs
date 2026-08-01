@@ -76,6 +76,10 @@ public partial class MainWindow : Window
         var windowsRepairAssessmentService =
             new WindowsRepairAssessmentService(
                 new WindowsRepairCommandRunner());
+        var windowsRepairPlanService =
+            new WindowsRepairPlanService();
+        var windowsRepairPlanHistoryService =
+            new WindowsRepairPlanHistoryService();
         var healthCheckService = new HealthCheckService(
             systemMonitorService,
             startupItemService);
@@ -114,7 +118,9 @@ public partial class MainWindow : Window
             diagnosticInteractionService,
             windowsRepairAssessmentService,
             windowsRepairHistoryService,
-            new WindowsRepairAssessmentInteractionService());
+            new WindowsRepairAssessmentInteractionService(),
+            windowsRepairPlanService,
+            windowsRepairPlanHistoryService);
     }
 
     private void Window_Closing(
