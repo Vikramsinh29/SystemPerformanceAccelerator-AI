@@ -59,6 +59,17 @@ public sealed class WindowsRepairAssessmentViewModel :
         "No repair is authorized or executed.";
     private WindowsRepairAssessmentResult? _latestResult;
     private WindowsRepairPlan? _latestPlan;
+    private WindowsRepairExecutionResult? _latestRepairResult;
+    private string _repairResultOutcome = "Not available";
+    private string _repairResultReference = "None";
+    private string _repairResultCompletedText = "Not completed";
+    private string _repairResultDurationText = "Duration: --";
+    private string _dismRestoreHealthResult = "Not recorded";
+    private string _sfcScannowResult = "Not recorded";
+    private string _dismCheckHealthResult = "Not recorded";
+    private string _sfcVerifyOnlyResult = "Not recorded";
+    private string _repairResultRecommendation = string.Empty;
+    private string _automaticRestartEvidence = string.Empty;
 
     public WindowsRepairAssessmentViewModel(
         IWindowsRepairAssessmentService assessmentService,
@@ -140,7 +151,7 @@ public sealed class WindowsRepairAssessmentViewModel :
             featureAccessGuard,
             ApplicationFeature.WindowsRepairAssessment,
             FeatureAccessRequirement.Execute,
-            () => !IsBusy && HasLatestAssessment);
+            () => !IsBusy && HasWindowsRepairHistory);
 
         LoadLatestHistory();
     }
@@ -300,6 +311,72 @@ public sealed class WindowsRepairAssessmentViewModel :
 
     public bool HasLatestAssessment =>
         _latestResult is not null;
+
+    public bool HasLatestRepairResult =>
+        _latestRepairResult is not null;
+
+    public bool HasWindowsRepairHistory =>
+        HasLatestAssessment || HasLatestRepairResult;
+
+    public string RepairResultOutcome
+    {
+        get => _repairResultOutcome;
+        private set => SetField(ref _repairResultOutcome, value);
+    }
+
+    public string RepairResultReference
+    {
+        get => _repairResultReference;
+        private set => SetField(ref _repairResultReference, value);
+    }
+
+    public string RepairResultCompletedText
+    {
+        get => _repairResultCompletedText;
+        private set => SetField(ref _repairResultCompletedText, value);
+    }
+
+    public string RepairResultDurationText
+    {
+        get => _repairResultDurationText;
+        private set => SetField(ref _repairResultDurationText, value);
+    }
+
+    public string DismRestoreHealthResult
+    {
+        get => _dismRestoreHealthResult;
+        private set => SetField(ref _dismRestoreHealthResult, value);
+    }
+
+    public string SfcScannowResult
+    {
+        get => _sfcScannowResult;
+        private set => SetField(ref _sfcScannowResult, value);
+    }
+
+    public string DismCheckHealthResult
+    {
+        get => _dismCheckHealthResult;
+        private set => SetField(ref _dismCheckHealthResult, value);
+    }
+
+    public string SfcVerifyOnlyResult
+    {
+        get => _sfcVerifyOnlyResult;
+        private set => SetField(ref _sfcVerifyOnlyResult, value);
+    }
+
+    public string RepairResultRecommendation
+    {
+        get => _repairResultRecommendation;
+        private set => SetField(ref _repairResultRecommendation, value);
+    }
+
+    public string AutomaticRestartEvidence
+    {
+        get => _automaticRestartEvidence;
+        private set => SetField(ref _automaticRestartEvidence, value);
+    }
 
     public bool IsRepairPlanPreviewVisible
     {
@@ -674,6 +751,7 @@ public sealed class WindowsRepairAssessmentViewModel :
 
             await _repairExecutionHistoryService.SaveAsync(
                 result);
+            ShowRepairResult(result);
 
             if (result.VerificationAssessment is not null)
             {
@@ -970,6 +1048,7 @@ public sealed class WindowsRepairAssessmentViewModel :
         _repairExecutionHistoryService.DeleteHistory();
         _latestResult = null;
         _latestPlan = null;
+        ClearRepairResult();
         IsRepairPlanPreviewVisible = false;
         RepairPlanPreflight.Clear();
         RepairPlanSteps.Clear();
@@ -999,16 +1078,26 @@ public sealed class WindowsRepairAssessmentViewModel :
         try
         {
             var latest = _historyService.LoadLatest();
-            if (latest is null)
+            if (latest is not null)
             {
-                return;
+                ShowResult(latest);
+                CurrentCheckText = "Latest assessment loaded";
+                ProgressText = "Saved local assessment";
             }
 
-            ShowResult(latest);
-            CurrentCheckText = "Latest assessment loaded";
-            ProgressText = "Saved local assessment";
-            Status =
-                "The latest local read-only Windows assessment is displayed.";
+            var latestRepair =
+                _repairExecutionHistoryService.LoadLatest();
+            if (latestRepair is not null)
+            {
+                ShowRepairResult(latestRepair);
+            }
+
+            if (latest is not null || latestRepair is not null)
+            {
+                Status = latestRepair is not null
+                    ? "The latest saved guided-repair result is displayed."
+                    : "The latest local read-only Windows assessment is displayed.";
+            }
         }
         catch (Exception)
         {
@@ -1016,6 +1105,118 @@ public sealed class WindowsRepairAssessmentViewModel :
                 "Existing assessment history could not be read. Run a fresh assessment.";
         }
     }
+
+    private void ShowRepairResult(
+        WindowsRepairExecutionResult result)
+    {
+        _latestRepairResult = result;
+        RepairResultOutcome = FormatRepairOutcome(result.Outcome);
+        RepairResultReference = result.ReferenceId;
+        RepairResultCompletedText = result.FinishedUtc
+            .ToLocalTime()
+            .ToString("dd MMM yyyy  HH:mm");
+        RepairResultDurationText =
+            FormatDuration(result.Duration);
+        DismRestoreHealthResult = FormatStepResult(
+            result,
+            WindowsRepairExecutionStep.ComponentStoreRepair);
+        SfcScannowResult = FormatStepResult(
+            result,
+            WindowsRepairExecutionStep.ProtectedSystemFilesRepair);
+        DismCheckHealthResult = FormatStepResult(
+            result,
+            WindowsRepairExecutionStep.ComponentStoreVerification);
+        SfcVerifyOnlyResult = FormatStepResult(
+            result,
+            WindowsRepairExecutionStep.ProtectedSystemFilesVerification);
+        RepairResultRecommendation =
+            BuildRepairRecommendation(result.Outcome);
+        AutomaticRestartEvidence = result.AutomaticRestartAttempted
+            ? "Saved evidence records an automatic restart attempt. Review this result."
+            : "Saved evidence confirms PC-SPA did not automatically restart Windows.";
+
+        OnPropertyChanged(nameof(HasLatestRepairResult));
+        OnPropertyChanged(nameof(HasWindowsRepairHistory));
+        DeleteAssessmentHistoryCommand.RaiseCanExecuteChanged();
+    }
+
+    private void ClearRepairResult()
+    {
+        _latestRepairResult = null;
+        RepairResultOutcome = "Not available";
+        RepairResultReference = "None";
+        RepairResultCompletedText = "Not completed";
+        RepairResultDurationText = "Duration: --";
+        DismRestoreHealthResult = "Not recorded";
+        SfcScannowResult = "Not recorded";
+        DismCheckHealthResult = "Not recorded";
+        SfcVerifyOnlyResult = "Not recorded";
+        RepairResultRecommendation = string.Empty;
+        AutomaticRestartEvidence = string.Empty;
+        OnPropertyChanged(nameof(HasLatestRepairResult));
+        OnPropertyChanged(nameof(HasWindowsRepairHistory));
+    }
+
+    private static string FormatStepResult(
+        WindowsRepairExecutionResult result,
+        WindowsRepairExecutionStep step)
+    {
+        var stepResult = result.Steps.FirstOrDefault(
+            item => item.Step == step);
+        return stepResult is null
+            ? "Not recorded"
+            : stepResult.Outcome switch
+            {
+                WindowsRepairExecutionStepOutcome.Succeeded =>
+                    "Succeeded",
+                WindowsRepairExecutionStepOutcome.Attention =>
+                    "Needs attention",
+                WindowsRepairExecutionStepOutcome.Skipped =>
+                    "Skipped",
+                WindowsRepairExecutionStepOutcome.Failed =>
+                    "Failed",
+                _ => stepResult.Outcome.ToString()
+            };
+    }
+
+    private static string FormatRepairOutcome(
+        WindowsRepairExecutionOutcome outcome) =>
+        outcome switch
+        {
+            WindowsRepairExecutionOutcome.Completed => "Completed",
+            WindowsRepairExecutionOutcome.CompletedWithAttention =>
+                "Completed with attention",
+            WindowsRepairExecutionOutcome.Stopped => "Stopped safely",
+            WindowsRepairExecutionOutcome.Blocked => "Blocked safely",
+            WindowsRepairExecutionOutcome.Failed => "Failed safely",
+            _ => outcome.ToString()
+        };
+
+    private static string FormatDuration(TimeSpan duration)
+    {
+        var safeDuration = duration < TimeSpan.Zero
+            ? TimeSpan.Zero
+            : duration;
+        return safeDuration.TotalHours >= 1
+            ? $"Duration: {(int)safeDuration.TotalHours:N0} hr {safeDuration.Minutes:00} min {safeDuration.Seconds:00} sec"
+            : $"Duration: {(int)safeDuration.TotalMinutes:N0} min {safeDuration.Seconds:00} sec";
+    }
+
+    private static string BuildRepairRecommendation(
+        WindowsRepairExecutionOutcome outcome) =>
+        outcome switch
+        {
+            WindowsRepairExecutionOutcome.Completed =>
+                "No further repair action is recommended. Continue normal use and run a fresh assessment only if symptoms return.",
+            WindowsRepairExecutionOutcome.CompletedWithAttention =>
+                "Fresh verification still needs attention. Review the four results and run a new read-only assessment before deciding on another action.",
+            WindowsRepairExecutionOutcome.Stopped =>
+                "The workflow stopped safely. Run a fresh read-only assessment before considering another guided repair.",
+            WindowsRepairExecutionOutcome.Blocked =>
+                "The safety checks blocked repair. Resolve the reported prerequisite and run a fresh read-only assessment.",
+            _ =>
+                "The repair did not complete successfully. Review the saved result and run a fresh read-only assessment before trying again."
+        };
 
     private void ShowResult(
         WindowsRepairAssessmentResult result)
@@ -1117,6 +1318,7 @@ public sealed class WindowsRepairAssessmentViewModel :
         DeleteAssessmentHistoryCommand
             .RaiseCanExecuteChanged();
         OnPropertyChanged(nameof(HasLatestAssessment));
+        OnPropertyChanged(nameof(HasWindowsRepairHistory));
     }
 
     private void RefreshSummary()

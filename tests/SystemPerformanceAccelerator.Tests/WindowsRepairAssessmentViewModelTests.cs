@@ -42,6 +42,144 @@ public sealed class WindowsRepairAssessmentViewModelTests
             viewModel.PreviewRepairPlanCommand.CanExecute(null));
         Assert.False(
             viewModel.RunGuidedRepairCommand.CanExecute(null));
+        Assert.False(viewModel.HasLatestRepairResult);
+        Assert.False(
+            viewModel.DeleteAssessmentHistoryCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void Constructor_LoadsLatestGuidedRepairResult()
+    {
+        var result = CreateExecutionResult();
+        var history = new TestExecutionHistoryService(result);
+
+        var viewModel = CreateViewModel(
+            executionHistoryService: history);
+
+        Assert.True(viewModel.HasLatestRepairResult);
+        Assert.True(viewModel.HasWindowsRepairHistory);
+        Assert.Equal("Completed", viewModel.RepairResultOutcome);
+        Assert.Equal("REPAIR-TEST", viewModel.RepairResultReference);
+        Assert.Equal("Duration: 4 min 08 sec", viewModel.RepairResultDurationText);
+        Assert.Equal("Succeeded", viewModel.DismRestoreHealthResult);
+        Assert.Equal("Succeeded", viewModel.SfcScannowResult);
+        Assert.Equal("Succeeded", viewModel.DismCheckHealthResult);
+        Assert.Equal("Succeeded", viewModel.SfcVerifyOnlyResult);
+        Assert.Contains(
+            "did not automatically restart Windows",
+            viewModel.AutomaticRestartEvidence,
+            StringComparison.OrdinalIgnoreCase);
+        Assert.True(
+            viewModel.DeleteAssessmentHistoryCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void Constructor_MissingRepairStepIsReportedConservatively()
+    {
+        var result = CreateExecutionResult() with
+        {
+            Steps = CreateExecutionResult().Steps.Take(1).ToArray()
+        };
+
+        var viewModel = CreateViewModel(
+            executionHistoryService:
+                new TestExecutionHistoryService(result));
+
+        Assert.Equal("Succeeded", viewModel.DismRestoreHealthResult);
+        Assert.Equal("Not recorded", viewModel.SfcScannowResult);
+        Assert.Equal("Not recorded", viewModel.DismCheckHealthResult);
+        Assert.Equal("Not recorded", viewModel.SfcVerifyOnlyResult);
+    }
+
+    [Fact]
+    public void DeleteHistory_WithExecutionOnly_ClearsDisplayedResult()
+    {
+        var history = new TestExecutionHistoryService(
+            CreateExecutionResult());
+        var viewModel = CreateViewModel(
+            executionHistoryService: history,
+            interactionService: new ConfirmingInteractionService());
+
+        viewModel.DeleteAssessmentHistoryCommand.Execute(null);
+
+        Assert.True(history.DeleteCalled);
+        Assert.False(viewModel.HasLatestRepairResult);
+        Assert.False(viewModel.HasWindowsRepairHistory);
+        Assert.Equal("None", viewModel.RepairResultReference);
+        Assert.False(
+            viewModel.DeleteAssessmentHistoryCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void ShowRepairResult_NewCompletionIsDisplayedImmediately()
+    {
+        var viewModel = CreateViewModel();
+        var result = CreateExecutionResult() with
+        {
+            Outcome =
+                WindowsRepairExecutionOutcome.CompletedWithAttention
+        };
+
+        InvokePrivateInstanceMethod(
+            viewModel,
+            "ShowRepairResult",
+            result);
+
+        Assert.True(viewModel.HasLatestRepairResult);
+        Assert.Equal(
+            "Completed with attention",
+            viewModel.RepairResultOutcome);
+        Assert.Contains(
+            "Fresh verification still needs attention",
+            viewModel.RepairResultRecommendation,
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Constructor_AssessmentOnlyEnablesHistoryDeletion()
+    {
+        var assessment = CreateResult(
+            new[]
+            {
+                CreateCheck(
+                    WindowsRepairAssessmentOutcome.Healthy)
+            },
+            stopRequested: false);
+
+        var viewModel = CreateViewModel(
+            assessmentHistoryService:
+                new TestAssessmentHistoryService(assessment));
+
+        Assert.True(viewModel.HasLatestAssessment);
+        Assert.False(viewModel.HasLatestRepairResult);
+        Assert.True(viewModel.HasWindowsRepairHistory);
+        Assert.True(
+            viewModel.DeleteAssessmentHistoryCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void Constructor_BothHistoryTypesRemainAvailable()
+    {
+        var assessment = CreateResult(
+            new[]
+            {
+                CreateCheck(
+                    WindowsRepairAssessmentOutcome.Healthy)
+            },
+            stopRequested: false);
+
+        var viewModel = CreateViewModel(
+            assessmentHistoryService:
+                new TestAssessmentHistoryService(assessment),
+            executionHistoryService:
+                new TestExecutionHistoryService(
+                    CreateExecutionResult()));
+
+        Assert.True(viewModel.HasLatestAssessment);
+        Assert.True(viewModel.HasLatestRepairResult);
+        Assert.True(viewModel.HasWindowsRepairHistory);
+        Assert.True(
+            viewModel.DeleteAssessmentHistoryCommand.CanExecute(null));
     }
 
     [Fact]
@@ -164,7 +302,10 @@ public sealed class WindowsRepairAssessmentViewModelTests
             viewModel.StopAfterCurrentCheckCommand.CanExecute(null));
     }
 
-    private static WindowsRepairAssessmentViewModel CreateViewModel()
+    private static WindowsRepairAssessmentViewModel CreateViewModel(
+        IWindowsRepairAssessmentHistoryService? assessmentHistoryService = null,
+        IWindowsRepairExecutionHistoryService? executionHistoryService = null,
+        IWindowsRepairAssessmentInteractionService? interactionService = null)
     {
         var accessService = new FeatureAccessService(
             ApplicationEdition.Free,
@@ -172,10 +313,13 @@ public sealed class WindowsRepairAssessmentViewModelTests
 
         return new WindowsRepairAssessmentViewModel(
             new DisabledWindowsRepairAssessmentService(),
-            new DisabledWindowsRepairAssessmentHistoryService(),
+            assessmentHistoryService ??
+                new DisabledWindowsRepairAssessmentHistoryService(),
             new FeatureAccessGuard(accessService),
             new LocalDiagnosticService(),
-            new NonInteractiveWindowsRepairAssessmentInteractionService());
+            interactionService ??
+                new NonInteractiveWindowsRepairAssessmentInteractionService(),
+            repairExecutionHistoryService: executionHistoryService);
     }
 
     private static string InvokeBuildCompletionStatus(
@@ -255,5 +399,107 @@ public sealed class WindowsRepairAssessmentViewModelTests
             string.Empty,
             outcome == WindowsRepairAssessmentOutcome.Skipped,
             "Read-only test.");
+    }
+
+    private static WindowsRepairExecutionResult CreateExecutionResult()
+    {
+        var started = DateTimeOffset.Parse(
+            "2026-08-01T12:00:00Z");
+        var steps = Enum
+            .GetValues<WindowsRepairExecutionStep>()
+            .Select((step, index) =>
+                new WindowsRepairExecutionStepResult(
+                    step,
+                    WindowsRepairExecutionStepOutcome.Succeeded,
+                    step.ToString(),
+                    "Completed.",
+                    ChangesWindows: index < 2,
+                    index % 2 == 0 ? "DISM.exe" : "sfc.exe",
+                    Array.Empty<string>(),
+                    0,
+                    started.AddMinutes(index),
+                    started.AddMinutes(index + 1),
+                    string.Empty,
+                    string.Empty))
+            .ToArray();
+
+        return new WindowsRepairExecutionResult(
+            "REPAIR-TEST",
+            "ASSESS-TEST",
+            started,
+            started.AddMinutes(4).AddSeconds(8),
+            "1.0.0",
+            "test-build",
+            WindowsRepairExecutionOutcome.Completed,
+            "Completed.",
+            steps,
+            VerificationAssessment: null,
+            StopRequested: false,
+            AutomaticRestartAttempted: false,
+            Issues: Array.Empty<string>());
+    }
+
+    private sealed class TestExecutionHistoryService(
+        WindowsRepairExecutionResult? latest) :
+        IWindowsRepairExecutionHistoryService
+    {
+        public string ExecutionRoot => string.Empty;
+
+        public bool DeleteCalled { get; private set; }
+
+        public Task SaveAsync(
+            WindowsRepairExecutionResult result,
+            CancellationToken cancellationToken = default) =>
+            Task.CompletedTask;
+
+        public WindowsRepairExecutionResult? LoadLatest() => latest;
+
+        public void DeleteHistory() => DeleteCalled = true;
+    }
+
+    private sealed class TestAssessmentHistoryService(
+        WindowsRepairAssessmentResult? latest) :
+        IWindowsRepairAssessmentHistoryService
+    {
+        public string AssessmentRoot => string.Empty;
+
+        public Task SaveAsync(
+            WindowsRepairAssessmentResult result,
+            CancellationToken cancellationToken = default) =>
+            Task.CompletedTask;
+
+        public WindowsRepairAssessmentResult? LoadLatest() => latest;
+
+        public Task<string?> ExportLatestAsync(
+            string destinationZipPath,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<string?>(null);
+
+        public void DeleteHistory()
+        {
+        }
+    }
+
+    private sealed class ConfirmingInteractionService :
+        IWindowsRepairAssessmentInteractionService
+    {
+        public bool ConfirmAssessment(
+            WindowsRepairAssessmentRequest request) => true;
+
+        public string? ChooseReportDestination(
+            string suggestedFileName) => null;
+
+        public bool ConfirmDeleteHistory() => true;
+
+        public void OpenFolder(string path)
+        {
+        }
+
+        public void ShowMessage(
+            string title,
+            string message,
+            bool isError = false)
+        {
+        }
     }
 }
