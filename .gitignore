@@ -7,3 +7,9 @@ TestResults/
 artifacts/
 bin/
 obj/
+
+# Privacy-sensitive/generated diagnostic artifacts
+*.diagnostics.zip
+*.dmp
+/crash-reports/
+/diagnostic-exports/

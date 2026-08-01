@@ -27,6 +27,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     private readonly ITemporaryFileService _temporaryFileService;
     private readonly IFeatureAccessGuard _featureAccessGuard;
+    private readonly IDiagnosticService _diagnosticService;
     private CancellationTokenSource? _cancellationTokenSource;
     private ApplicationModule _currentModule = ApplicationModule.Cleaner;
     private bool _isBusy;
@@ -48,11 +49,17 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         IHealthCheckService healthCheckService,
         IApplicationSettingsService applicationSettingsService,
         ApplicationSettingsLoadResult settingsLoadResult,
-        IFeatureAccessGuard featureAccessGuard)
+        IFeatureAccessGuard featureAccessGuard,
+        IDiagnosticService? diagnosticService = null,
+        IDiagnosticInteractionService? diagnosticInteractionService = null)
     {
         _temporaryFileService = temporaryFileService;
         _featureAccessGuard = featureAccessGuard ??
             throw new ArgumentNullException(nameof(featureAccessGuard));
+        _diagnosticService = diagnosticService ??
+            new DisabledDiagnosticService();
+        diagnosticInteractionService ??=
+            new NonInteractiveDiagnosticInteractionService();
 
         CleanerAccess = CreateAccess(ApplicationFeature.Cleaner);
         HealthCheckAccess = CreateAccess(ApplicationFeature.HealthCheck);
@@ -102,7 +109,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             applicationSettingsService,
             settingsLoadResult,
             ApplySettings,
-            featureAccessGuard);
+            featureAccessGuard,
+            _diagnosticService,
+            diagnosticInteractionService);
 
         ScanCommand = new AsyncRelayCommand(
             ScanAsync,
@@ -456,6 +465,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         LargeFileFinder.ApplyDefaultMinimumSize(settings.LargeFileMinimumSizeMb);
         SystemMonitor.ApplyRefreshInterval(
             settings.SystemMonitorRefreshIntervalSeconds);
+        _diagnosticService.Configure(
+            settings.LocalDiagnosticsEnabled,
+            settings.IncludeHardwareSummaryInDiagnosticExport);
     }
 
     private async Task ScanAsync()

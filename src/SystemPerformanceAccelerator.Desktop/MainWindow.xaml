@@ -4719,6 +4719,195 @@
                         </Border>
 
                         <Border Margin="0,14,0,0"
+                                Padding="18"
+                                Style="{StaticResource FluentCardStyle}">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel>
+                                        <TextBlock Text="LOCAL DIAGNOSTICS"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontSize="10"
+                                                   FontWeight="Bold" />
+                                        <TextBlock Margin="0,5,0,0"
+                                                   Text="Privacy-safe diagnostic evidence"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                   FontSize="15"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Margin="0,4,0,0"
+                                                   Text="Unexpected errors can be recorded locally for support. Nothing is uploaded automatically, and exports require your review and confirmation."
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontSize="11"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <Border Grid.Column="1"
+                                            Margin="16,0,0,0"
+                                            Padding="10,6"
+                                            Background="{DynamicResource AccentSoftBrush}"
+                                            CornerRadius="12"
+                                            VerticalAlignment="Top">
+                                        <TextBlock Text="{Binding DiagnosticsEnabledStatus}"
+                                                   Foreground="{DynamicResource AccentBrush}"
+                                                   FontSize="10.5"
+                                                   FontWeight="SemiBold" />
+                                    </Border>
+                                </Grid>
+
+                                <CheckBox Margin="0,14,0,0"
+                                          IsChecked="{Binding LocalDiagnosticsEnabled, Mode=TwoWay}"
+                                          Content="Enable privacy-safe local diagnostics"
+                                          Foreground="{DynamicResource TextPrimaryBrush}"
+                                          FontWeight="SemiBold" />
+
+                                <CheckBox Margin="0,8,0,0"
+                                          IsChecked="{Binding IncludeHardwareSummaryInDiagnosticExport, Mode=TwoWay}"
+                                          IsEnabled="{Binding LocalDiagnosticsEnabled}"
+                                          Content="Include a basic CPU and memory summary in manual diagnostic exports"
+                                          Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                                <TextBlock Margin="24,5,0,0"
+                                           Text="{Binding DiagnosticExportPolicyText}"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           FontSize="10.5"
+                                           TextWrapping="Wrap" />
+
+                                <Border Margin="0,14,0,14"
+                                        Height="1"
+                                        Background="{DynamicResource BorderBrush}" />
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="1*" MinWidth="180" />
+                                        <ColumnDefinition Width="18" />
+                                        <ColumnDefinition Width="1*" MinWidth="180" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="APPLICATION"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontSize="10"
+                                                   FontWeight="Bold" />
+                                        <TextBlock Margin="0,4,0,0"
+                                                   Text="{Binding DiagnosticVersionText}"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                   FontSize="11"
+                                                   TextWrapping="Wrap" />
+
+                                        <TextBlock Margin="0,12,0,0"
+                                                   Text="WINDOWS / PRIVILEGE"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontSize="10"
+                                                   FontWeight="Bold" />
+                                        <TextBlock Margin="0,4,0,0"
+                                                   Text="{Binding DiagnosticWindowsText}"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                   FontSize="11"
+                                                   TextWrapping="Wrap" />
+                                        <TextBlock Margin="0,3,0,0"
+                                                   Text="{Binding DiagnosticElevationText}"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontSize="10.5" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="RUNTIME"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontSize="10"
+                                                   FontWeight="Bold" />
+                                        <TextBlock Margin="0,4,0,0"
+                                                   Text="{Binding DiagnosticRuntimeText}"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                   FontSize="11"
+                                                   TextWrapping="Wrap" />
+
+                                        <TextBlock Margin="0,12,0,0"
+                                                   Text="ANONYMOUS INSTALLATION ID"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontSize="10"
+                                                   FontWeight="Bold" />
+                                        <TextBlock Margin="0,4,0,0"
+                                                   Text="{Binding InstallationIdText}"
+                                                   ToolTip="{Binding InstallationIdText}"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                   FontSize="10.5"
+                                                   TextWrapping="Wrap" />
+
+                                        <TextBlock Margin="0,12,0,0"
+                                                   Text="LATEST ERROR REFERENCE"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontSize="10"
+                                                   FontWeight="Bold" />
+                                        <TextBlock Margin="0,4,0,0"
+                                                   Text="{Binding LatestErrorReferenceText}"
+                                                   ToolTip="{Binding LatestErrorReferenceText}"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                   FontSize="10.5"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <TextBlock Margin="0,14,0,0"
+                                           Text="{Binding DiagnosticsPath}"
+                                           ToolTip="{Binding DiagnosticsPath}"
+                                           Foreground="{DynamicResource TextTertiaryBrush}"
+                                           FontSize="10.5"
+                                           TextWrapping="Wrap" />
+
+                                <WrapPanel Margin="0,14,0,0">
+                                    <Button Command="{Binding OpenDiagnosticsFolderCommand}"
+                                            Style="{StaticResource FluentSecondaryButtonStyle}"
+                                            Margin="0,0,8,8">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE838;" Style="{StaticResource ActionButtonGlyphStyle}" />
+                                            <TextBlock Margin="8,0,0,0" Text="Open diagnostics folder" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+
+                                    <Button Command="{Binding ExportDiagnosticPackageCommand}"
+                                            Style="{StaticResource FluentPrimaryButtonStyle}"
+                                            Margin="0,0,8,8">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE74E;" Style="{StaticResource ActionButtonGlyphStyle}" />
+                                            <TextBlock Margin="8,0,0,0" Text="Preview &amp; export package" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+
+                                    <Button Command="{Binding CopyLatestErrorReferenceCommand}"
+                                            Style="{StaticResource FluentSecondaryButtonStyle}"
+                                            Margin="0,0,8,8">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE8C8;" Style="{StaticResource ActionButtonGlyphStyle}" />
+                                            <TextBlock Margin="8,0,0,0" Text="Copy error reference" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+
+                                    <Button Command="{Binding DeleteDiagnosticHistoryCommand}"
+                                            Style="{StaticResource FluentSecondaryButtonStyle}"
+                                            Margin="0,0,8,8">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE74D;" Style="{StaticResource ActionButtonGlyphStyle}" />
+                                            <TextBlock Margin="8,0,0,0" Text="Delete diagnostic history" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+
+                                    <Button Command="{Binding ResetInstallationIdCommand}"
+                                            Style="{StaticResource FluentSecondaryButtonStyle}"
+                                            Margin="0,0,0,8">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE777;" Style="{StaticResource ActionButtonGlyphStyle}" />
+                                            <TextBlock Margin="8,0,0,0" Text="Reset installation ID" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Margin="0,14,0,0"
                                 Style="{StaticResource BrandAboutCardStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions>

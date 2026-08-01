@@ -1,0 +1,67 @@
+# PC-SPA Release Certification Checklist
+
+A release candidate must not be published until all applicable items are completed.
+
+## Source state
+
+- [ ] Correct branch and intended commit confirmed.
+- [ ] Working tree clean before release packaging.
+- [ ] `git diff --check` passes.
+- [ ] Release version and product metadata are correct.
+
+## Automated verification
+
+- [ ] Clean Release build succeeds.
+- [ ] Existing tests remain green.
+- [ ] New Sprint 34A diagnostic tests pass.
+- [ ] No compiler warnings or errors.
+- [ ] Portable publish verification succeeds.
+- [ ] ZIP and SHA-256 files are generated.
+
+## Core safety regression
+
+- [ ] Cleaner requires reviewed selection and confirmation.
+- [ ] Custom Clean requires preview, selection, and confirmation.
+- [ ] Large File Finder uses the Recycle Bin and revalidates files.
+- [ ] Duplicate Finder leaves at least one verified copy.
+- [ ] Startup Manager changes state only after confirmation.
+- [ ] Auto Clean Schedule remains manual-only.
+- [ ] No destructive operation bypasses confirmation.
+- [ ] Cancellation leaves each module consistent.
+
+## Diagnostic verification
+
+- [ ] Diagnostics are disabled on a clean settings profile.
+- [ ] Enabling and saving diagnostics creates one anonymous ID.
+- [ ] No event is stored while diagnostics are disabled.
+- [ ] A controlled test exception produces a sanitized local record.
+- [ ] The latest error reference can be copied.
+- [ ] Export preview accurately reports event count.
+- [ ] Export ZIP can be opened and inspected.
+- [ ] Optional hardware summary follows the saved setting.
+- [ ] Delete history removes event files.
+- [ ] Reset ID deletes history and produces a new random ID.
+- [ ] No network request occurs during capture or export.
+
+## UI and compatibility smoke tests
+
+- [ ] Settings diagnostics card works in Light theme.
+- [ ] Settings diagnostics card works in Dark theme.
+- [ ] Normal, maximized, and resized layouts remain usable.
+- [ ] 100%, 125%, 150%, and 200% display scaling checked where practical.
+- [ ] Windows 10 x64 smoke test completed.
+- [ ] Windows 11 x64 smoke test completed or explicitly marked blocked.
+- [ ] Non-English or Unicode path smoke test completed.
+
+## Release blockers
+
+Do not approve the release if any of these are true:
+
+- a known critical data-loss defect exists
+- a high-risk cleanup false positive remains unresolved
+- a core workflow crashes
+- a supported Windows version lacks required smoke testing
+- logs or exports contain unsanitized personal paths
+- diagnostic data is transmitted without explicit architecture and consent
+- destructive operations bypass confirmation
+- automated tests fail

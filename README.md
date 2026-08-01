@@ -791,3 +791,17 @@ Sprint 33C completes the PC-SPA launch identity using the already approved brand
 - Cleaner, Health Check, Custom Clean, Auto Clean, Large File Finder, Duplicate Finder, Startup Manager, System Monitor, Settings, safety rules, services, commands, persistence, and feature access remain unchanged.
 - The repository contains approved raster launch assets and a multi-resolution ICO. A true editable vector/8K master must come from original design artwork and is not fabricated by this sprint.
 
+## Sprint 34A - Quality and Diagnostic Foundation
+
+Sprint 34A adds an opt-in, local-only diagnostic evidence foundation for controlled beta support without changing feature behaviour.
+
+- Local diagnostics are disabled by default and require an explicit saved Settings choice.
+- Unexpected WPF dispatcher, AppDomain, background-task, and startup exceptions can be recorded locally when diagnostics are enabled.
+- Diagnostic records use a random anonymous installation ID and contain sanitized messages, sanitized stack traces, version/build context, Windows/runtime information, elevation state, and limited resource context.
+- Personal paths, email-like values, document contents, browser history, credentials, cookies, licence keys, machine serial numbers, and unrelated process command lines are excluded by design.
+- Local evidence is bounded to 50 events and 30 days.
+- Settings provides Open diagnostics folder, Preview & export package, Copy error reference, Delete diagnostic history, and Reset installation ID controls.
+- Diagnostic ZIP export is manual, previewed, user-confirmed, user-selected, and never uploaded automatically.
+- Optional CPU and memory summary inclusion is controlled by the user.
+- Cleaner, Custom Clean, Auto Clean Schedule, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, Health Check, edition access, safety confirmation, and release packaging behaviour remain unchanged.
+- Remote telemetry, analytics, cloud crash reporting, benchmarking, compatibility claims, and false-positive scoring remain outside this sprint.

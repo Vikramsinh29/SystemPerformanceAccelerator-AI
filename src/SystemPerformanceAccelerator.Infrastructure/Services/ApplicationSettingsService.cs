@@ -5,20 +5,23 @@ using SystemPerformanceAccelerator.Core.Models;
 
 namespace SystemPerformanceAccelerator.Infrastructure.Services;
 
-public sealed class ApplicationSettingsService : IApplicationSettingsService
+public sealed class ApplicationSettingsService :
+    IApplicationSettingsService
 {
-    private static readonly JsonSerializerOptions SerializerOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        WriteIndented = true,
-        Converters = { new JsonStringEnumConverter() }
-    };
+    private static readonly JsonSerializerOptions SerializerOptions =
+        new()
+        {
+            PropertyNameCaseInsensitive = true,
+            WriteIndented = true,
+            Converters = { new JsonStringEnumConverter() }
+        };
 
     public ApplicationSettingsService(string? settingsPath = null)
     {
         SettingsPath = string.IsNullOrWhiteSpace(settingsPath)
             ? Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                Environment.GetFolderPath(
+                    Environment.SpecialFolder.LocalApplicationData),
                 "SystemPerformanceAccelerator",
                 "settings.json")
             : Path.GetFullPath(settingsPath);
@@ -38,9 +41,10 @@ public sealed class ApplicationSettingsService : IApplicationSettingsService
         try
         {
             var json = File.ReadAllText(SettingsPath);
-            var stored = JsonSerializer.Deserialize<ApplicationSettings>(
-                json,
-                SerializerOptions);
+            var stored =
+                JsonSerializer.Deserialize<ApplicationSettings>(
+                    json,
+                    SerializerOptions);
 
             if (stored is null)
             {
@@ -53,7 +57,9 @@ public sealed class ApplicationSettingsService : IApplicationSettingsService
                 ? string.Empty
                 : "One or more invalid local settings were replaced with safe values.";
 
-            return new ApplicationSettingsLoadResult(normalized, warning);
+            return new ApplicationSettingsLoadResult(
+                normalized,
+                warning);
         }
         catch (Exception ex) when (
             ex is IOException or
@@ -72,15 +78,21 @@ public sealed class ApplicationSettingsService : IApplicationSettingsService
 
         var normalized = Normalize(settings);
         var directory = Path.GetDirectoryName(SettingsPath)
-            ?? throw new InvalidOperationException("The settings path has no parent directory.");
+            ?? throw new InvalidOperationException(
+                "The settings path has no parent directory.");
         Directory.CreateDirectory(directory);
 
         var temporaryPath = SettingsPath + ".tmp";
         try
         {
-            var json = JsonSerializer.Serialize(normalized, SerializerOptions);
+            var json = JsonSerializer.Serialize(
+                normalized,
+                SerializerOptions);
             File.WriteAllText(temporaryPath, json);
-            File.Move(temporaryPath, SettingsPath, true);
+            File.Move(
+                temporaryPath,
+                SettingsPath,
+                overwrite: true);
         }
         finally
         {
@@ -100,7 +112,8 @@ public sealed class ApplicationSettingsService : IApplicationSettingsService
         }
     }
 
-    private static ApplicationSettings Normalize(ApplicationSettings settings)
+    private static ApplicationSettings Normalize(
+        ApplicationSettings settings)
     {
         var theme = Enum.IsDefined(settings.Theme)
             ? settings.Theme
@@ -120,9 +133,16 @@ public sealed class ApplicationSettingsService : IApplicationSettingsService
             theme,
             true,
             minimumSize,
-            refreshSeconds);
+            refreshSeconds)
+        {
+            LocalDiagnosticsEnabled =
+                settings.LocalDiagnosticsEnabled,
+            IncludeHardwareSummaryInDiagnosticExport =
+                settings.IncludeHardwareSummaryInDiagnosticExport
+        };
     }
 
-    private static ApplicationSettingsLoadResult DefaultWithWarning(string warning) =>
+    private static ApplicationSettingsLoadResult
+        DefaultWithWarning(string warning) =>
         new(ApplicationSettings.Default, warning);
 }

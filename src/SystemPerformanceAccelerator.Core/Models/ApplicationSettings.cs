@@ -11,9 +11,17 @@ public sealed record ApplicationSettings(
     public const int MinimumMonitorRefreshSeconds = 1;
     public const int MaximumMonitorRefreshSeconds = 10;
 
+    public bool LocalDiagnosticsEnabled { get; init; }
+
+    public bool IncludeHardwareSummaryInDiagnosticExport { get; init; }
+
     public static ApplicationSettings Default { get; } = new(
         ApplicationTheme.System,
         true,
         100,
-        1);
+        1)
+    {
+        LocalDiagnosticsEnabled = false,
+        IncludeHardwareSummaryInDiagnosticExport = false
+    };
 }
