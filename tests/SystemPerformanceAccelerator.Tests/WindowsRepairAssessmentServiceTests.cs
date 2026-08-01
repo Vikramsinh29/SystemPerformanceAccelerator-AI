@@ -168,6 +168,30 @@ public sealed class WindowsRepairAssessmentServiceTests
     }
 
     [Fact]
+    public async Task AssessAsync_RealSfcOutputWithNullSeparators_IsNormalizedAndHealthy()
+    {
+        var capturedOutput = string.Join(
+            "\0",
+            "Windows Resource Protection did not find any integrity violations."
+                .ToCharArray()) + "\0";
+        var runner = new FakeRunner(Completed(capturedOutput));
+        var service = CreateService(runner);
+
+        var result = await service.AssessAsync(
+            new WindowsRepairAssessmentRequest(false, true));
+
+        var check = Assert.Single(result.Checks);
+        Assert.Equal(
+            WindowsRepairAssessmentOutcome.Healthy,
+            check.Outcome);
+        Assert.False(check.SanitizedOutput.Contains('\0'));
+        Assert.Contains(
+            "did not find any integrity violations",
+            check.SanitizedOutput,
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void InterpretText_UnknownOrLocalizedText_IsInconclusive()
     {
         var outcome =

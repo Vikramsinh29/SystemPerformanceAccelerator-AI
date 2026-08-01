@@ -187,11 +187,12 @@ public sealed class WindowsRepairAssessmentService :
         bool userStopRequested)
     {
         var output = _sanitizer.Sanitize(
-            command.StandardOutput);
+            NormalizeCapturedText(command.StandardOutput));
         var error = _sanitizer.Sanitize(
-            string.IsNullOrWhiteSpace(command.StartFailure)
-                ? command.StandardError
-                : command.StartFailure);
+            NormalizeCapturedText(
+                string.IsNullOrWhiteSpace(command.StartFailure)
+                    ? command.StandardError
+                    : command.StartFailure));
 
         if (!command.Started)
         {
@@ -266,7 +267,8 @@ public sealed class WindowsRepairAssessmentService :
         WindowsRepairAssessmentCheck check,
         string? output)
     {
-        var text = output?.ToLowerInvariant() ?? string.Empty;
+        var text = NormalizeCapturedText(output)
+            .ToLowerInvariant();
 
         return check switch
         {
@@ -306,6 +308,11 @@ public sealed class WindowsRepairAssessmentService :
             _ => WindowsRepairAssessmentOutcome.Inconclusive
         };
     }
+
+    private static string NormalizeCapturedText(string? value) =>
+        string.IsNullOrEmpty(value)
+            ? string.Empty
+            : value.Replace("\0", string.Empty);
 
     private static WindowsRepairCommandRequest CreateCommandRequest(
         WindowsRepairAssessmentCheck check,
