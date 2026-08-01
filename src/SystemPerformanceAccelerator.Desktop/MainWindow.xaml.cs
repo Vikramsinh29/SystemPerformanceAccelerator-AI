@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using SystemPerformanceAccelerator.Core.Interfaces;
 using SystemPerformanceAccelerator.Core.Models;
 using SystemPerformanceAccelerator.Desktop.Services;
@@ -106,7 +108,7 @@ public partial class MainWindow : Window
         var featureAccessGuard = new FeatureAccessGuard(
             featureAccessService);
 
-        DataContext = new MainWindowViewModel(
+        var viewModel = new MainWindowViewModel(
             temporaryFileService,
             customCleanService,
             autoCleanScheduleService,
@@ -130,7 +132,66 @@ public partial class MainWindow : Window
             windowsRepairPlanHistoryService,
             windowsRepairExecutionService,
             windowsRepairExecutionHistoryService);
+        DataContext = viewModel;
+        viewModel.PropertyChanged +=
+            OnMainViewModelPropertyChanged;
     }
+
+    private void OnMainViewModelPropertyChanged(
+        object? sender,
+        PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName !=
+            nameof(MainWindowViewModel.ModuleTitle))
+        {
+            return;
+        }
+
+        Dispatcher.BeginInvoke(
+            new Action(
+                ToolContentScrollViewer.ScrollToTop));
+    }
+
+    private void ToolContentScrollViewer_PreviewMouseWheel(
+        object sender,
+        MouseWheelEventArgs e)
+    {
+        var nested = FindNestedScrollViewer(
+            e.OriginalSource as DependencyObject);
+        if (nested is null || CanScroll(nested, e.Delta))
+        {
+            return;
+        }
+
+        e.Handled = true;
+        ToolContentScrollViewer.ScrollToVerticalOffset(
+            ToolContentScrollViewer.VerticalOffset - e.Delta);
+    }
+
+    private ScrollViewer? FindNestedScrollViewer(
+        DependencyObject? current)
+    {
+        while (current is not null &&
+               current != ToolContentScrollViewer)
+        {
+            if (current is ScrollViewer scrollViewer)
+            {
+                return scrollViewer;
+            }
+
+            current = VisualTreeHelper.GetParent(current);
+        }
+
+        return null;
+    }
+
+    private static bool CanScroll(
+        ScrollViewer scrollViewer,
+        int delta) =>
+        delta > 0
+            ? scrollViewer.VerticalOffset > 0
+            : scrollViewer.VerticalOffset <
+                scrollViewer.ScrollableHeight;
 
     private void Window_Closing(
         object? sender,
