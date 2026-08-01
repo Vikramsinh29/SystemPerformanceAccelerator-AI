@@ -150,6 +150,25 @@ public sealed class DesktopTablePresentationTests
         AssertSetter(successStyle, "Background", "{DynamicResource SuccessBrush}");
     }
 
+    [Fact]
+    public void SystemMonitor_UsesCpuAndMemoryLiveHistoryCharts()
+    {
+        var document = XDocument.Load(FindRepositoryFile(
+            "src",
+            "SystemPerformanceAccelerator.Desktop",
+            "MainWindow.xaml"));
+
+        var valueBindings = document
+            .Descendants()
+            .Where(element => element.Name.LocalName == "LiveHistoryChart")
+            .Select(element => (string?)element.Attribute("Values"))
+            .ToArray();
+
+        Assert.Equal(2, valueBindings.Length);
+        Assert.Contains("{Binding CpuUsageHistory}", valueBindings);
+        Assert.Contains("{Binding MemoryUsageHistory}", valueBindings);
+    }
+
     private static void AssertSetter(XElement style, string property, string value)
     {
         Assert.Contains(

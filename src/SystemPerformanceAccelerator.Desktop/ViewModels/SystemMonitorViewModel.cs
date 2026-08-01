@@ -11,6 +11,7 @@ public sealed class SystemMonitorViewModel : INotifyPropertyChanged
     private static readonly TimeSpan CpuSampleDuration = TimeSpan.FromMilliseconds(500);
 
     private readonly ISystemMonitorService _systemMonitorService;
+    private readonly SystemMonitorHistoryBuffer _history = new();
     private TimeSpan _refreshInterval;
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _isMonitoring;
@@ -21,6 +22,8 @@ public sealed class SystemMonitorViewModel : INotifyPropertyChanged
     private long _totalMemoryBytes;
     private string _status = "Start monitoring to view live total CPU and physical-memory usage.";
     private string _lastUpdated = "Not started";
+    private IReadOnlyList<double> _cpuUsageHistory = Array.Empty<double>();
+    private IReadOnlyList<double> _memoryUsageHistory = Array.Empty<double>();
 
     public SystemMonitorViewModel(
         ISystemMonitorService systemMonitorService,
@@ -137,6 +140,20 @@ public sealed class SystemMonitorViewModel : INotifyPropertyChanged
     public string TotalMemoryText => FormatBytes(TotalMemoryBytes);
     public string MonitoringState => IsMonitoring ? "Monitoring" : "Stopped";
 
+    public IReadOnlyList<double> CpuUsageHistory
+    {
+        get => _cpuUsageHistory;
+        private set => SetField(ref _cpuUsageHistory, value);
+    }
+
+    public IReadOnlyList<double> MemoryUsageHistory
+    {
+        get => _memoryUsageHistory;
+        private set => SetField(ref _memoryUsageHistory, value);
+    }
+
+    public bool HasHistory => _history.Count > 0;
+
     public void ApplyRefreshInterval(int refreshIntervalSeconds)
     {
         _refreshInterval = TimeSpan.FromSeconds(
@@ -191,6 +208,7 @@ public sealed class SystemMonitorViewModel : INotifyPropertyChanged
     {
         _cancellationTokenSource?.Dispose();
         _cancellationTokenSource = new CancellationTokenSource();
+        ResetHistory();
         Status = "Starting read-only CPU and memory monitoring...";
         IsMonitoring = true;
     }
@@ -210,6 +228,18 @@ public sealed class SystemMonitorViewModel : INotifyPropertyChanged
         AvailableMemoryBytes = snapshot.AvailablePhysicalMemoryBytes;
         TotalMemoryBytes = snapshot.TotalPhysicalMemoryBytes;
         LastUpdated = snapshot.CapturedAt.ToLocalTime().ToString("HH:mm:ss");
+        _history.Add(snapshot.CpuUsagePercent, snapshot.MemoryUsagePercent);
+        CpuUsageHistory = _history.CpuValues.ToArray();
+        MemoryUsageHistory = _history.MemoryValues.ToArray();
+        OnPropertyChanged(nameof(HasHistory));
+    }
+
+    private void ResetHistory()
+    {
+        _history.Clear();
+        CpuUsageHistory = Array.Empty<double>();
+        MemoryUsageHistory = Array.Empty<double>();
+        OnPropertyChanged(nameof(HasHistory));
     }
 
     private static string FormatBytes(long bytes)
