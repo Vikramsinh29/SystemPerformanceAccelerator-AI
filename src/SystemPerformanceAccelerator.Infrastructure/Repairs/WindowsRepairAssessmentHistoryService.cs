@@ -112,13 +112,24 @@ public sealed class WindowsRepairAssessmentHistoryService :
         }
     }
 
-    public WindowsRepairAssessmentResult? LoadLatest()
+    public WindowsRepairAssessmentResult? LoadLatest() =>
+        LoadRecent(1).FirstOrDefault();
+
+    public IReadOnlyList<WindowsRepairAssessmentResult> LoadRecent(
+        int maximumCount = 20)
     {
-        if (!Directory.Exists(_recordsDirectory))
+        if (maximumCount < 1)
         {
-            return null;
+            throw new ArgumentOutOfRangeException(
+                nameof(maximumCount));
         }
 
+        if (!Directory.Exists(_recordsDirectory))
+        {
+            return Array.Empty<WindowsRepairAssessmentResult>();
+        }
+
+        var results = new List<WindowsRepairAssessmentResult>();
         try
         {
             foreach (var file in Directory
@@ -139,7 +150,11 @@ public sealed class WindowsRepairAssessmentHistoryService :
                         SerializerOptions);
                     if (result is not null)
                     {
-                        return Sanitize(result);
+                        results.Add(Sanitize(result));
+                        if (results.Count >= maximumCount)
+                        {
+                            break;
+                        }
                     }
                 }
                 catch (Exception ex) when (
@@ -158,7 +173,7 @@ public sealed class WindowsRepairAssessmentHistoryService :
         {
         }
 
-        return null;
+        return results;
     }
 
     public async Task<string?> ExportLatestAsync(

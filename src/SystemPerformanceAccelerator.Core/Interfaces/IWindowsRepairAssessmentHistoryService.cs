@@ -12,6 +12,9 @@ public interface IWindowsRepairAssessmentHistoryService
 
     WindowsRepairAssessmentResult? LoadLatest();
 
+    IReadOnlyList<WindowsRepairAssessmentResult> LoadRecent(
+        int maximumCount = 20);
+
     Task<string?> ExportLatestAsync(
         string destinationZipPath,
         CancellationToken cancellationToken = default);

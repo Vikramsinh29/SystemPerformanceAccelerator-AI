@@ -72,6 +72,33 @@ public sealed class WindowsRepairExecutionHistoryServiceTests
     }
 
     [Fact]
+    public async Task LoadRecent_ReturnsNewestRequestedRecords()
+    {
+        var root = CreateTemporaryDirectory();
+        try
+        {
+            var service =
+                new WindowsRepairExecutionHistoryService(root);
+            await service.SaveAsync(
+                CreateResult("REPAIR-RECENT-ONE", "first"));
+            await Task.Delay(20);
+            await service.SaveAsync(
+                CreateResult("REPAIR-RECENT-TWO", "second"));
+
+            var records = service.LoadRecent(1);
+
+            Assert.Single(records);
+            Assert.Equal(
+                "REPAIR-RECENT-TWO",
+                records[0].ReferenceId);
+        }
+        finally
+        {
+            TryDelete(root);
+        }
+    }
+
+    [Fact]
     public async Task ExportLatestAsync_UsesLatestSanitizedResult()
     {
         var root = CreateTemporaryDirectory();

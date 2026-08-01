@@ -5163,6 +5163,15 @@
                                    FontWeight="SemiBold" />
                     </Border>
 
+                    <Button Command="{Binding OpenPastRecordsCommand}"
+                            Style="{StaticResource FluentSecondaryButtonStyle}"
+                            Margin="0,0,8,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE81C;" Style="{StaticResource ActionButtonGlyphStyle}" />
+                            <TextBlock Margin="7,0,0,0" Text="Past records" />
+                        </StackPanel>
+                    </Button>
+
                     <Button Command="{Binding DeleteAssessmentHistoryCommand}"
                             Style="{StaticResource FluentSecondaryButtonStyle}">
                         <StackPanel Orientation="Horizontal">
@@ -5174,6 +5183,137 @@
             </Grid>
         </Grid>
     </Border>
+
+    <Grid Grid.RowSpan="5"
+          Panel.ZIndex="60"
+          Visibility="{Binding IsPastRecordsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Border Background="#B8000000" />
+
+        <Border Margin="24"
+                MaxWidth="1160"
+                MaxHeight="760"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Style="{StaticResource FluentElevatedCardStyle}">
+            <Grid Margin="22,18,22,20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Past Windows Repair records"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   FontSize="20"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Margin="0,4,0,0"
+                                   Text="Newest saved assessments and guided-repair results. Records are read-only."
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   FontSize="11.5" />
+                    </StackPanel>
+                    <Border Grid.Column="1"
+                            Margin="16,0,12,0"
+                            Style="{StaticResource OperationMetaChipStyle}"
+                            VerticalAlignment="Center">
+                        <TextBlock Text="{Binding PastRecordsCountText}"
+                                   Foreground="{DynamicResource MetaTextBrush}"
+                                   FontSize="10.5"
+                                   FontWeight="SemiBold" />
+                    </Border>
+                    <Button Grid.Column="2"
+                            Command="{Binding ClosePastRecordsCommand}"
+                            Style="{StaticResource FluentSecondaryButtonStyle}"
+                            Content="Back to Windows Repair"
+                            VerticalAlignment="Center" />
+                </Grid>
+
+                <Grid Grid.Row="1" Margin="0,16,0,0">
+                    <DataGrid x:Name="WindowsRepairPastRecordsGrid"
+                              ItemsSource="{Binding PastRecords}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              CanUserReorderColumns="False"
+                              CanUserResizeColumns="True"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="None"
+                              BorderThickness="0"
+                              RowHeaderWidth="0"
+                              Style="{StaticResource FluentDataGridStyle}"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                              ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="TYPE"
+                                                Binding="{Binding RecordType}"
+                                                ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
+                                                Width="110"
+                                                MinWidth="110" />
+                            <DataGridTextColumn Header="REFERENCE"
+                                                Binding="{Binding Reference}"
+                                                ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
+                                                Width="220"
+                                                MinWidth="220" />
+                            <DataGridTextColumn Header="OUTCOME"
+                                                Binding="{Binding Outcome}"
+                                                ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
+                                                Width="150"
+                                                MinWidth="150" />
+                            <DataGridTextColumn Header="COMPLETED"
+                                                Binding="{Binding CompletedText}"
+                                                ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
+                                                Width="150"
+                                                MinWidth="150" />
+                            <DataGridTextColumn Header="DURATION"
+                                                Binding="{Binding DurationText}"
+                                                ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
+                                                Width="100"
+                                                MinWidth="100" />
+                            <DataGridTextColumn Header="DETAILS"
+                                                Binding="{Binding Summary}"
+                                                ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
+                                                Width="300"
+                                                MinWidth="300" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Border Background="{DynamicResource SurfaceBrush}"
+                            IsHitTestVisible="False">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=WindowsRepairPastRecordsGrid, Path=HasItems}"
+                                                 Value="False">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <StackPanel HorizontalAlignment="Center"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="No past records"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Center" />
+                            <TextBlock Margin="0,5,0,0"
+                                       Text="Completed assessments and guided repairs will appear here."
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       FontSize="11"
+                                       HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
 
     <Grid Grid.RowSpan="5"
           Panel.ZIndex="50"

@@ -79,6 +79,26 @@ public sealed class WindowsRepairAssessmentHistoryServiceTests
     }
 
     [Fact]
+    public async Task LoadRecent_ReturnsNewestRequestedRecords()
+    {
+        using var location = new TemporaryAssessmentLocation();
+        var service = new WindowsRepairAssessmentHistoryService(
+            location.Root);
+        await service.SaveAsync(
+            CreateResult("ASSESS-RECENT-ONE"));
+        await Task.Delay(20);
+        await service.SaveAsync(
+            CreateResult("ASSESS-RECENT-TWO"));
+
+        var records = service.LoadRecent(1);
+
+        Assert.Single(records);
+        Assert.Equal(
+            "ASSESS-RECENT-TWO",
+            records[0].ReferenceId);
+    }
+
+    [Fact]
     public async Task SaveAsync_RemovesExpiredRecords()
     {
         using var location = new TemporaryAssessmentLocation();

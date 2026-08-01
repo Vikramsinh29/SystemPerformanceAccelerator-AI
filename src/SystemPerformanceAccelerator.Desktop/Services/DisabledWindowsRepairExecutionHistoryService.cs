@@ -19,6 +19,10 @@ public sealed class DisabledWindowsRepairExecutionHistoryService :
     public WindowsRepairExecutionResult? LoadLatest() =>
         null;
 
+    public IReadOnlyList<WindowsRepairExecutionResult> LoadRecent(
+        int maximumCount = 20) =>
+        Array.Empty<WindowsRepairExecutionResult>();
+
     public Task<string?> ExportLatestAsync(
         string destinationZipPath,
         CancellationToken cancellationToken = default)

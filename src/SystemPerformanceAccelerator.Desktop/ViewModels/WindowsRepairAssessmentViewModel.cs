@@ -70,6 +70,7 @@ public sealed class WindowsRepairAssessmentViewModel :
     private string _sfcVerifyOnlyResult = "Not recorded";
     private string _repairResultRecommendation = string.Empty;
     private string _automaticRestartEvidence = string.Empty;
+    private bool _isPastRecordsVisible;
 
     public WindowsRepairAssessmentViewModel(
         IWindowsRepairAssessmentService assessmentService,
@@ -158,6 +159,14 @@ public sealed class WindowsRepairAssessmentViewModel :
             ApplicationFeature.WindowsRepairAssessment,
             FeatureAccessRequirement.Execute,
             () => !IsBusy && HasWindowsRepairHistory);
+        OpenPastRecordsCommand = new RelayCommand(
+            OpenPastRecords,
+            featureAccessGuard,
+            ApplicationFeature.WindowsRepairAssessment,
+            FeatureAccessRequirement.Execute,
+            () => !IsBusy && HasWindowsRepairHistory);
+        ClosePastRecordsCommand = new RelayCommand(
+            ClosePastRecords);
 
         LoadLatestHistory();
     }
@@ -190,6 +199,13 @@ public sealed class WindowsRepairAssessmentViewModel :
     public RelayCommand OpenAssessmentFolderCommand { get; }
 
     public RelayCommand DeleteAssessmentHistoryCommand { get; }
+
+    public RelayCommand OpenPastRecordsCommand { get; }
+
+    public RelayCommand ClosePastRecordsCommand { get; }
+
+    public ObservableCollection<WindowsRepairPastRecordViewModel>
+        PastRecords { get; } = [];
 
     public bool CheckComponentStore
     {
@@ -385,6 +401,17 @@ public sealed class WindowsRepairAssessmentViewModel :
         get => _automaticRestartEvidence;
         private set => SetField(ref _automaticRestartEvidence, value);
     }
+
+    public bool IsPastRecordsVisible
+    {
+        get => _isPastRecordsVisible;
+        private set => SetField(ref _isPastRecordsVisible, value);
+    }
+
+    public bool HasPastRecords => PastRecords.Count > 0;
+
+    public string PastRecordsCountText =>
+        $"{PastRecords.Count:N0} of {PastRecords.Count:N0} records";
 
     public bool IsRepairPlanPreviewVisible
     {
@@ -1117,6 +1144,8 @@ public sealed class WindowsRepairAssessmentViewModel :
         _latestResult = null;
         _latestPlan = null;
         ClearRepairResult();
+        IsPastRecordsVisible = false;
+        PastRecords.Clear();
         IsRepairPlanPreviewVisible = false;
         RepairPlanPreflight.Clear();
         RepairPlanSteps.Clear();
@@ -1140,6 +1169,59 @@ public sealed class WindowsRepairAssessmentViewModel :
         RefreshSummary();
         RaiseCommandStates();
     }
+
+    private void OpenPastRecords()
+    {
+        try
+        {
+            var records = _historyService.LoadRecent(20)
+                .Select(result =>
+                    new WindowsRepairPastRecordViewModel(
+                        "Assessment",
+                        result.ReferenceId,
+                        FormatOutcome(result.OverallOutcome),
+                        result.FinishedUtc,
+                        result.Duration,
+                        BuildCompletionStatus(result)))
+                .Concat(
+                    _repairExecutionHistoryService.LoadRecent(20)
+                        .Select(result =>
+                            new WindowsRepairPastRecordViewModel(
+                                "Guided repair",
+                                result.ReferenceId,
+                                FormatRepairOutcome(result.Outcome),
+                                result.FinishedUtc,
+                                result.Duration,
+                                result.Summary)))
+                .OrderByDescending(item => item.CompletedUtc)
+                .Take(20)
+                .ToArray();
+
+            PastRecords.Clear();
+            foreach (var record in records)
+            {
+                PastRecords.Add(record);
+            }
+
+            OnPropertyChanged(nameof(HasPastRecords));
+            OnPropertyChanged(nameof(PastRecordsCountText));
+            IsPastRecordsVisible = true;
+            Status = records.Length == 0
+                ? "No saved Windows Repair records are available."
+                : $"Showing the newest {records.Length:N0} saved Windows Repair records.";
+        }
+        catch (Exception ex)
+        {
+            Status =
+                "Saved Windows Repair records could not be loaded.";
+            _ = TryRecordUnexpectedExceptionAsync(
+                ex,
+                "Past Windows Repair records");
+        }
+    }
+
+    private void ClosePastRecords() =>
+        IsPastRecordsVisible = false;
 
     private void LoadLatestHistory()
     {
@@ -1206,6 +1288,7 @@ public sealed class WindowsRepairAssessmentViewModel :
         OnPropertyChanged(nameof(HasLatestRepairResult));
         OnPropertyChanged(nameof(HasWindowsRepairHistory));
         ExportLatestRepairResultCommand.RaiseCanExecuteChanged();
+        OpenPastRecordsCommand.RaiseCanExecuteChanged();
         DeleteAssessmentHistoryCommand.RaiseCanExecuteChanged();
     }
 
@@ -1388,6 +1471,7 @@ public sealed class WindowsRepairAssessmentViewModel :
             .RaiseCanExecuteChanged();
         DeleteAssessmentHistoryCommand
             .RaiseCanExecuteChanged();
+        OpenPastRecordsCommand.RaiseCanExecuteChanged();
         OnPropertyChanged(nameof(HasLatestAssessment));
         OnPropertyChanged(nameof(HasWindowsRepairHistory));
     }

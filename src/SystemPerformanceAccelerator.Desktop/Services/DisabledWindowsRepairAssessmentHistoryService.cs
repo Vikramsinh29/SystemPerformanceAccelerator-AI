@@ -18,6 +18,10 @@ public sealed class DisabledWindowsRepairAssessmentHistoryService :
 
     public WindowsRepairAssessmentResult? LoadLatest() => null;
 
+    public IReadOnlyList<WindowsRepairAssessmentResult> LoadRecent(
+        int maximumCount = 20) =>
+        Array.Empty<WindowsRepairAssessmentResult>();
+
     public Task<string?> ExportLatestAsync(
         string destinationZipPath,
         CancellationToken cancellationToken = default)

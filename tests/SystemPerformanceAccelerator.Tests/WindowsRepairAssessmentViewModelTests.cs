@@ -185,6 +185,37 @@ public sealed class WindowsRepairAssessmentViewModelTests
     }
 
     [Fact]
+    public void PastRecords_CombinesAssessmentAndGuidedRepair()
+    {
+        var assessment = CreateResult(
+            new[]
+            {
+                CreateCheck(
+                    WindowsRepairAssessmentOutcome.Healthy)
+            },
+            stopRequested: false);
+        var viewModel = CreateViewModel(
+            assessmentHistoryService:
+                new TestAssessmentHistoryService(assessment),
+            executionHistoryService:
+                new TestExecutionHistoryService(
+                    CreateExecutionResult()));
+
+        viewModel.OpenPastRecordsCommand.Execute(null);
+
+        Assert.True(viewModel.IsPastRecordsVisible);
+        Assert.True(viewModel.HasPastRecords);
+        Assert.Equal(2, viewModel.PastRecords.Count);
+        Assert.Contains(
+            viewModel.PastRecords,
+            item => item.RecordType == "Assessment");
+        Assert.Contains(
+            viewModel.PastRecords,
+            item => item.RecordType == "Guided repair");
+        Assert.Equal("2 of 2 records", viewModel.PastRecordsCountText);
+    }
+
+    [Fact]
     public void CompletionStatus_StopOnFinalCheck_DoesNotClaimAnythingWasSkipped()
     {
         var result = CreateResult(
@@ -456,6 +487,12 @@ public sealed class WindowsRepairAssessmentViewModelTests
 
         public WindowsRepairExecutionResult? LoadLatest() => latest;
 
+        public IReadOnlyList<WindowsRepairExecutionResult> LoadRecent(
+            int maximumCount = 20) =>
+            latest is null
+                ? Array.Empty<WindowsRepairExecutionResult>()
+                : new[] { latest };
+
         public Task<string?> ExportLatestAsync(
             string destinationZipPath,
             CancellationToken cancellationToken = default) =>
@@ -476,6 +513,12 @@ public sealed class WindowsRepairAssessmentViewModelTests
             Task.CompletedTask;
 
         public WindowsRepairAssessmentResult? LoadLatest() => latest;
+
+        public IReadOnlyList<WindowsRepairAssessmentResult> LoadRecent(
+            int maximumCount = 20) =>
+            latest is null
+                ? Array.Empty<WindowsRepairAssessmentResult>()
+                : new[] { latest };
 
         public Task<string?> ExportLatestAsync(
             string destinationZipPath,
