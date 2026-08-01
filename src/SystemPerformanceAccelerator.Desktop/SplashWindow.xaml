@@ -22,7 +22,7 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <Image Source="Assets/Branding/PC-SPA-Full-Lockup-Dark.png"
+            <Image Source="{StaticResource BrandSplashSource}"
                    Stretch="Uniform"
                    HorizontalAlignment="Stretch"
                    VerticalAlignment="Stretch"

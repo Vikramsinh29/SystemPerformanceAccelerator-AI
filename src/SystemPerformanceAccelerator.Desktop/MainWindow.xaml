@@ -565,16 +565,15 @@
                                 Orientation="Horizontal"
                                 VerticalAlignment="Center"
                                 IsHitTestVisible="False">
-                        <Image Width="24"
-                               Height="24"
-                               Source="{DynamicResource BrandPhoenixSource}"
+                        <Image Width="28"
+                               Height="28"
+                               Source="{StaticResource BrandTitlebarPhoenixSource}"
                                Style="{StaticResource BrandImageStyle}" />
-                        <TextBlock Margin="8,0,0,0"
-                                   Text="PC-SPA"
-                                   Foreground="{DynamicResource TitleBarForegroundBrush}"
-                                   FontSize="12.5"
-                                   FontWeight="SemiBold"
-                                   VerticalAlignment="Center" />
+                        <Image Width="70"
+                               Height="28"
+                               Margin="8,0,0,0"
+                               Source="{StaticResource BrandTitlebarWordmarkSource}"
+                               Style="{StaticResource BrandImageStyle}" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="1"
@@ -632,36 +631,34 @@
                         </Grid.ColumnDefinitions>
 
                         <Image Grid.Column="0"
-                               Width="104"
-                               Height="104"
+                               Width="96"
+                               Height="96"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"
-                               Source="{DynamicResource BrandPhoenixSource}"
+                               Source="{StaticResource BrandSidebarPhoenixSource}"
                                Style="{StaticResource BrandImageStyle}" />
 
                         <StackPanel Grid.Column="2"
                                     HorizontalAlignment="Stretch"
-                                    VerticalAlignment="Center">
+                                    VerticalAlignment="Center"
+                                    TextOptions.TextFormattingMode="Display"
+                                    TextOptions.TextRenderingMode="ClearType">
                             <Image Width="116"
-                                   Height="44"
+                                   Height="28"
+                                   Margin="0,0,0,3"
                                    HorizontalAlignment="Left"
-                                   Source="{DynamicResource BrandWordmarkSource}"
+                                   Source="{StaticResource BrandSidebarWordmarkSource}"
                                    Style="{StaticResource BrandImageStyle}" />
-                            <TextBlock Margin="1,5,0,0"
-                                       Text="SYSTEM"
+                            <TextBlock Margin="8,0,0,0"
+                                       Text="SYSTEM PERFORMANCE"
                                        Foreground="{DynamicResource SidebarTextBrush}"
-                                       FontSize="8"
-                                       FontWeight="SemiBold" />
-                            <TextBlock Margin="1,0,0,0"
-                                       Text="PERFORMANCE"
-                                       Foreground="{DynamicResource SidebarTextBrush}"
-                                       FontSize="8"
-                                       FontWeight="SemiBold" />
-                            <TextBlock Margin="1,2,0,0"
-                                       Text="A C C E L E R A T O R"
+                                       FontSize="9"
+                                       FontWeight="Bold" />
+                            <TextBlock Margin="8,1,0,0"
+                                       Text="ACCELERATOR"
                                        Foreground="{DynamicResource AccentBrush}"
-                                       FontSize="7.2"
-                                       FontWeight="SemiBold" />
+                                       FontSize="9"
+                                       FontWeight="Bold" />
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -6193,13 +6190,13 @@
                                 Style="{StaticResource BrandAboutCardStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="204" />
-                                    <ColumnDefinition Width="28" />
+                                    <ColumnDefinition Width="250" />
+                                    <ColumnDefinition Width="24" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
 
-                                <Image Width="190"
-                                       Height="190"
+                                <Image Width="240"
+                                       Height="240"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"
                                        Source="{DynamicResource BrandPhoenixSource}"
@@ -6212,8 +6209,8 @@
                                                FontSize="10"
                                                FontWeight="Bold" />
                                     <Image Margin="0,8,0,0"
-                                           Width="320"
-                                           Height="116"
+                                           Width="280"
+                                           Height="102"
                                            HorizontalAlignment="Left"
                                            Source="{DynamicResource BrandWordmarkSource}"
                                            Style="{StaticResource BrandImageStyle}" />

@@ -1,19 +1,34 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <BitmapImage x:Key="BrandPhoenixDarkSource"
-                 UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Phoenix-Dark.png"
+                 UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Phoenix-About-2x.png"
                  CacheOption="OnLoad" />
     <BitmapImage x:Key="BrandPhoenixLightSource"
                  UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Phoenix-Light.png"
                  CacheOption="OnLoad" />
     <BitmapImage x:Key="BrandWordmarkDarkSource"
-                 UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Wordmark-Dark.png"
+                 UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Wordmark-About-2x.png"
                  CacheOption="OnLoad" />
     <BitmapImage x:Key="BrandWordmarkLightSource"
                  UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Wordmark-Light.png"
                  CacheOption="OnLoad" />
     <BitmapImage x:Key="BrandFullLockupDarkSource"
                  UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Full-Lockup-Dark.png"
+                 CacheOption="OnLoad" />
+    <BitmapImage x:Key="BrandTitlebarPhoenixSource"
+                 UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Phoenix-Titlebar-4x.png"
+                 CacheOption="OnLoad" />
+    <BitmapImage x:Key="BrandTitlebarWordmarkSource"
+                 UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Wordmark-Titlebar-4x.png"
+                 CacheOption="OnLoad" />
+    <BitmapImage x:Key="BrandSidebarPhoenixSource"
+                 UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Phoenix-Sidebar-2x.png"
+                 CacheOption="OnLoad" />
+    <BitmapImage x:Key="BrandSidebarWordmarkSource"
+                 UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Wordmark-Sidebar-2x.png"
+                 CacheOption="OnLoad" />
+    <BitmapImage x:Key="BrandSplashSource"
+                 UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Full-Lockup-Splash.png"
                  CacheOption="OnLoad" />
 
     <!-- Runtime aliases are replaced by ThemeManager whenever the theme changes. -->
