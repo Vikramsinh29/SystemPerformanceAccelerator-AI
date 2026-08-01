@@ -9,7 +9,7 @@
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="GridLinesVisibility" Value="Horizontal" />
+        <Setter Property="GridLinesVisibility" Value="None" />
         <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource PremiumDividerBrush}" />
         <Setter Property="VerticalGridLinesBrush" Value="{DynamicResource PremiumDividerBrush}" />
         <Setter Property="HeadersVisibility" Value="Column" />

@@ -58,6 +58,71 @@
         </Setter>
     </Style>
 
+    <Style x:Key="FullTrackActivityProgressBarStyle"
+           TargetType="ProgressBar"
+           BasedOn="{StaticResource FluentProgressBarStyle}">
+        <Setter Property="Height" Value="6" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ProgressBar">
+                    <Grid ClipToBounds="True">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3" />
+                        <Border x:Name="PART_Track"
+                                Margin="1"
+                                Background="Transparent" />
+                        <Border x:Name="PART_Indicator"
+                                Margin="1"
+                                HorizontalAlignment="Left"
+                                Background="{TemplateBinding Foreground}"
+                                CornerRadius="3" />
+                        <Border x:Name="FullTrackActivity"
+                                Margin="1"
+                                Background="{TemplateBinding Foreground}"
+                                CornerRadius="3"
+                                Opacity="0">
+                            <Border.OpacityMask>
+                                <LinearGradientBrush StartPoint="0,0.5"
+                                                     EndPoint="1,0.5">
+                                    <LinearGradientBrush.RelativeTransform>
+                                        <TranslateTransform X="-0.425" />
+                                    </LinearGradientBrush.RelativeTransform>
+                                    <GradientStop Color="Transparent" Offset="0.35" />
+                                    <GradientStop Color="White" Offset="0.425" />
+                                    <GradientStop Color="White" Offset="0.575" />
+                                    <GradientStop Color="Transparent" Offset="0.65" />
+                                </LinearGradientBrush>
+                            </Border.OpacityMask>
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsIndeterminate" Value="True">
+                            <Setter TargetName="PART_Indicator" Property="Opacity" Value="0" />
+                            <Setter TargetName="FullTrackActivity" Property="Opacity" Value="1" />
+                            <Trigger.EnterActions>
+                                <BeginStoryboard x:Name="FullTrackActivityStoryboard">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FullTrackActivity"
+                                                         Storyboard.TargetProperty="(UIElement.OpacityMask).(Brush.RelativeTransform).(TranslateTransform.X)"
+                                                         From="-0.425"
+                                                         To="0.425"
+                                                         Duration="0:0:1.8"
+                                                         RepeatBehavior="Forever" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <RemoveStoryboard BeginStoryboardName="FullTrackActivityStoryboard" />
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="PremiumStatusDotStyle" TargetType="Ellipse">
         <Setter Property="Width" Value="8" />
         <Setter Property="Height" Value="8" />

@@ -1112,6 +1112,7 @@
 
             <Grid Grid.Row="1"
                   Margin="20,16,20,18"
+                  Height="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=34}"
                   DataContext="{Binding HealthCheck}"
                   Visibility="{Binding DataContext.IsHealthCheckContentVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
 
@@ -1400,7 +1401,6 @@
                                           CanUserDeleteRows="False"
                                           CanUserReorderColumns="False"
                                           HeadersVisibility="Column"
-                                          GridLinesVisibility="None"
                                           BorderThickness="0"
                                           RowHeaderWidth="0"
                                           SelectionMode="Single"
@@ -1881,6 +1881,7 @@
 
             <Grid Grid.Row="1"
                   Margin="20,16,20,18"
+                  Height="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=34}"
                   Visibility="{Binding IsCleanerContentVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -2317,6 +2318,7 @@
 
             <Grid Grid.Row="1"
                   Margin="20,16,20,18"
+                  Height="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=34}"
                   DataContext="{Binding CustomClean}"
                   Visibility="{Binding DataContext.IsCustomCleanContentVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
@@ -2792,6 +2794,7 @@
 
             <Grid Grid.Row="1"
                   Margin="20,16,20,18"
+                  Height="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=34}"
                   DataContext="{Binding AutoCleanSchedule}"
                   Visibility="{Binding DataContext.IsAutoCleanScheduleContentVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.Resources>
@@ -3559,6 +3562,7 @@
 
             <Grid Grid.Row="1"
                   Margin="20,16,20,18"
+                  Height="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=34}"
                   DataContext="{Binding LargeFileFinder}"
                   Visibility="{Binding DataContext.IsLargeFileFinderContentVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
@@ -3679,7 +3683,6 @@
                               CanUserDeleteRows="False"
                               CanUserReorderColumns="False"
                               HeadersVisibility="Column"
-                              GridLinesVisibility="None"
                               BorderThickness="0"
                               RowHeaderWidth="0"
                               SelectionMode="Extended"
@@ -3747,7 +3750,9 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <ProgressBar Height="6"
+                        <ProgressBar x:Name="LargeFileActivityProgressBar"
+                                     Style="{StaticResource FullTrackActivityProgressBarStyle}"
+                                     Height="6"
                                      Minimum="0"
                                      Maximum="100"
                                      Value="{Binding Progress, Mode=OneWay}"
@@ -3795,6 +3800,7 @@
 
             <Grid Grid.Row="1"
                   Margin="20,16,20,18"
+                  Height="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=34}"
                   DataContext="{Binding DuplicateFileFinder}"
                   Visibility="{Binding DataContext.IsDuplicateFileFinderContentVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
@@ -3876,8 +3882,6 @@
                               CanUserDeleteRows="False"
                               CanUserReorderColumns="False"
                               HeadersVisibility="Column"
-                              GridLinesVisibility="Vertical"
-                              VerticalGridLinesBrush="{DynamicResource BorderBrush}"
                               BorderThickness="0"
                               RowHeaderWidth="0"
                               SelectionMode="Extended"
@@ -3892,26 +3896,9 @@
                               HorizontalContentAlignment="Stretch"
                               VirtualizingPanel.IsVirtualizingWhenGrouping="True"
                               VirtualizingPanel.VirtualizationMode="Recycling">
-                        <DataGrid.ColumnHeaderStyle>
-                            <Style TargetType="DataGridColumnHeader"
-                                   BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
-                                <Setter Property="Padding" Value="10,0" />
-                                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
-                                <Setter Property="BorderThickness" Value="0,0,1,1" />
-                            </Style>
-                        </DataGrid.ColumnHeaderStyle>
-                        <DataGrid.CellStyle>
-                            <Style TargetType="DataGridCell"
-                                   BasedOn="{StaticResource {x:Type DataGridCell}}">
-                                <Setter Property="Padding" Value="10,0" />
-                                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
-                                <Setter Property="BorderThickness" Value="0,0,1,0" />
-                            </Style>
-                        </DataGrid.CellStyle>
                         <DataGrid.RowStyle>
                             <Style TargetType="DataGridRow"
                                    BasedOn="{StaticResource {x:Type DataGridRow}}">
-                                <Setter Property="Height" Value="38" />
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                             </Style>
                         </DataGrid.RowStyle>
@@ -4120,7 +4107,9 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <ProgressBar Height="6"
+                        <ProgressBar x:Name="DuplicateActivityProgressBar"
+                                     Style="{StaticResource FullTrackActivityProgressBarStyle}"
+                                     Height="6"
                                      Minimum="0"
                                      Maximum="100"
                                      Value="{Binding Progress, Mode=OneWay}"
@@ -4168,6 +4157,7 @@
 
             <Grid Grid.Row="1"
                   Margin="20,16,20,18"
+                  Height="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=34}"
                   DataContext="{Binding StartupManager}"
                   Visibility="{Binding DataContext.IsStartupManagerContentVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
@@ -4270,7 +4260,6 @@
                               CanUserDeleteRows="False"
                               CanUserReorderColumns="False"
                               HeadersVisibility="Column"
-                              GridLinesVisibility="None"
                               BorderThickness="0"
                               RowHeaderWidth="0"
                               SelectionMode="Single"
@@ -4409,6 +4398,7 @@
 
 <Grid Grid.Row="1"
       Margin="20,14,20,16"
+      Height="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=30}"
       DataContext="{Binding WindowsRepairAssessment}"
       Visibility="{Binding DataContext.IsWindowsRepairAssessmentContentVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
     <Grid.RowDefinitions>
@@ -4828,6 +4818,7 @@
                 <Grid Grid.Row="1" Margin="12,0,12,12">
                     <DataGrid x:Name="WindowsRepairResultsGrid"
                               ItemsSource="{Binding Results}"
+                              Style="{StaticResource FluentDataGridStyle}"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
                               SelectionMode="Single"
@@ -4838,8 +4829,6 @@
                               CanUserReorderColumns="False"
                               HorizontalScrollBarVisibility="Auto"
                               VerticalScrollBarVisibility="Auto"
-                              ColumnHeaderHeight="36"
-                              RowHeight="44"
                               RowHeaderWidth="0">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="CHECK"
@@ -5246,7 +5235,6 @@
                               CanUserReorderColumns="False"
                               CanUserResizeColumns="True"
                               HeadersVisibility="Column"
-                              GridLinesVisibility="None"
                               BorderThickness="0"
                               RowHeaderWidth="0"
                               Style="{StaticResource FluentDataGridStyle}"
