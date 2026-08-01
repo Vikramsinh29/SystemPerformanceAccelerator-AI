@@ -13,3 +13,8 @@ obj/
 *.dmp
 /crash-reports/
 /diagnostic-exports/
+
+# Generated Windows Repair Assessment evidence
+*.repair-assessment.zip
+/repair-assessments/
+/windows-repair-reports/

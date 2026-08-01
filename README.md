@@ -805,3 +805,22 @@ Sprint 34A adds an opt-in, local-only diagnostic evidence foundation for control
 - Optional CPU and memory summary inclusion is controlled by the user.
 - Cleaner, Custom Clean, Auto Clean Schedule, Large File Finder, Duplicate File Finder, Startup Manager, System Monitor, Health Check, edition access, safety confirmation, and release packaging behaviour remain unchanged.
 - Remote telemetry, analytics, cloud crash reporting, benchmarking, compatibility claims, and false-positive scoring remain outside this sprint.
+
+## Sprint 35A - Read-only Windows Repair Assessment
+
+Sprint 35A adds a feature-access-controlled Windows Repair module that runs
+only Microsoft DISM CheckHealth and SFC VerifyOnly assessment commands.
+
+- Commands are started directly without Command Prompt, PowerShell, scripts,
+  or user-supplied arguments.
+- No RestoreHealth, ScanHealth, SFC Scannow, CHKDSK, component cleanup,
+  registry repair, restart scheduling, or downloaded repair source is
+  implemented.
+- Stop after current check never force-terminates a running Microsoft process.
+- Result interpretation is conservative; unknown or localized wording is
+  Inconclusive rather than guessed.
+- Sanitized local history is bounded to 20 records and 90 days.
+- Reports are exported manually, contain no personal files, and are never
+  uploaded automatically.
+- Existing cleanup, startup, health, diagnostics, settings, edition, and
+  packaging behaviour remains unchanged.

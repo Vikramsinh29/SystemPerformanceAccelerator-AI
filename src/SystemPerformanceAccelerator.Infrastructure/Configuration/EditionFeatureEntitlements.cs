@@ -16,6 +16,7 @@ public static class EditionFeatureEntitlements
             [ApplicationFeature.LargeFileFinder] = AvailableToAll(ApplicationFeature.LargeFileFinder),
             [ApplicationFeature.DuplicateFileFinder] = AvailableToAll(ApplicationFeature.DuplicateFileFinder),
             [ApplicationFeature.StartupManager] = AvailableToAll(ApplicationFeature.StartupManager),
+            [ApplicationFeature.WindowsRepairAssessment] = AvailableToAll(ApplicationFeature.WindowsRepairAssessment),
             [ApplicationFeature.SystemMonitor] = AvailableToAll(ApplicationFeature.SystemMonitor),
             [ApplicationFeature.Settings] = AvailableToAll(ApplicationFeature.Settings)
         };

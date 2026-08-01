@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using SystemPerformanceAccelerator.Core.Interfaces;
@@ -6,6 +7,7 @@ using SystemPerformanceAccelerator.Desktop.Services;
 using SystemPerformanceAccelerator.Desktop.ViewModels;
 using SystemPerformanceAccelerator.Infrastructure.Configuration;
 using SystemPerformanceAccelerator.Infrastructure.Diagnostics;
+using SystemPerformanceAccelerator.Infrastructure.Repairs;
 using SystemPerformanceAccelerator.Infrastructure.Services;
 
 namespace SystemPerformanceAccelerator.Desktop;
@@ -69,6 +71,11 @@ public partial class MainWindow : Window
             new LargeFileCleanupService();
         var startupItemService = new StartupItemService();
         var systemMonitorService = new SystemMonitorService();
+        var windowsRepairHistoryService =
+            new WindowsRepairAssessmentHistoryService();
+        var windowsRepairAssessmentService =
+            new WindowsRepairAssessmentService(
+                new WindowsRepairCommandRunner());
         var healthCheckService = new HealthCheckService(
             systemMonitorService,
             startupItemService);
@@ -104,9 +111,32 @@ public partial class MainWindow : Window
             settingsLoadResult,
             featureAccessGuard,
             diagnosticService,
-            diagnosticInteractionService);
+            diagnosticInteractionService,
+            windowsRepairAssessmentService,
+            windowsRepairHistoryService,
+            new WindowsRepairAssessmentInteractionService());
     }
 
+    private void Window_Closing(
+        object? sender,
+        CancelEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel viewModel ||
+            !viewModel.WindowsRepairAssessment
+                .IsAssessmentRunning)
+        {
+            return;
+        }
+
+        e.Cancel = true;
+        MessageBox.Show(
+            "A Microsoft Windows assessment is still running.\n\n" +
+            "PC-SPA is active and waiting for DISM or SFC to finish normally. " +
+            "Use Stop after current check, keep this window open, and close PC-SPA after the assessment finishes.",
+            "Windows assessment still running",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
+    }
     private void MinimizeButton_Click(
         object sender,
         RoutedEventArgs e)

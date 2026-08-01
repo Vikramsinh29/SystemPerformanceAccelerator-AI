@@ -21,6 +21,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         LargeFileFinder,
         DuplicateFileFinder,
         StartupManager,
+        WindowsRepairAssessment,
         SystemMonitor,
         Settings
     }
@@ -51,7 +52,10 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ApplicationSettingsLoadResult settingsLoadResult,
         IFeatureAccessGuard featureAccessGuard,
         IDiagnosticService? diagnosticService = null,
-        IDiagnosticInteractionService? diagnosticInteractionService = null)
+        IDiagnosticInteractionService? diagnosticInteractionService = null,
+        IWindowsRepairAssessmentService? windowsRepairAssessmentService = null,
+        IWindowsRepairAssessmentHistoryService? windowsRepairAssessmentHistoryService = null,
+        IWindowsRepairAssessmentInteractionService? windowsRepairAssessmentInteractionService = null)
     {
         _temporaryFileService = temporaryFileService;
         _featureAccessGuard = featureAccessGuard ??
@@ -60,6 +64,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             new DisabledDiagnosticService();
         diagnosticInteractionService ??=
             new NonInteractiveDiagnosticInteractionService();
+        windowsRepairAssessmentService ??=
+            new DisabledWindowsRepairAssessmentService();
+        windowsRepairAssessmentHistoryService ??=
+            new DisabledWindowsRepairAssessmentHistoryService();
+        windowsRepairAssessmentInteractionService ??=
+            new NonInteractiveWindowsRepairAssessmentInteractionService();
 
         CleanerAccess = CreateAccess(ApplicationFeature.Cleaner);
         HealthCheckAccess = CreateAccess(ApplicationFeature.HealthCheck);
@@ -68,6 +78,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         LargeFileFinderAccess = CreateAccess(ApplicationFeature.LargeFileFinder);
         DuplicateFileFinderAccess = CreateAccess(ApplicationFeature.DuplicateFileFinder);
         StartupManagerAccess = CreateAccess(ApplicationFeature.StartupManager);
+        WindowsRepairAssessmentAccess = CreateAccess(ApplicationFeature.WindowsRepairAssessment);
         SystemMonitorAccess = CreateAccess(ApplicationFeature.SystemMonitor);
         SettingsAccess = CreateAccess(ApplicationFeature.Settings);
         _currentModule = GetInitialModule();
@@ -101,6 +112,15 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             startupItemService,
             featureAccessGuard);
         StartupManager.PropertyChanged += OnChildModulePropertyChanged;
+        WindowsRepairAssessment =
+            new WindowsRepairAssessmentViewModel(
+                windowsRepairAssessmentService,
+                windowsRepairAssessmentHistoryService,
+                featureAccessGuard,
+                _diagnosticService,
+                windowsRepairAssessmentInteractionService);
+        WindowsRepairAssessment.PropertyChanged +=
+            OnChildModulePropertyChanged;
         SystemMonitor = new SystemMonitorViewModel(
             systemMonitorService,
             featureAccessGuard,
@@ -133,6 +153,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ShowLargeFileFinderCommand = CreateNavigationCommand(ApplicationModule.LargeFileFinder);
         ShowDuplicateFileFinderCommand = CreateNavigationCommand(ApplicationModule.DuplicateFileFinder);
         ShowStartupManagerCommand = CreateNavigationCommand(ApplicationModule.StartupManager);
+        ShowWindowsRepairAssessmentCommand = CreateNavigationCommand(ApplicationModule.WindowsRepairAssessment);
         ShowSystemMonitorCommand = CreateNavigationCommand(ApplicationModule.SystemMonitor);
         ShowSettingsCommand = CreateNavigationCommand(ApplicationModule.Settings);
     }
@@ -144,6 +165,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public LargeFileFinderViewModel LargeFileFinder { get; }
     public DuplicateFileFinderViewModel DuplicateFileFinder { get; }
     public StartupManagerViewModel StartupManager { get; }
+    public WindowsRepairAssessmentViewModel WindowsRepairAssessment { get; }
     public SystemMonitorViewModel SystemMonitor { get; }
     public SettingsViewModel Settings { get; }
     public FeatureAccessPresentation CleanerAccess { get; }
@@ -153,6 +175,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public FeatureAccessPresentation LargeFileFinderAccess { get; }
     public FeatureAccessPresentation DuplicateFileFinderAccess { get; }
     public FeatureAccessPresentation StartupManagerAccess { get; }
+    public FeatureAccessPresentation WindowsRepairAssessmentAccess { get; }
     public FeatureAccessPresentation SystemMonitorAccess { get; }
     public FeatureAccessPresentation SettingsAccess { get; }
     public AsyncRelayCommand ScanCommand { get; }
@@ -165,6 +188,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public RelayCommand ShowLargeFileFinderCommand { get; }
     public RelayCommand ShowDuplicateFileFinderCommand { get; }
     public RelayCommand ShowStartupManagerCommand { get; }
+    public RelayCommand ShowWindowsRepairAssessmentCommand { get; }
     public RelayCommand ShowSystemMonitorCommand { get; }
     public RelayCommand ShowSettingsCommand { get; }
 
@@ -175,6 +199,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public bool IsLargeFileFinderActive => _currentModule == ApplicationModule.LargeFileFinder;
     public bool IsDuplicateFileFinderActive => _currentModule == ApplicationModule.DuplicateFileFinder;
     public bool IsStartupManagerActive => _currentModule == ApplicationModule.StartupManager;
+    public bool IsWindowsRepairAssessmentActive => _currentModule == ApplicationModule.WindowsRepairAssessment;
     public bool IsSystemMonitorActive => _currentModule == ApplicationModule.SystemMonitor;
     public bool IsSettingsActive => _currentModule == ApplicationModule.Settings;
 
@@ -185,6 +210,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public bool IsLargeFileFinderContentVisible => IsLargeFileFinderActive && LargeFileFinderAccess.IsAvailable;
     public bool IsDuplicateFileFinderContentVisible => IsDuplicateFileFinderActive && DuplicateFileFinderAccess.IsAvailable;
     public bool IsStartupManagerContentVisible => IsStartupManagerActive && StartupManagerAccess.IsAvailable;
+    public bool IsWindowsRepairAssessmentContentVisible => IsWindowsRepairAssessmentActive && WindowsRepairAssessmentAccess.IsAvailable;
     public bool IsSystemMonitorContentVisible => IsSystemMonitorActive && SystemMonitorAccess.IsAvailable;
     public bool IsSettingsContentVisible => IsSettingsActive && SettingsAccess.IsAvailable;
 
@@ -226,6 +252,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ApplicationModule.LargeFileFinder => "Large File Finder",
         ApplicationModule.DuplicateFileFinder => "Duplicate File Finder",
         ApplicationModule.StartupManager => "Startup Manager",
+        ApplicationModule.WindowsRepairAssessment => "Windows Repair",
         ApplicationModule.SystemMonitor => "System Monitor",
         ApplicationModule.Settings => "Settings",
         _ => "PC-SPA"
@@ -240,6 +267,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ApplicationModule.LargeFileFinder => "Find and safely move selected large files to the Windows Recycle Bin",
         ApplicationModule.DuplicateFileFinder => "Find content-confirmed duplicates and safely recycle selected copies",
         ApplicationModule.StartupManager => "Safely enable or disable Windows startup entries without deleting them",
+        ApplicationModule.WindowsRepairAssessment => "Assess Windows component and protected-file integrity without performing repairs",
         ApplicationModule.SystemMonitor => "View live total CPU and physical-memory usage without changing the system",
         ApplicationModule.Settings => "Manage local appearance and safe operating defaults",
         _ => string.Empty
@@ -355,6 +383,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             ApplicationModule.LargeFileFinder => LargeFileFinderAccess,
             ApplicationModule.DuplicateFileFinder => DuplicateFileFinderAccess,
             ApplicationModule.StartupManager => StartupManagerAccess,
+            ApplicationModule.WindowsRepairAssessment => WindowsRepairAssessmentAccess,
             ApplicationModule.SystemMonitor => SystemMonitorAccess,
             ApplicationModule.Settings => SettingsAccess,
             _ => CleanerAccess
@@ -383,6 +412,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             ApplicationModule.LargeFileFinder => ApplicationFeature.LargeFileFinder,
             ApplicationModule.DuplicateFileFinder => ApplicationFeature.DuplicateFileFinder,
             ApplicationModule.StartupManager => ApplicationFeature.StartupManager,
+            ApplicationModule.WindowsRepairAssessment => ApplicationFeature.WindowsRepairAssessment,
             ApplicationModule.SystemMonitor => ApplicationFeature.SystemMonitor,
             ApplicationModule.Settings => ApplicationFeature.Settings,
             _ => (ApplicationFeature)(-1)
@@ -397,6 +427,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(IsLargeFileFinderActive));
         OnPropertyChanged(nameof(IsDuplicateFileFinderActive));
         OnPropertyChanged(nameof(IsStartupManagerActive));
+        OnPropertyChanged(nameof(IsWindowsRepairAssessmentActive));
         OnPropertyChanged(nameof(IsSystemMonitorActive));
         OnPropertyChanged(nameof(IsSettingsActive));
         OnPropertyChanged(nameof(IsCleanerContentVisible));
@@ -406,6 +437,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(IsLargeFileFinderContentVisible));
         OnPropertyChanged(nameof(IsDuplicateFileFinderContentVisible));
         OnPropertyChanged(nameof(IsStartupManagerContentVisible));
+        OnPropertyChanged(nameof(IsWindowsRepairAssessmentContentVisible));
         OnPropertyChanged(nameof(IsSystemMonitorContentVisible));
         OnPropertyChanged(nameof(IsSettingsContentVisible));
         OnPropertyChanged(nameof(CurrentFeatureAccess));
@@ -436,7 +468,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         !AutoCleanSchedule.IsBusy &&
         !LargeFileFinder.IsBusy &&
         !DuplicateFileFinder.IsBusy &&
-        !StartupManager.IsBusy;
+        !StartupManager.IsBusy &&
+        !WindowsRepairAssessment.IsBusy;
 
     private void OnChildModulePropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
@@ -455,6 +488,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ShowLargeFileFinderCommand.RaiseCanExecuteChanged();
         ShowDuplicateFileFinderCommand.RaiseCanExecuteChanged();
         ShowStartupManagerCommand.RaiseCanExecuteChanged();
+        ShowWindowsRepairAssessmentCommand.RaiseCanExecuteChanged();
         ShowSystemMonitorCommand.RaiseCanExecuteChanged();
         ShowSettingsCommand.RaiseCanExecuteChanged();
     }

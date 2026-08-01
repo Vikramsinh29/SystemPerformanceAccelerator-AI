@@ -8,6 +8,7 @@ public enum ApplicationFeature
     LargeFileFinder,
     DuplicateFileFinder,
     StartupManager,
+    WindowsRepairAssessment,
     SystemMonitor,
     Settings,
     AutoCleanSchedule

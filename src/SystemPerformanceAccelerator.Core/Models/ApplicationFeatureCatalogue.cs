@@ -16,6 +16,7 @@ public static class ApplicationFeatureCatalogue
             [ApplicationFeature.LargeFileFinder] = new(ApplicationFeature.LargeFileFinder, "Large File Finder"),
             [ApplicationFeature.DuplicateFileFinder] = new(ApplicationFeature.DuplicateFileFinder, "Duplicate File Finder"),
             [ApplicationFeature.StartupManager] = new(ApplicationFeature.StartupManager, "Startup Manager"),
+            [ApplicationFeature.WindowsRepairAssessment] = new(ApplicationFeature.WindowsRepairAssessment, "Windows Repair"),
             [ApplicationFeature.SystemMonitor] = new(ApplicationFeature.SystemMonitor, "System Monitor"),
             [ApplicationFeature.Settings] = new(ApplicationFeature.Settings, "Settings")
         };

@@ -65,3 +65,14 @@ Do not approve the release if any of these are true:
 - diagnostic data is transmitted without explicit architecture and consent
 - destructive operations bypass confirmation
 - automated tests fail
+
+## Sprint 35A Windows Repair Assessment
+
+- [ ] Only DISM CheckHealth and SFC VerifyOnly can be generated.
+- [ ] No repair, CHKDSK, restart, registry, or component-cleanup command exists.
+- [ ] Microsoft processes are not force-terminated.
+- [ ] Stop after current check skips remaining checks.
+- [ ] Unknown or localized output is Inconclusive.
+- [ ] Exported reports contain sanitized evidence only.
+- [ ] Windows 10 physical smoke test completed.
+- [ ] Windows 11 physical smoke test completed or marked blocked.

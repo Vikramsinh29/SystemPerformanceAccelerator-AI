@@ -14,6 +14,7 @@
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         ResizeMode="CanResize"
+        Closing="Window_Closing"
         StateChanged="Window_StateChanged"
         Style="{StaticResource FluentWindowStyle}"
         Background="{DynamicResource AppBackgroundBrush}">
@@ -25,6 +26,9 @@
                             UseAeroCaptionButtons="False" />
     </shell:WindowChrome.WindowChrome>
 
+    <Window.TaskbarItemInfo>
+        <shell:TaskbarItemInfo ProgressState="{Binding WindowsRepairAssessment.TaskbarProgressState}" />
+    </Window.TaskbarItemInfo>
     <Window.Resources>
         <Style x:Key="NavigationButtonStyle"
                TargetType="Button"
@@ -909,6 +913,41 @@
                             </Border>
                         </Grid>
                     </Button>
+
+<Button Command="{Binding ShowWindowsRepairAssessmentCommand}"
+        Visibility="{Binding WindowsRepairAssessmentAccess.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+        ToolTip="{Binding WindowsRepairAssessmentAccess.Message}">
+    <Button.Style>
+        <Style TargetType="Button" BasedOn="{StaticResource NavigationButtonStyle}">
+            <Setter Property="Cursor" Value="Hand" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsWindowsRepairAssessmentActive}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource SidebarSelectedBrush}" />
+                    <Setter Property="Foreground" Value="{DynamicResource SidebarSelectedForegroundBrush}" />
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Button.Style>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="28" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column="0" Text="&#xE90F;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
+        <TextBlock Grid.Column="1" Text="Windows Repair" VerticalAlignment="Center" />
+        <Border Grid.Column="2"
+                Style="{StaticResource FeatureAccessBadgeStyle}"
+                Visibility="{Binding WindowsRepairAssessmentAccess.IsBadgeVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                ToolTip="{Binding WindowsRepairAssessmentAccess.Message}">
+            <TextBlock Text="{Binding WindowsRepairAssessmentAccess.BadgeText}"
+                       Foreground="{DynamicResource AccentBrush}"
+                       FontSize="8"
+                       FontWeight="Bold" />
+        </Border>
+    </Grid>
+</Button>
 
                     <Button Command="{Binding ShowSystemMonitorCommand}"
                             Visibility="{Binding SystemMonitorAccess.IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
@@ -4357,6 +4396,577 @@
                     </Grid>
                 </Border>
             </Grid>
+
+<Grid Grid.Row="1"
+      Margin="20,14,20,16"
+      DataContext="{Binding WindowsRepairAssessment}"
+      Visibility="{Binding DataContext.IsWindowsRepairAssessmentContentVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
+    <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="*" />
+        <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <Border Grid.Row="0" Style="{StaticResource ModuleHeroCardStyle}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Border Background="{DynamicResource AccentSoftBrush}"
+                    Style="{StaticResource ModuleHeroIconStyle}">
+                <TextBlock Text="&#xE90F;"
+                           Foreground="{DynamicResource AccentBrush}"
+                           Style="{StaticResource ModuleHeroGlyphStyle}" />
+            </Border>
+
+            <StackPanel Grid.Column="1"
+                        Margin="16,0,22,0"
+                        VerticalAlignment="Center">
+                <TextBlock Text="Read-only Windows assessment"
+                           Style="{StaticResource ModuleHeroTitleStyle}" />
+                <TextBlock Text="Check Windows component and protected-file integrity using Microsoft read-only tools."
+                           Style="{StaticResource ModuleHeroDescriptionStyle}" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="2"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center">
+                <Button Command="{Binding RunAssessmentCommand}"
+                        Style="{StaticResource FluentPrimaryButtonStyle}"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE768;" Style="{StaticResource ActionButtonGlyphStyle}" />
+                        <TextBlock Margin="8,0,0,0"
+                                   Text="Run assessment"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding StopAfterCurrentCheckCommand}"
+                        Style="{StaticResource FluentSecondaryButtonStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE71A;" Style="{StaticResource ActionButtonGlyphStyle}" />
+                        <TextBlock Margin="8,0,0,0"
+                                   Text="Stop after current check"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
+
+    <Grid Grid.Row="1" Margin="0,12,0,12">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1.9*" />
+            <ColumnDefinition Width="12" />
+            <ColumnDefinition Width="0.85*" />
+            <ColumnDefinition Width="12" />
+            <ColumnDefinition Width="0.95*" />
+            <ColumnDefinition Width="12" />
+            <ColumnDefinition Width="1.15*" />
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0"
+                Padding="16,12"
+                MinHeight="98"
+                Style="{StaticResource FluentCardStyle}">
+            <StackPanel>
+                <TextBlock Text="ASSESSMENT CHECKS"
+                           Style="{StaticResource FluentCaptionStyle}" />
+
+                <CheckBox Margin="0,9,0,0"
+                          IsChecked="{Binding CheckComponentStore, Mode=TwoWay}"
+                          Foreground="{DynamicResource TextPrimaryBrush}"
+                          VerticalContentAlignment="Center">
+                    <StackPanel Margin="4,0,0,0">
+                        <TextBlock Text="DISM CheckHealth"
+                                   FontSize="12.5"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Margin="0,2,0,0"
+                                   Text="Windows component store"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   FontSize="10.5" />
+                    </StackPanel>
+                </CheckBox>
+
+                <CheckBox Margin="0,8,0,0"
+                          IsChecked="{Binding VerifyProtectedSystemFiles, Mode=TwoWay}"
+                          Foreground="{DynamicResource TextPrimaryBrush}"
+                          VerticalContentAlignment="Center">
+                    <StackPanel Margin="4,0,0,0">
+                        <TextBlock Text="SFC VerifyOnly"
+                                   FontSize="12.5"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Margin="0,2,0,0"
+                                   Text="Protected Windows files"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   FontSize="10.5" />
+                    </StackPanel>
+                </CheckBox>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Column="2"
+                Padding="16,12"
+                MinHeight="98"
+                Style="{StaticResource FluentCardStyle}">
+            <StackPanel>
+                <TextBlock Text="COMPLETED"
+                           Style="{StaticResource FluentCaptionStyle}" />
+                <TextBlock Margin="0,7,0,0"
+                           Text="{Binding CompletedChecks}"
+                           Foreground="{DynamicResource TextPrimaryBrush}"
+                           FontSize="26"
+                           FontWeight="SemiBold" />
+                <TextBlock Margin="0,1,0,0"
+                           Text="checks"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           FontSize="10.5" />
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Column="4"
+                Padding="16,12"
+                MinHeight="98"
+                Style="{StaticResource FluentCardStyle}">
+            <StackPanel>
+                <TextBlock Text="NO ISSUE"
+                           Style="{StaticResource FluentCaptionStyle}" />
+                <TextBlock Margin="0,7,0,0"
+                           Text="{Binding HealthyChecks}"
+                           Foreground="{DynamicResource SuccessBrush}"
+                           FontSize="26"
+                           FontWeight="SemiBold" />
+                <TextBlock Margin="0,1,0,0"
+                           Text="classified"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           FontSize="10.5" />
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Column="6"
+                Padding="16,12"
+                MinHeight="98"
+                Style="{StaticResource FluentCardStyle}">
+            <StackPanel>
+                <TextBlock Text="REVIEW"
+                           Style="{StaticResource FluentCaptionStyle}" />
+                <Grid Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="1" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="{Binding AttentionChecks}"
+                                   Foreground="{DynamicResource WarningBrush}"
+                                   FontSize="20"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Margin="0,2,0,0"
+                                   Text="Attention"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   FontSize="10" />
+                    </StackPanel>
+
+                    <Border Grid.Column="1"
+                            Background="{DynamicResource BorderBrush}"
+                            Margin="8,0" />
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="{Binding InconclusiveChecks}"
+                                   Foreground="{DynamicResource AccentBrush}"
+                                   FontSize="20"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Margin="0,2,0,0"
+                                   Text="Inconclusive"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   FontSize="10" />
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Border>
+    </Grid>
+
+    <Grid Grid.Row="2">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.88*" />
+            <ColumnDefinition Width="14" />
+            <ColumnDefinition Width="2.45*" />
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0"
+                Padding="18"
+                Style="{StaticResource FluentElevatedCardStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="ASSESSMENT SAFEGUARDS"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           FontSize="10"
+                           FontWeight="Bold" />
+
+                <StackPanel Grid.Row="1" Margin="0,7,0,0">
+                    <TextBlock Text="Read-only by design"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               FontSize="16"
+                               FontWeight="SemiBold" />
+                    <TextBlock Margin="0,5,0,0"
+                               Text="No repairs, cleanup, restart scheduling, downloads, or registry changes."
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               FontSize="11"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Margin="0,14,0,0">
+                    <Grid Margin="0,0,0,9">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="28" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border Width="24"
+                                Height="24"
+                                Background="{DynamicResource AccentSoftBrush}"
+                                CornerRadius="8">
+                            <TextBlock Text="&#xE73E;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource AccentBrush}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock Grid.Column="1"
+                                   Text="Microsoft read-only commands only"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   FontSize="11"
+                                   VerticalAlignment="Center"
+                                   TextWrapping="Wrap" />
+                    </Grid>
+
+                    <Grid Margin="0,0,0,9">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="28" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border Width="24"
+                                Height="24"
+                                Background="{DynamicResource AccentSoftBrush}"
+                                CornerRadius="8">
+                            <TextBlock Text="&#xE71A;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource AccentBrush}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock Grid.Column="1"
+                                   Text="Current Microsoft check is never force-closed"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   FontSize="11"
+                                   VerticalAlignment="Center"
+                                   TextWrapping="Wrap" />
+                    </Grid>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="28" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border Width="24"
+                                Height="24"
+                                Background="{DynamicResource AccentSoftBrush}"
+                                CornerRadius="8">
+                            <TextBlock Text="&#xE8A5;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource AccentBrush}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock Grid.Column="1"
+                                   Text="Reports remain local and sanitized"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   FontSize="11"
+                                   VerticalAlignment="Center"
+                                   TextWrapping="Wrap" />
+                    </Grid>
+                </StackPanel>
+
+                <Border Grid.Row="3"
+                        Margin="0,14,0,0"
+                        Padding="11,9"
+                        Background="{DynamicResource WarningSoftBrush}"
+                        BorderBrush="{DynamicResource WarningBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        VerticalAlignment="Top">
+                    <StackPanel>
+                        <TextBlock Text="Safe stop"
+                                   Foreground="{DynamicResource WarningBrush}"
+                                   FontSize="11"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Margin="0,3,0,0"
+                                   Text="Finishes the active check normally, then skips only remaining selected checks."
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   FontSize="10.5"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Grid.Row="4" Margin="0,14,0,0">
+                    <TextBlock Text="LATEST REFERENCE"
+                               Style="{StaticResource FluentCaptionStyle}" />
+                    <TextBlock Margin="0,4,0,0"
+                               Text="{Binding LatestReference}"
+                               ToolTip="{Binding LatestReference}"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               FontSize="11"
+                               FontWeight="SemiBold"
+                               TextTrimming="CharacterEllipsis" />
+
+                    <WrapPanel Margin="0,10,0,0">
+                        <Button Command="{Binding ExportLatestReportCommand}"
+                                Style="{StaticResource FluentSecondaryButtonStyle}"
+                                Margin="0,0,8,8">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xEDE1;" Style="{StaticResource ActionButtonGlyphStyle}" />
+                                <TextBlock Margin="7,0,0,0" Text="Export report" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding OpenAssessmentFolderCommand}"
+                                Style="{StaticResource FluentSecondaryButtonStyle}"
+                                Margin="0,0,0,8">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE838;" Style="{StaticResource ActionButtonGlyphStyle}" />
+                                <TextBlock Margin="7,0,0,0" Text="Open folder" />
+                            </StackPanel>
+                        </Button>
+                    </WrapPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Grid.Column="2"
+                Style="{StaticResource FluentElevatedCardStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid Margin="18,15,18,11">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="ASSESSMENT RESULTS"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   FontSize="10"
+                                   FontWeight="Bold" />
+                        <TextBlock Margin="0,4,0,0"
+                                   Text="Results are classified conservatively; unknown wording remains Inconclusive."
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   FontSize="11"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <Border Grid.Column="1"
+                            Style="{StaticResource OperationMetaChipStyle}">
+                        <TextBlock Text="{Binding AssessmentState}"
+                                   Foreground="{DynamicResource MetaTextBrush}"
+                                   FontSize="11"
+                                   FontWeight="SemiBold" />
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="1" Margin="12,0,12,12">
+                    <DataGrid x:Name="WindowsRepairResultsGrid"
+                              ItemsSource="{Binding Results}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              SelectionMode="Single"
+                              SelectionUnit="FullRow"
+                              HeadersVisibility="Column"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              CanUserReorderColumns="False"
+                              HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Auto"
+                              ColumnHeaderHeight="36"
+                              RowHeight="44"
+                              RowHeaderWidth="0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="CHECK"
+                                                Binding="{Binding Title}"
+                                                ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
+                                                Width="1.15*"
+                                                MinWidth="125" />
+                            <DataGridTextColumn Header="RESULT"
+                                                Binding="{Binding OutcomeText}"
+                                                ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
+                                                Width="112"
+                                                MinWidth="100" />
+                            <DataGridTextColumn Header="DURATION"
+                                                Binding="{Binding DurationText}"
+                                                ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
+                                                Width="80"
+                                                MinWidth="72" />
+                            <DataGridTextColumn Header="SUMMARY"
+                                                Binding="{Binding Summary}"
+                                                ElementStyle="{StaticResource ResponsiveDataGridTextStyle}"
+                                                Width="1.75*"
+                                                MinWidth="155" />
+                        </DataGrid.Columns>
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow"
+                                   BasedOn="{StaticResource FluentDataGridRowStyle}">
+                                <Setter Property="ToolTip" Value="{Binding Details}" />
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+
+                    <Border Background="{DynamicResource SurfaceBrush}"
+                            IsHitTestVisible="False">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=WindowsRepairResultsGrid, Path=HasItems}"
+                                                 Value="False">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+
+                        <StackPanel HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    MaxWidth="410">
+                            <Border Width="54"
+                                    Height="54"
+                                    Background="{DynamicResource AccentSoftBrush}"
+                                    CornerRadius="17">
+                                <TextBlock Text="&#xE90F;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="21"
+                                           Foreground="{DynamicResource AccentBrush}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock Margin="0,13,0,0"
+                                       Text="No assessment results yet"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                       FontSize="15"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Center" />
+                            <TextBlock Margin="0,5,0,0"
+                                       Text="Choose one or both approved checks, then run the read-only assessment."
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       FontSize="11"
+                                       TextAlignment="Center"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+
+    <Border Grid.Row="3"
+            Margin="0,12,0,0"
+            Style="{StaticResource OperationStatusPanelStyle}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <ProgressBar Height="5"
+                         Minimum="0"
+                         Maximum="100"
+                         Value="{Binding Progress, Mode=OneWay}"
+                         IsIndeterminate="{Binding IsAssessmentRunning}"
+                         Foreground="{DynamicResource AccentBrush}"
+                         Background="{DynamicResource ProgressTrackBrush}" />
+
+            <Grid Grid.Row="1" Margin="0,10,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Border Style="{StaticResource OperationStatusIconStyle}">
+                    <TextBlock Text="&#xE90F;"
+                               Style="{StaticResource OperationStatusGlyphStyle}" />
+                </Border>
+
+                <StackPanel Grid.Column="1"
+                            Margin="12,0,18,0"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="ASSESSMENT STATUS"
+                               Style="{StaticResource OperationStatusLabelStyle}" />
+                    <TextBlock Margin="0,3,0,0"
+                               Text="{Binding CurrentCheckText}"
+                               ToolTip="{Binding CurrentCheckText}"
+                               Style="{StaticResource OperationStatusMessageStyle}" />
+                    <TextBlock Margin="0,3,0,0"
+                               Text="{Binding Status}"
+                               ToolTip="{Binding Status}"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               FontSize="10.5"
+                               TextWrapping="Wrap"
+                               MaxHeight="30" />
+                    <TextBlock Margin="0,3,0,0"
+                               Text="{Binding ProgressText}"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               FontSize="10" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="2"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <Border Style="{StaticResource OperationMetaChipStyle}"
+                            Margin="0,0,8,0">
+                        <TextBlock Text="{Binding AssessmentState}"
+                                   Foreground="{DynamicResource MetaTextBrush}"
+                                   FontSize="10.5"
+                                   FontWeight="SemiBold" />
+                    </Border>
+
+                    <Border Style="{StaticResource OperationMetaChipStyle}"
+                            Margin="0,0,8,0">
+                        <TextBlock Text="{Binding ElapsedText}"
+                                   Foreground="{DynamicResource MetaTextBrush}"
+                                   FontSize="10.5"
+                                   FontWeight="SemiBold" />
+                    </Border>
+
+                    <Button Command="{Binding DeleteAssessmentHistoryCommand}"
+                            Style="{StaticResource FluentSecondaryButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE74D;" Style="{StaticResource ActionButtonGlyphStyle}" />
+                            <TextBlock Margin="7,0,0,0" Text="Delete history" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</Grid>
+
 
             <Grid Grid.Row="1"
                   Margin="20,16,20,18"
