@@ -126,6 +126,12 @@ public sealed class WindowsRepairAssessmentViewModel :
             ApplicationFeature.WindowsRepairAssessment,
             FeatureAccessRequirement.Execute,
             () => !IsBusy && HasLatestAssessment);
+        ExportLatestRepairResultCommand = new AsyncRelayCommand(
+            ExportLatestRepairResultAsync,
+            featureAccessGuard,
+            ApplicationFeature.WindowsRepairAssessment,
+            FeatureAccessRequirement.Execute,
+            () => !IsBusy && HasLatestRepairResult);
         PreviewRepairPlanCommand = new AsyncRelayCommand(
             PreviewRepairPlanAsync,
             featureAccessGuard,
@@ -172,6 +178,8 @@ public sealed class WindowsRepairAssessmentViewModel :
     public RelayCommand StopAfterCurrentCheckCommand { get; }
 
     public AsyncRelayCommand ExportLatestReportCommand { get; }
+
+    public AsyncRelayCommand ExportLatestRepairResultCommand { get; }
 
     public AsyncRelayCommand PreviewRepairPlanCommand { get; }
 
@@ -1009,6 +1017,66 @@ public sealed class WindowsRepairAssessmentViewModel :
         }
     }
 
+    private async Task ExportLatestRepairResultAsync()
+    {
+        if (_latestRepairResult is null)
+        {
+            Status =
+                "No saved guided-repair result is available to export.";
+            return;
+        }
+
+        var suggestedName =
+            $"PC-SPA-{_latestRepairResult.ReferenceId}-Repair-Result.zip";
+        var destination =
+            _interactionService.ChooseReportDestination(
+                suggestedName);
+
+        if (string.IsNullOrWhiteSpace(destination))
+        {
+            Status = "Repair-result export cancelled.";
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            var exportedPath =
+                await _repairExecutionHistoryService
+                    .ExportLatestAsync(destination);
+
+            if (string.IsNullOrWhiteSpace(exportedPath))
+            {
+                Status =
+                    "No saved guided-repair result was available to export.";
+                return;
+            }
+
+            Status =
+                "Guided-repair result exported. Inspect the ZIP before sharing it.";
+            _interactionService.ShowMessage(
+                "Guided-repair result exported",
+                $"The sanitized guided-repair result was created at:\n\n{exportedPath}\n\nInspect the ZIP before sharing it.");
+        }
+        catch (Exception ex)
+        {
+            Status =
+                "The guided-repair result could not be exported.";
+            await TryRecordUnexpectedExceptionAsync(
+                ex,
+                "Guided-repair result export",
+                userDataMayHaveBeenAffected: false);
+            _interactionService.ShowMessage(
+                "Repair-result export failed",
+                Status,
+                isError: true);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
     private void OpenAssessmentFolder()
     {
         try
@@ -1137,6 +1205,7 @@ public sealed class WindowsRepairAssessmentViewModel :
 
         OnPropertyChanged(nameof(HasLatestRepairResult));
         OnPropertyChanged(nameof(HasWindowsRepairHistory));
+        ExportLatestRepairResultCommand.RaiseCanExecuteChanged();
         DeleteAssessmentHistoryCommand.RaiseCanExecuteChanged();
     }
 
@@ -1308,6 +1377,8 @@ public sealed class WindowsRepairAssessmentViewModel :
         StopAfterCurrentCheckCommand
             .RaiseCanExecuteChanged();
         ExportLatestReportCommand
+            .RaiseCanExecuteChanged();
+        ExportLatestRepairResultCommand
             .RaiseCanExecuteChanged();
         PreviewRepairPlanCommand
             .RaiseCanExecuteChanged();

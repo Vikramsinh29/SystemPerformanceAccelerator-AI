@@ -4974,6 +4974,15 @@
                                Foreground="{DynamicResource TextSecondaryBrush}"
                                FontSize="10.5"
                                HorizontalAlignment="Right" />
+                    <Button Margin="0,7,0,0"
+                            Command="{Binding ExportLatestRepairResultCommand}"
+                            Style="{StaticResource FluentSecondaryButtonStyle}"
+                            HorizontalAlignment="Right">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xEDE1;" Style="{StaticResource ActionButtonGlyphStyle}" />
+                            <TextBlock Margin="7,0,0,0" Text="Export repair result" />
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Grid>
 

@@ -71,6 +71,45 @@ public sealed class WindowsRepairExecutionHistoryServiceTests
         }
     }
 
+    [Fact]
+    public async Task ExportLatestAsync_UsesLatestSanitizedResult()
+    {
+        var root = CreateTemporaryDirectory();
+        var exportRoot = CreateTemporaryDirectory();
+        try
+        {
+            var service =
+                new WindowsRepairExecutionHistoryService(root);
+            await service.SaveAsync(
+                CreateResult(
+                    "REPAIR-EXPORT",
+                    @"C:\Users\Alice\secret.txt"));
+            var destination = Path.Combine(
+                exportRoot,
+                "repair-result.zip");
+
+            var exported = await service.ExportLatestAsync(
+                destination);
+
+            Assert.Equal(destination, exported);
+            using var archive =
+                System.IO.Compression.ZipFile.OpenRead(destination);
+            var entry = archive.GetEntry("repair-result.json");
+            Assert.NotNull(entry);
+            using var reader = new StreamReader(entry.Open());
+            var json = await reader.ReadToEndAsync();
+            Assert.DoesNotContain(
+                "Alice",
+                json,
+                StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            TryDelete(root);
+            TryDelete(exportRoot);
+        }
+    }
+
     private static WindowsRepairExecutionResult
         CreateResult(
             string reference,

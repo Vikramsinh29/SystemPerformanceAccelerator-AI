@@ -76,7 +76,7 @@ public sealed class WindowsRepairAssessmentInteractionService :
     {
         var dialog = new SaveFileDialog
         {
-            Title = "Export Windows repair assessment",
+            Title = "Export Windows repair report",
             Filter = "ZIP package (*.zip)|*.zip",
             DefaultExt = ".zip",
             AddExtension = true,

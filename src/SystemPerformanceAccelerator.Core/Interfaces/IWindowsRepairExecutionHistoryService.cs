@@ -12,5 +12,9 @@ public interface IWindowsRepairExecutionHistoryService
 
     WindowsRepairExecutionResult? LoadLatest();
 
+    Task<string?> ExportLatestAsync(
+        string destinationZipPath,
+        CancellationToken cancellationToken = default);
+
     void DeleteHistory();
 }

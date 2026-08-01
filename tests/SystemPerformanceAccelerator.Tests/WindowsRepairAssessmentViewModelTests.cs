@@ -71,6 +71,8 @@ public sealed class WindowsRepairAssessmentViewModelTests
             StringComparison.OrdinalIgnoreCase);
         Assert.True(
             viewModel.DeleteAssessmentHistoryCommand.CanExecute(null));
+        Assert.True(
+            viewModel.ExportLatestRepairResultCommand.CanExecute(null));
     }
 
     [Fact]
@@ -453,6 +455,11 @@ public sealed class WindowsRepairAssessmentViewModelTests
             Task.CompletedTask;
 
         public WindowsRepairExecutionResult? LoadLatest() => latest;
+
+        public Task<string?> ExportLatestAsync(
+            string destinationZipPath,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<string?>(destinationZipPath);
 
         public void DeleteHistory() => DeleteCalled = true;
     }

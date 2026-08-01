@@ -26,6 +26,8 @@ public sealed class WindowsRepairExecutionHistoryService :
     private readonly Func<DateTimeOffset> _utcNow;
     private readonly int _maximumRecordCount;
     private readonly TimeSpan _maximumRecordAge;
+    private readonly WindowsRepairExecutionReportExporter
+        _exporter;
     private readonly SemaphoreSlim _writeLock =
         new(1, 1);
 
@@ -35,7 +37,8 @@ public sealed class WindowsRepairExecutionHistoryService :
         Func<DateTimeOffset>? utcNow = null,
         int maximumRecordCount =
             DefaultMaximumRecordCount,
-        TimeSpan? maximumRecordAge = null)
+        TimeSpan? maximumRecordAge = null,
+        WindowsRepairExecutionReportExporter? exporter = null)
     {
         if (maximumRecordCount < 1)
         {
@@ -59,6 +62,8 @@ public sealed class WindowsRepairExecutionHistoryService :
         _maximumRecordCount = maximumRecordCount;
         _maximumRecordAge = maximumRecordAge ??
             DefaultMaximumRecordAge;
+        _exporter = exporter ??
+            new WindowsRepairExecutionReportExporter();
     }
 
     public string ExecutionRoot { get; }
@@ -164,6 +169,23 @@ public sealed class WindowsRepairExecutionHistoryService :
         }
 
         return null;
+    }
+
+    public async Task<string?> ExportLatestAsync(
+        string destinationZipPath,
+        CancellationToken cancellationToken = default)
+    {
+        var latest = LoadLatest();
+        if (latest is null)
+        {
+            return null;
+        }
+
+        return await _exporter.ExportAsync(
+                latest,
+                destinationZipPath,
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     public void DeleteHistory()

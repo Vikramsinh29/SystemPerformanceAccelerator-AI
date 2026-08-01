@@ -19,6 +19,14 @@ public sealed class DisabledWindowsRepairExecutionHistoryService :
     public WindowsRepairExecutionResult? LoadLatest() =>
         null;
 
+    public Task<string?> ExportLatestAsync(
+        string destinationZipPath,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult<string?>(null);
+    }
+
     public void DeleteHistory()
     {
     }
