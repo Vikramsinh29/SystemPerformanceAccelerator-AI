@@ -4623,7 +4623,7 @@
 
     <Grid Grid.Row="2">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="0.88*" />
+            <ColumnDefinition Width="0.88*" MinWidth="236" />
             <ColumnDefinition Width="14" />
             <ColumnDefinition Width="2.45*" />
         </Grid.ColumnDefinitions>
@@ -4649,7 +4649,8 @@
                     <TextBlock Text="Assessment first, repair only with consent"
                                Foreground="{DynamicResource TextPrimaryBrush}"
                                FontSize="16"
-                               FontWeight="SemiBold" />
+                               FontWeight="SemiBold"
+                               TextWrapping="Wrap" />
                     <TextBlock Margin="0,5,0,0"
                                Text="Assessment stays read-only. Guided repair requires eligible evidence, fresh checks, and explicit confirmation."
                                Foreground="{DynamicResource TextSecondaryBrush}"
@@ -4838,7 +4839,7 @@
                               CanUserAddRows="False"
                               CanUserDeleteRows="False"
                               CanUserReorderColumns="False"
-                              HorizontalScrollBarVisibility="Disabled"
+                              HorizontalScrollBarVisibility="Auto"
                               VerticalScrollBarVisibility="Auto"
                               ColumnHeaderHeight="36"
                               RowHeight="44"
@@ -5111,10 +5112,13 @@
             </Grid>
 
             <Grid Grid.Row="1" Margin="0,10,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <Border Style="{StaticResource OperationStatusIconStyle}">
@@ -5144,9 +5148,11 @@
                                FontSize="10" />
                 </StackPanel>
 
-                <StackPanel Grid.Column="2"
-                            Orientation="Horizontal"
-                            VerticalAlignment="Center">
+                <WrapPanel Grid.Row="1"
+                           Grid.ColumnSpan="2"
+                           Margin="46,10,0,0"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center">
                     <Border Style="{StaticResource OperationMetaChipStyle}"
                             Margin="0,0,8,0">
                         <TextBlock Text="{Binding AssessmentState}"
@@ -5179,7 +5185,7 @@
                             <TextBlock Margin="7,0,0,0" Text="Delete history" />
                         </StackPanel>
                     </Button>
-                </StackPanel>
+                </WrapPanel>
             </Grid>
         </Grid>
     </Border>
