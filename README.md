@@ -846,3 +846,23 @@ repair execution capability.
 - No repair command, process execution, automatic restart, CHKDSK, registry
   repair, component cleanup, or download is added.
 - Sanitized preview records are local and bounded to 20 records and 90 days.
+
+## Sprint 35B2 - Combined Guided Windows Repair
+
+Sprint 35B2 adds one explicitly confirmed foreground repair chain for eligible
+Attention assessments.
+
+- Fresh execution-time safety checks repeat immediately before confirmation.
+- PC-SPA requires at least 5 GB free on the Windows drive under product policy.
+- The fixed repair commands are DISM RestoreHealth with NoRestart followed by
+  SFC Scannow.
+- DISM may use Windows Update; no custom source or LimitAccess policy is added.
+- The existing read-only DISM CheckHealth and SFC VerifyOnly assessment runs
+  again after both repair commands.
+- Exit code 0 alone is not treated as proof of health; verification evidence
+  determines the final result.
+- Stop after current step never force-terminates an active Microsoft process.
+- No automatic restart, CHKDSK, registry repair, component cleanup, scheduling,
+  background repair, command shell, script, or user-supplied argument is added.
+- Sanitized repair-execution history is local and bounded to 20 records and
+  90 days.

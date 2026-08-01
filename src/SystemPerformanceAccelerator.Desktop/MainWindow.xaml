@@ -4410,10 +4410,13 @@
 
     <Border Grid.Row="0" Style="{StaticResource ModuleHeroCardStyle}">
         <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <Border Background="{DynamicResource AccentSoftBrush}"
@@ -4424,18 +4427,20 @@
             </Border>
 
             <StackPanel Grid.Column="1"
-                        Margin="16,0,22,0"
+                        Margin="16,0,0,0"
                         VerticalAlignment="Center">
-                <TextBlock Text="Read-only Windows assessment"
-                           Style="{StaticResource ModuleHeroTitleStyle}" />
-                <TextBlock Text="Check Windows component and protected-file integrity using Microsoft read-only tools."
+                <TextBlock Text="Windows Assessment and Guided Repair"
+                           Style="{StaticResource ModuleHeroTitleStyle}"
+                           FontSize="23" />
+                <TextBlock Margin="0,4,0,0"
+                           Text="Check Windows for system file problems and run a safe guided repair only when an issue is found."
                            Style="{StaticResource ModuleHeroDescriptionStyle}" />
             </StackPanel>
 
-            <StackPanel Grid.Column="2"
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center">
+            <WrapPanel Grid.Row="1"
+                       Grid.ColumnSpan="2"
+                       Margin="0,14,0,0"
+                       HorizontalAlignment="Right">
                 <Button Command="{Binding RunAssessmentCommand}"
                         Style="{StaticResource FluentPrimaryButtonStyle}"
                         Margin="0,0,8,0">
@@ -4461,11 +4466,11 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="&#xE71A;" Style="{StaticResource ActionButtonGlyphStyle}" />
                         <TextBlock Margin="8,0,0,0"
-                                   Text="Stop after current check"
+                                   Text="Stop after current step"
                                    VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
-            </StackPanel>
+            </WrapPanel>
         </Grid>
     </Border>
 
@@ -4627,12 +4632,12 @@
                            FontWeight="Bold" />
 
                 <StackPanel Grid.Row="1" Margin="0,7,0,0">
-                    <TextBlock Text="Read-only by design"
+                    <TextBlock Text="Assessment first, repair only with consent"
                                Foreground="{DynamicResource TextPrimaryBrush}"
                                FontSize="16"
                                FontWeight="SemiBold" />
                     <TextBlock Margin="0,5,0,0"
-                               Text="No repairs, cleanup, restart scheduling, downloads, or registry changes."
+                               Text="Assessment stays read-only. Guided repair requires eligible evidence, fresh checks, and explicit confirmation."
                                Foreground="{DynamicResource TextSecondaryBrush}"
                                FontSize="11"
                                TextWrapping="Wrap" />
@@ -4656,7 +4661,7 @@
                                        VerticalAlignment="Center" />
                         </Border>
                         <TextBlock Grid.Column="1"
-                                   Text="Microsoft read-only commands only"
+                                   Text="Assessment uses Microsoft read-only commands"
                                    Foreground="{DynamicResource TextPrimaryBrush}"
                                    FontSize="11"
                                    VerticalAlignment="Center"
@@ -4680,7 +4685,7 @@
                                        VerticalAlignment="Center" />
                         </Border>
                         <TextBlock Grid.Column="1"
-                                   Text="Current Microsoft check is never force-closed"
+                                   Text="Active Microsoft repair or check is never force-closed"
                                    Foreground="{DynamicResource TextPrimaryBrush}"
                                    FontSize="11"
                                    VerticalAlignment="Center"
@@ -4726,7 +4731,7 @@
                                    FontSize="11"
                                    FontWeight="SemiBold" />
                         <TextBlock Margin="0,3,0,0"
-                                   Text="Finishes the active check normally, then skips only remaining selected checks."
+                                   Text="Finishes the active Microsoft step normally, then skips only steps that have not started."
                                    Foreground="{DynamicResource TextPrimaryBrush}"
                                    FontSize="10.5"
                                    TextWrapping="Wrap" />
@@ -4970,7 +4975,7 @@
                 <StackPanel Grid.Column="1"
                             Margin="12,0,18,0"
                             VerticalAlignment="Center">
-                    <TextBlock Text="ASSESSMENT STATUS"
+                    <TextBlock Text="WINDOWS REPAIR STATUS"
                                Style="{StaticResource OperationStatusLabelStyle}" />
                     <TextBlock Margin="0,3,0,0"
                                Text="{Binding CurrentCheckText}"
@@ -5066,7 +5071,7 @@
                                    FontSize="19"
                                    FontWeight="SemiBold" />
                         <TextBlock Margin="0,3,0,0"
-                                   Text="Safety planning only — no repair command is available in this sprint."
+                                   Text="Review the fixed sequence. Starting it still requires fresh checks and a separate explicit confirmation."
                                    Foreground="{DynamicResource TextSecondaryBrush}"
                                    FontSize="12"
                                    TextWrapping="Wrap" />
@@ -5219,11 +5224,11 @@
                                 Padding="16"
                                 Style="{StaticResource FluentCardStyle}">
                             <StackPanel>
-                                <TextBlock Text="POSSIBLE FUTURE SEQUENCE"
+                                <TextBlock Text="GUIDED REPAIR SEQUENCE"
                                            Style="{StaticResource FluentCaptionStyle}"
                                            FontSize="11.5" />
                                 <TextBlock Margin="0,5,0,12"
-                                           Text="Displayed for transparency only. No step can be started here."
+                                           Text="The sequence starts only after fresh execution-time checks and explicit confirmation."
                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                            FontSize="11.5"
                                            TextWrapping="Wrap" />
@@ -5301,6 +5306,7 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Text="&#xE72E;"
@@ -5319,9 +5325,16 @@
                                    VerticalAlignment="Center" />
 
                         <Button Grid.Column="2"
-                                Command="{Binding CloseRepairPlanPreviewCommand}"
+                                Command="{Binding RunGuidedRepairCommand}"
                                 Style="{StaticResource FluentPrimaryButtonStyle}"
-                                Content="Understood — close"
+                                Content="Start guided repair"
+                                Margin="0,0,8,0"
+                                VerticalAlignment="Center" />
+
+                        <Button Grid.Column="3"
+                                Command="{Binding CloseRepairPlanPreviewCommand}"
+                                Style="{StaticResource FluentSecondaryButtonStyle}"
+                                Content="Close preview"
                                 VerticalAlignment="Center" />
                     </Grid>
                 </Border>

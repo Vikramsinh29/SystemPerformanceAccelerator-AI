@@ -90,3 +90,19 @@ Do not approve the release if any of these are true:
 - [ ] No repair action, automatic restart, CHKDSK, registry repair, component
       cleanup, or background download is available.
 - [ ] Deleting Windows Repair history also removes saved repair-plan previews.
+
+## Sprint 35B2 combined guided repair
+
+- [ ] Only an eligible fresh Attention assessment can reach repair confirmation.
+- [ ] Fresh elevation, tool, restart, and free-space checks run at execution time.
+- [ ] Confirmation names DISM RestoreHealth, SFC Scannow, verification, Windows
+      Update possibility, no forced termination, and no automatic restart.
+- [ ] DISM uses only `/Online /English /Cleanup-Image /RestoreHealth /NoRestart`.
+- [ ] SFC repair uses only `/scannow`.
+- [ ] DISM failure stops before SFC and verification.
+- [ ] Stop after current step skips only commands that have not started.
+- [ ] Read-only DISM CheckHealth and SFC VerifyOnly verification run after repair.
+- [ ] Healthy is never claimed from repair exit codes alone.
+- [ ] Repair-execution history is sanitized, local, and retention bounded.
+- [ ] CHKDSK, registry repair, component cleanup, custom sources, scheduling,
+      background repair, and automatic restart remain unavailable.

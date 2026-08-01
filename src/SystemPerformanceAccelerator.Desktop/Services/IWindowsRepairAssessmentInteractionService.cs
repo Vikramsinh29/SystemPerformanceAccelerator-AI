@@ -7,6 +7,10 @@ public interface IWindowsRepairAssessmentInteractionService
     bool ConfirmAssessment(
         WindowsRepairAssessmentRequest request);
 
+    bool ConfirmGuidedRepair(
+        WindowsRepairExecutionReadiness readiness) =>
+        false;
+
     string? ChooseReportDestination(
         string suggestedFileName);
 

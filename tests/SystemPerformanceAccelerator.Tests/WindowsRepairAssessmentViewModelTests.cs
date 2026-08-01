@@ -40,6 +40,8 @@ public sealed class WindowsRepairAssessmentViewModelTests
         Assert.False(viewModel.IsRepairPlanPreviewVisible);
         Assert.False(
             viewModel.PreviewRepairPlanCommand.CanExecute(null));
+        Assert.False(
+            viewModel.RunGuidedRepairCommand.CanExecute(null));
     }
 
     [Fact]

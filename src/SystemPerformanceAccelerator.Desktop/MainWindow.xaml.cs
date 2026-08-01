@@ -80,6 +80,13 @@ public partial class MainWindow : Window
             new WindowsRepairPlanService();
         var windowsRepairPlanHistoryService =
             new WindowsRepairPlanHistoryService();
+        var windowsRepairExecutionService =
+            new WindowsRepairExecutionService(
+                new WindowsRepairExecutionCommandRunner(),
+                windowsRepairAssessmentService,
+                windowsRepairPlanService);
+        var windowsRepairExecutionHistoryService =
+            new WindowsRepairExecutionHistoryService();
         var healthCheckService = new HealthCheckService(
             systemMonitorService,
             startupItemService);
@@ -120,7 +127,9 @@ public partial class MainWindow : Window
             windowsRepairHistoryService,
             new WindowsRepairAssessmentInteractionService(),
             windowsRepairPlanService,
-            windowsRepairPlanHistoryService);
+            windowsRepairPlanHistoryService,
+            windowsRepairExecutionService,
+            windowsRepairExecutionHistoryService);
     }
 
     private void Window_Closing(
@@ -136,10 +145,10 @@ public partial class MainWindow : Window
 
         e.Cancel = true;
         MessageBox.Show(
-            "A Microsoft Windows assessment is still running.\n\n" +
-            "PC-SPA is active and waiting for DISM or SFC to finish normally. " +
-            "Use Stop after current check, keep this window open, and close PC-SPA after the assessment finishes.",
-            "Windows assessment still running",
+            "A Microsoft Windows assessment or guided repair step is still running.\n\n" +
+            "PC-SPA is waiting for the active DISM or SFC process to finish normally. " +
+            "Use Stop after current step, keep this window open, and close PC-SPA after the operation finishes.",
+            "Windows operation still running",
             MessageBoxButton.OK,
             MessageBoxImage.Information);
     }

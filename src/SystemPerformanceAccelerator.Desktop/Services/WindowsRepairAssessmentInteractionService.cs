@@ -42,6 +42,35 @@ public sealed class WindowsRepairAssessmentInteractionService :
             MessageBoxResult.No) == MessageBoxResult.Yes;
     }
 
+    public bool ConfirmGuidedRepair(
+        WindowsRepairExecutionReadiness readiness)
+    {
+        ArgumentNullException.ThrowIfNull(readiness);
+
+        if (!readiness.IsReady)
+        {
+            return false;
+        }
+
+        var message =
+            "PC-SPA will run this fixed Microsoft Windows repair sequence:\n\n" +
+            "1. DISM.exe /Online /English /Cleanup-Image /RestoreHealth /NoRestart\n" +
+            "2. sfc.exe /scannow\n" +
+            "3. DISM.exe /Online /English /Cleanup-Image /CheckHealth\n" +
+            "4. sfc.exe /verifyonly\n\n" +
+            "DISM may use Windows Update to obtain repair files. PC-SPA does not provide or select a custom repair source.\n\n" +
+            "The workflow changes Windows. It may take a long time. Keep PC-SPA open and connected to power. PC-SPA will not restart Windows automatically and will not force-close a Microsoft process already running.\n\n" +
+            "Start the guided repair now?";
+
+        return MessageBox.Show(
+            message,
+            "Confirm guided Windows repair",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning,
+            MessageBoxResult.No) ==
+            MessageBoxResult.Yes;
+    }
+
     public string? ChooseReportDestination(
         string suggestedFileName)
     {

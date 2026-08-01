@@ -21,6 +21,10 @@ public sealed class WindowsRepairAssessmentViewModel :
         _repairPlanService;
     private readonly IWindowsRepairPlanHistoryService
         _repairPlanHistoryService;
+    private readonly IWindowsRepairExecutionService
+        _repairExecutionService;
+    private readonly IWindowsRepairExecutionHistoryService
+        _repairExecutionHistoryService;
     private readonly IWindowsRepairAssessmentInteractionService
         _interactionService;
     private readonly IDiagnosticService _diagnosticService;
@@ -31,6 +35,7 @@ public sealed class WindowsRepairAssessmentViewModel :
     private bool _isBusy;
     private bool _isAssessmentRunning;
     private bool _stopAfterCurrentRequested;
+    private bool _isGuidedRepairRunning;
     private int _progress;
     private DateTimeOffset? _assessmentStartedUtc;
     private string _status =
@@ -53,6 +58,7 @@ public sealed class WindowsRepairAssessmentViewModel :
     private string _repairPlanDisclosure =
         "No repair is authorized or executed.";
     private WindowsRepairAssessmentResult? _latestResult;
+    private WindowsRepairPlan? _latestPlan;
 
     public WindowsRepairAssessmentViewModel(
         IWindowsRepairAssessmentService assessmentService,
@@ -61,7 +67,9 @@ public sealed class WindowsRepairAssessmentViewModel :
         IDiagnosticService diagnosticService,
         IWindowsRepairAssessmentInteractionService interactionService,
         IWindowsRepairPlanService? repairPlanService = null,
-        IWindowsRepairPlanHistoryService? repairPlanHistoryService = null)
+        IWindowsRepairPlanHistoryService? repairPlanHistoryService = null,
+        IWindowsRepairExecutionService? repairExecutionService = null,
+        IWindowsRepairExecutionHistoryService? repairExecutionHistoryService = null)
     {
         _assessmentService = assessmentService ??
             throw new ArgumentNullException(nameof(assessmentService));
@@ -71,6 +79,11 @@ public sealed class WindowsRepairAssessmentViewModel :
             new DisabledWindowsRepairPlanService();
         _repairPlanHistoryService = repairPlanHistoryService ??
             new DisabledWindowsRepairPlanHistoryService();
+        _repairExecutionService = repairExecutionService ??
+            new DisabledWindowsRepairExecutionService();
+        _repairExecutionHistoryService =
+            repairExecutionHistoryService ??
+            new DisabledWindowsRepairExecutionHistoryService();
         _diagnosticService = diagnosticService ??
             throw new ArgumentNullException(nameof(diagnosticService));
         _interactionService = interactionService ??
@@ -108,6 +121,12 @@ public sealed class WindowsRepairAssessmentViewModel :
             ApplicationFeature.WindowsRepairAssessment,
             FeatureAccessRequirement.Execute,
             () => !IsBusy && HasLatestAssessment);
+        RunGuidedRepairCommand = new AsyncRelayCommand(
+            RunGuidedRepairAsync,
+            featureAccessGuard,
+            ApplicationFeature.WindowsRepairAssessment,
+            FeatureAccessRequirement.Execute,
+            CanRunGuidedRepair);
         CloseRepairPlanPreviewCommand = new RelayCommand(
             CloseRepairPlanPreview);
         OpenAssessmentFolderCommand = new RelayCommand(
@@ -144,6 +163,8 @@ public sealed class WindowsRepairAssessmentViewModel :
     public AsyncRelayCommand ExportLatestReportCommand { get; }
 
     public AsyncRelayCommand PreviewRepairPlanCommand { get; }
+
+    public AsyncRelayCommand RunGuidedRepairCommand { get; }
 
     public RelayCommand CloseRepairPlanPreviewCommand { get; }
 
@@ -550,11 +571,240 @@ public sealed class WindowsRepairAssessmentViewModel :
     private void RequestStopAfterCurrentCheck()
     {
         StopAfterCurrentRequested = true;
+
+        if (_isGuidedRepairRunning)
+        {
+            Status =
+                "Stop requested. The active Microsoft repair or verification step will finish normally. PC-SPA will not start any remaining step.";
+            ProgressText =
+                "Waiting for the active guided-repair step to finish normally...";
+            return;
+        }
+
         Status =
             "Stop requested. The current Microsoft check is still running and will finish normally. PC-SPA remains active; please keep this window open.";
         ProgressText =
             "Waiting for the current read-only check to finish before skipping any remaining selected checks...";
     }
+
+    private bool CanRunGuidedRepair() =>
+        !IsBusy &&
+        _latestResult is not null &&
+        _latestPlan?.Decision ==
+            WindowsRepairPlanDecision.ReviewRequired;
+
+    private async Task RunGuidedRepairAsync()
+    {
+        if (_latestResult is null)
+        {
+            Status =
+                "Run a fresh read-only assessment before guided repair.";
+            return;
+        }
+
+        WindowsRepairExecutionReadiness readiness;
+        try
+        {
+            readiness =
+                _repairExecutionService.CheckReadiness(
+                    _latestResult);
+        }
+        catch (Exception ex)
+        {
+            Status =
+                "Fresh guided-repair safety checks failed. No repair command was started.";
+            await TryRecordUnexpectedExceptionAsync(
+                ex,
+                "Guided Windows repair preflight",
+                userDataMayHaveBeenAffected: false);
+            return;
+        }
+
+        if (!readiness.IsReady)
+        {
+            Status = readiness.Summary;
+            _interactionService.ShowMessage(
+                "Guided repair blocked",
+                readiness.Summary +
+                (readiness.Issues.Count == 0
+                    ? string.Empty
+                    : "\n\n" +
+                      string.Join(
+                          "\n",
+                          readiness.Issues.Select(
+                              item => "• " + item))),
+                isError: true);
+            return;
+        }
+
+        if (!_interactionService.ConfirmGuidedRepair(
+                readiness))
+        {
+            Status =
+                "Guided repair was not started.";
+            return;
+        }
+
+        IsRepairPlanPreviewVisible = false;
+        IsBusy = true;
+        IsAssessmentRunning = true;
+        _isGuidedRepairRunning = true;
+        StopAfterCurrentRequested = false;
+        Progress = 0;
+        AssessmentState = "Repairing";
+        ProgressText =
+            "Running fresh execution-time safety checks...";
+        CurrentCheckText =
+            "Guided repair preflight";
+        Status =
+            "Guided Windows repair is running. Keep PC-SPA open and connected to power.";
+        StartElapsedTimer();
+
+        try
+        {
+            var progress =
+                new Progress<WindowsRepairExecutionProgress>(
+                    ApplyRepairProgress);
+
+            var result =
+                await _repairExecutionService.ExecuteAsync(
+                    _latestResult,
+                    () => StopAfterCurrentRequested,
+                    progress);
+
+            await _repairExecutionHistoryService.SaveAsync(
+                result);
+
+            if (result.VerificationAssessment is not null)
+            {
+                await _historyService.SaveAsync(
+                    result.VerificationAssessment);
+                ShowResult(
+                    result.VerificationAssessment);
+            }
+            else
+            {
+                AssessmentState = result.Outcome switch
+                {
+                    WindowsRepairExecutionOutcome.Blocked =>
+                        "Repair blocked",
+                    WindowsRepairExecutionOutcome.Stopped =>
+                        "Repair stopped",
+                    _ => "Repair failed safely"
+                };
+            }
+
+            Status =
+                BuildGuidedRepairCompletionStatus(result);
+            Progress = 100;
+            ProgressText =
+                "Guided repair workflow finished";
+            CurrentCheckText =
+                result.Outcome ==
+                    WindowsRepairExecutionOutcome.Completed
+                    ? "Guided repair and verification complete"
+                    : "Guided repair workflow finished";
+
+            _interactionService.ShowMessage(
+                "Guided Windows repair finished",
+                Status +
+                "\n\nPC-SPA did not restart Windows automatically.",
+                isError:
+                    result.Outcome is
+                        WindowsRepairExecutionOutcome.Failed or
+                        WindowsRepairExecutionOutcome.Blocked);
+        }
+        catch (Exception ex)
+        {
+            AssessmentState =
+                "Repair failed safely";
+            Status =
+                "The guided repair workflow failed safely. PC-SPA did not force-close a Microsoft process or restart Windows.";
+            ProgressText =
+                "Guided repair failed safely";
+            CurrentCheckText =
+                "Guided repair failed";
+            await TryRecordUnexpectedExceptionAsync(
+                ex,
+                "Guided Windows repair workflow",
+                userDataMayHaveBeenAffected: true);
+        }
+        finally
+        {
+            StopElapsedTimer();
+            _isGuidedRepairRunning = false;
+            IsAssessmentRunning = false;
+            IsBusy = false;
+            StopAfterCurrentRequested = false;
+        }
+    }
+
+    private void ApplyRepairProgress(
+        WindowsRepairExecutionProgress value)
+    {
+        Progress = value.Percentage;
+        ProgressText = value.Message;
+
+        if (value.CurrentStep is null)
+        {
+            CurrentCheckText =
+                "Guided repair preflight";
+            return;
+        }
+
+        var title =
+            GetGuidedRepairStepTitle(
+                value.CurrentStep.Value);
+        var finished =
+            value.Message.Contains(
+                "finished",
+                StringComparison.OrdinalIgnoreCase) ||
+            value.Message.Contains(
+                "completed",
+                StringComparison.OrdinalIgnoreCase);
+
+        CurrentCheckText = finished
+            ? $"{title} completed"
+            : $"{title} is running";
+
+        if (!finished &&
+            !StopAfterCurrentRequested)
+        {
+            Status =
+                $"{title} is running. Keep PC-SPA open and connected to power.";
+        }
+    }
+
+    private static string GetGuidedRepairStepTitle(
+        WindowsRepairExecutionStep step) =>
+        step switch
+        {
+            WindowsRepairExecutionStep.ComponentStoreRepair =>
+                "DISM RestoreHealth",
+            WindowsRepairExecutionStep.ProtectedSystemFilesRepair =>
+                "SFC Scannow",
+            WindowsRepairExecutionStep.ComponentStoreVerification =>
+                "DISM CheckHealth verification",
+            WindowsRepairExecutionStep.ProtectedSystemFilesVerification =>
+                "SFC VerifyOnly verification",
+            _ => "Microsoft Windows repair step"
+        };
+
+    private static string BuildGuidedRepairCompletionStatus(
+        WindowsRepairExecutionResult result) =>
+        result.Outcome switch
+        {
+            WindowsRepairExecutionOutcome.Completed =>
+                $"Guided repair {result.ReferenceId} completed. Fresh verification reported no classified integrity issue.",
+            WindowsRepairExecutionOutcome.CompletedWithAttention =>
+                $"Guided repair {result.ReferenceId} completed, but fresh verification still requires review.",
+            WindowsRepairExecutionOutcome.Stopped =>
+                $"Guided repair {result.ReferenceId} stopped after the active Microsoft step finished normally. Remaining steps were skipped.",
+            WindowsRepairExecutionOutcome.Blocked =>
+                "Guided repair was blocked by fresh execution-time safety checks. No repair command was started.",
+            _ =>
+                $"Guided repair {result.ReferenceId} did not complete successfully. Review the saved local result before trying again."
+        };
 
     private async Task PreviewRepairPlanAsync()
     {
@@ -591,6 +841,7 @@ public sealed class WindowsRepairAssessmentViewModel :
     private void ApplyRepairPlan(
         WindowsRepairPlan plan)
     {
+        _latestPlan = plan;
         RepairPlanDecision = plan.Decision;
         RepairPlanDecisionTitle = plan.DecisionTitle;
         RepairPlanSummary = plan.Summary;
@@ -616,6 +867,8 @@ public sealed class WindowsRepairAssessmentViewModel :
             RepairPlanSteps.Add(
                 new WindowsRepairPlanStepViewModel(step));
         }
+
+        RunGuidedRepairCommand.RaiseCanExecuteChanged();
     }
 
     private void CloseRepairPlanPreview() =>
@@ -714,7 +967,9 @@ public sealed class WindowsRepairAssessmentViewModel :
 
         _historyService.DeleteHistory();
         _repairPlanHistoryService.DeleteHistory();
+        _repairExecutionHistoryService.DeleteHistory();
         _latestResult = null;
+        _latestPlan = null;
         IsRepairPlanPreviewVisible = false;
         RepairPlanPreflight.Clear();
         RepairPlanSteps.Clear();
@@ -766,6 +1021,7 @@ public sealed class WindowsRepairAssessmentViewModel :
         WindowsRepairAssessmentResult result)
     {
         _latestResult = result;
+        _latestPlan = null;
         IsRepairPlanPreviewVisible = false;
         RepairPlanPreflight.Clear();
         RepairPlanSteps.Clear();
@@ -825,16 +1081,19 @@ public sealed class WindowsRepairAssessmentViewModel :
     }
 
     private async Task TryRecordUnexpectedExceptionAsync(
-        Exception exception)
+        Exception exception,
+        string operationStage =
+            "Read-only assessment workflow",
+        bool userDataMayHaveBeenAffected = false)
     {
         try
         {
             await _diagnosticService.RecordExceptionAsync(
                 exception,
-                "Windows Repair Assessment",
-                "Read-only assessment workflow",
+                "Windows Repair",
+                operationStage,
                 recovered: true,
-                userDataMayHaveBeenAffected: false,
+                userDataMayHaveBeenAffected,
                 DiagnosticSeverity.Error);
         }
         catch (Exception)
@@ -850,6 +1109,8 @@ public sealed class WindowsRepairAssessmentViewModel :
         ExportLatestReportCommand
             .RaiseCanExecuteChanged();
         PreviewRepairPlanCommand
+            .RaiseCanExecuteChanged();
+        RunGuidedRepairCommand
             .RaiseCanExecuteChanged();
         OpenAssessmentFolderCommand
             .RaiseCanExecuteChanged();
