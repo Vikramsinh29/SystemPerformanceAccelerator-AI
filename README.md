@@ -376,6 +376,16 @@ All selectable result tables must use the same application-wide behaviour:
 - `-RequireReady` fails closed when any signing prerequisite or expected artifact is missing.
 - Actual signing and timestamping remain excluded until an approved code-signing certificate is available.
 
+### Controlled beta distribution
+
+- `scripts/Publish-Controlled-Beta.ps1` reruns the verified installer pipeline and creates a local controlled-beta ZIP without publishing it externally.
+- The bundle contains the installer, its SHA-256 file, controlled-beta installation and security instructions, and a focused tester feedback checklist.
+- The publisher independently verifies the installer hash before bundling and validates every required ZIP entry afterward.
+- Instructions disclose administrator permission, unsigned-publisher and SmartScreen warnings, offline operation, no telemetry, no automatic restart, and retained local data.
+- Testers are instructed not to fabricate Windows Repair evidence, force an unhealthy assessment, or delete personal files merely for testing.
+- The bundle and its SHA-256 file are copied to the Desktop for distribution only to invited beta testers.
+- GitHub releases, public uploads, automatic updates, certificate acquisition, and actual code signing remain outside this controlled-beta packaging sprint.
+
 ## Verified state
 
 - Release build succeeds.
