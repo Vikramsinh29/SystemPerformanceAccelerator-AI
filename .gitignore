@@ -18,3 +18,8 @@ obj/
 *.repair-assessment.zip
 /repair-assessments/
 /windows-repair-reports/
+
+# Private code-signing certificate containers
+*.pfx
+*.p12
+*.pvk

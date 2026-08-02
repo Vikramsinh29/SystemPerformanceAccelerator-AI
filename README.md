@@ -357,13 +357,24 @@ All selectable result tables must use the same application-wide behaviour:
 ### Windows x64 installer foundation
 
 - `installer/PC-SPA.iss` defines a standalone Inno Setup installer for the verified self-contained Windows x64 publish.
-- Installation is per-machine under `Program Files`, requests administrator permission, creates a Start Menu shortcut, and offers an unchecked desktop-shortcut option.
+- Installation is per-machine under `Program Files`, requests administrator permission, creates a Start Menu shortcut, and offers a desktop-shortcut option that is selected by default.
 - Silent installation and uninstallation are supported. Silent installation never launches PC-SPA automatically.
 - Installation and uninstallation do not automatically restart Windows.
 - User-created settings, diagnostics, and history under local application data are not installer-managed and remain available across upgrades and uninstall unless the user deletes them separately.
 - `scripts/Publish-Windows-x64-Installer.ps1` reruns the verified portable release pipeline before compiling the installer, then generates a SHA-256 file and reports installer and published-PE signature status.
 - Inno Setup 6 must already be installed, or `INNO_SETUP_COMPILER` must identify `ISCC.exe`; the packaging script never downloads build tools.
 - Code signing remains required before public or Microsoft Store distribution.
+
+### Windows code-signing readiness
+
+- `scripts/Test-Windows-CodeSigningReadiness.ps1` performs a read-only signing-readiness audit and never signs files, imports certificates, downloads tools, or stores private-key passwords.
+- The audit locates the newest available x64 Windows SDK SignTool, or uses the explicit `PCSPA_SIGNTOOL_PATH` override.
+- Signing identity is selected by a 40-character certificate thumbprint from the current-user or local-machine personal certificate store; certificate files and private keys are never stored in the repository.
+- Certificate readiness requires an accessible private key, current validity, and the Code Signing enhanced-key-usage identifier.
+- Timestamp readiness requires an explicit absolute HTTP or HTTPS URL through `PCSPA_SIGNING_TIMESTAMP_URL`.
+- The audit reports signature state for the four PC-SPA-owned published PE files and the Windows installer without modifying Microsoft runtime files.
+- `-RequireReady` fails closed when any signing prerequisite or expected artifact is missing.
+- Actual signing and timestamping remain excluded until an approved code-signing certificate is available.
 
 ## Verified state
 
