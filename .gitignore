@@ -14,6 +14,11 @@ obj/
 /crash-reports/
 /diagnostic-exports/
 
+# Cloudflare Worker local state and dependencies
+backend/feedback-api/node_modules/
+backend/feedback-api/.wrangler/
+backend/feedback-api/.dev.vars
+
 # Generated Windows Repair Assessment evidence
 *.repair-assessment.zip
 /repair-assessments/

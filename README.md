@@ -31,6 +31,7 @@ PC-SPA (System Performance Accelerator) is a safe, offline Windows 10/11 desktop
 - `src/SystemPerformanceAccelerator.Desktop`
 - `tests/SystemPerformanceAccelerator.Tests`
 - Solution: `SystemPerformanceAccelerator.slnx`
+- Optional beta feedback backend: `backend/feedback-api` (separately deployed; the desktop application remains fully functional offline)
 
 Dependencies point inward: Desktop → Infrastructure → Core.
 
