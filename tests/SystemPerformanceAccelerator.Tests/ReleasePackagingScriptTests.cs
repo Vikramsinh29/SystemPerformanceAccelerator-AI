@@ -30,6 +30,7 @@ public sealed class ReleasePackagingScriptTests
         Assert.Contains("$launchProcess.CloseMainWindow()", script);
         Assert.Contains("$launchProcess.WaitForExit(10000)", script);
         Assert.Contains("Extracted portable launch: Passed", script);
+        Assert.Contains("SkipDesktopCopy", script);
     }
 
     private static string FindRepositoryFile(params string[] relativePath)

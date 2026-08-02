@@ -29,7 +29,7 @@ public sealed class InstallerPackagingTests
         Assert.Contains("Name: \"{group}\\PC-SPA\"", definition);
         Assert.Contains("Name: \"desktopicon\"", definition);
         Assert.DoesNotContain("Flags: unchecked", definition);
-        Assert.Contains("Flags: nowait postinstall skipifsilent", definition);
+        Assert.Contains("Verb: \"runas\"; Flags: nowait postinstall skipifsilent shellexec", definition);
     }
 
     [Fact]
@@ -45,6 +45,8 @@ public sealed class InstallerPackagingTests
         Assert.Contains("Programs\\Inno Setup 6\\ISCC.exe", script);
         Assert.Contains("Get-FileHash", script);
         Assert.Contains("Get-AuthenticodeSignature", script);
+        Assert.Contains("SkipDesktopCopy", script);
+        Assert.Contains("$portableArguments.SkipDesktopCopy = $true", script);
         Assert.DoesNotContain("Invoke-WebRequest", script);
     }
 

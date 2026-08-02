@@ -1,5 +1,6 @@
 param(
-    [switch]$AllowDirtyWorkingTree
+    [switch]$AllowDirtyWorkingTree,
+    [switch]$SkipDesktopCopy
 )
 
 $ErrorActionPreference = "Stop"
@@ -55,6 +56,7 @@ if ([string]::IsNullOrWhiteSpace($compiler)) {
 }
 
 $portableArguments = @{}
+$portableArguments.SkipDesktopCopy = $true
 if ($AllowDirtyWorkingTree) {
     $portableArguments.AllowDirtyWorkingTree = $true
 }
@@ -98,13 +100,15 @@ $installerHash = (
 "$installerHash  $installerName" |
     Set-Content -LiteralPath $hashPath -Encoding ASCII
 
-if ([string]::IsNullOrWhiteSpace($desktopDirectory) -or
-    -not (Test-Path -LiteralPath $desktopDirectory -PathType Container)) {
-    throw "Windows Desktop folder could not be resolved: $desktopDirectory"
-}
+if (-not $SkipDesktopCopy) {
+    if ([string]::IsNullOrWhiteSpace($desktopDirectory) -or
+        -not (Test-Path -LiteralPath $desktopDirectory -PathType Container)) {
+        throw "Windows Desktop folder could not be resolved: $desktopDirectory"
+    }
 
-Copy-Item -LiteralPath $installerPath -Destination $desktopInstallerPath -Force
-Copy-Item -LiteralPath $hashPath -Destination $desktopHashPath -Force
+    Copy-Item -LiteralPath $installerPath -Destination $desktopInstallerPath -Force
+    Copy-Item -LiteralPath $hashPath -Destination $desktopHashPath -Force
+}
 
 $installerSignature = Get-AuthenticodeSignature -LiteralPath $installerPath
 $publishedPeFiles = @(
@@ -123,8 +127,10 @@ Write-Host "Windows x64 installer created successfully." -ForegroundColor Green
 Write-Host "Installer: $installerPath" -ForegroundColor Green
 Write-Host "SHA-256: $installerHash" -ForegroundColor Green
 Write-Host "Hash file: $hashPath" -ForegroundColor Green
-Write-Host "Desktop installer: $desktopInstallerPath" -ForegroundColor Green
-Write-Host "Desktop hash: $desktopHashPath" -ForegroundColor Green
+if (-not $SkipDesktopCopy) {
+    Write-Host "Desktop installer: $desktopInstallerPath" -ForegroundColor Green
+    Write-Host "Desktop hash: $desktopHashPath" -ForegroundColor Green
+}
 Write-Host "Installer signature: $($installerSignature.Status)" -ForegroundColor Yellow
 Write-Host "Published PE files without a valid signature: $($unsignedPeFiles.Count)" -ForegroundColor Yellow
 Write-Host "No automatic restart is configured." -ForegroundColor Green

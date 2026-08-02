@@ -10,9 +10,12 @@ $installerPublisher = Join-Path $PSScriptRoot "Publish-Windows-x64-Installer.ps1
 $version = "1.0.0"
 $bundleName = "PC-SPA-$version-win-x64-controlled-beta"
 $installerName = "PC-SPA-$version-win-x64-setup.exe"
+$bundleInstallerName = "2-INSTALL-PC-SPA.exe"
 $installerDirectory = Join-Path $repo "artifacts\installer"
 $installerPath = Join-Path $installerDirectory $installerName
 $installerHashPath = "$installerPath.sha256"
+$brandingDirectory = Join-Path $repo "src\SystemPerformanceAccelerator.Desktop\Assets\Branding"
+$guideLogoPath = Join-Path $brandingDirectory "PC-SPA-Exact-Original-2048x2048.png"
 $releaseDirectory = Join-Path $repo "artifacts\beta"
 $stagingDirectory = Join-Path $releaseDirectory "_staging\$bundleName"
 $bundlePath = Join-Path $releaseDirectory "$bundleName.zip"
@@ -29,6 +32,7 @@ if (-not (Test-Path -LiteralPath $installerPublisher -PathType Leaf)) {
 }
 
 $installerArguments = @{}
+$installerArguments.SkipDesktopCopy = $true
 if ($AllowDirtyWorkingTree) {
     $installerArguments.AllowDirtyWorkingTree = $true
 }
@@ -44,6 +48,12 @@ if ($LASTEXITCODE -ne 0) {
 foreach ($requiredFile in @($installerPath, $installerHashPath)) {
     if (-not (Test-Path -LiteralPath $requiredFile -PathType Leaf)) {
         throw "Required controlled-beta file is missing: $requiredFile"
+    }
+}
+
+foreach ($brandingFile in @($guideLogoPath)) {
+    if (-not (Test-Path -LiteralPath $brandingFile -PathType Leaf)) {
+        throw "Required installation-guide branding asset is missing: $brandingFile"
     }
 }
 
@@ -71,9 +81,21 @@ if ($installerHash -ne $recordedInstallerHash) {
 
 Remove-Item -LiteralPath $releaseDirectory -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Path $stagingDirectory -Force | Out-Null
+$informationDirectory = Join-Path $stagingDirectory "Beta-Information"
+New-Item -ItemType Directory -Path $informationDirectory -Force | Out-Null
 
-Copy-Item -LiteralPath $installerPath -Destination $stagingDirectory -Force
-Copy-Item -LiteralPath $installerHashPath -Destination $stagingDirectory -Force
+Copy-Item `
+    -LiteralPath $installerPath `
+    -Destination (Join-Path $stagingDirectory $bundleInstallerName) `
+    -Force
+
+"$installerHash  $bundleInstallerName" |
+    Set-Content `
+        -LiteralPath (Join-Path $informationDirectory "$bundleInstallerName.sha256") `
+        -Encoding ASCII
+
+$guideLogoBase64 = [Convert]::ToBase64String(
+    [IO.File]::ReadAllBytes($guideLogoPath))
 
 $betaReadme = @"
 PC-SPA $version - CONTROLLED BETA
@@ -84,7 +106,7 @@ Microsoft Store release.
 SYSTEM REQUIREMENTS
 - Windows 10/11 x64
 - Administrator permission is required for installation and protected tools
-- Keep the installer and SHA-256 file together
+- Keep the complete extracted folder together
 
 SECURITY AND PRIVACY
 - The installer is currently unsigned. Windows may show Unknown Publisher or
@@ -101,14 +123,14 @@ SECURITY AND PRIVACY
 
 VERIFY IN POWERSHELL
 `$expected = "$installerHash"
-`$actual = (Get-FileHash ".\$installerName" -Algorithm SHA256).Hash.ToLowerInvariant()
+`$actual = (Get-FileHash "..\$bundleInstallerName" -Algorithm SHA256).Hash.ToLowerInvariant()
 `$actual -eq `$expected
 
 The verification result must be True.
 
 INSTALL
 1. Verify the SHA-256.
-2. Run $installerName.
+2. Run $bundleInstallerName from the main extracted folder.
 3. Review the administrator and unsigned-publisher prompts.
 4. Keep Create a desktop shortcut selected unless you do not want it.
 
@@ -169,14 +191,146 @@ Beta Error Feedback sends only after explicit preview and consent. PC-SPA
 never uploads diagnostic evidence automatically or attaches personal files.
 "@
 
+$installationGuide = @"
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Install PC-SPA $version</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #080b0f;
+      color: #f5f5f5;
+      font-family: "Segoe UI", Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.55;
+    }
+    main { width: min(820px, calc(100% - 32px)); margin: 40px auto; }
+    .hero {
+      margin-bottom: 26px;
+      padding: 18px 20px 16px;
+      background: #02090d;
+      border: 1px solid #34302a;
+      border-radius: 12px;
+    }
+    .logo-crop {
+      position: relative;
+      width: min(100%, 560px);
+      aspect-ratio: 1.43 / 1;
+      margin: 0 auto;
+      overflow: hidden;
+      background: #02090d;
+    }
+    .logo-lockup {
+      position: absolute;
+      inset: 0 auto auto 0;
+      display: block;
+      width: 100%;
+      height: auto;
+      transform: translateY(-15.5%);
+    }
+    .hero-copy {
+      padding: 14px 12px 0;
+      text-align: center;
+    }
+    h1 { margin: 0 0 6px; font-size: 28px; line-height: 1.18; }
+    .subtitle { margin: 0; color: #c7cbd1; font-size: 14px; }
+    .card {
+      margin: 16px 0;
+      padding: 24px;
+      background: #171b21;
+      border: 1px solid #3f3826;
+      border-radius: 12px;
+    }
+    h2 { margin: 0 0 16px; font-size: 21px; }
+    ol { margin: 0; padding-left: 24px; }
+    li { margin: 10px 0; padding-left: 6px; }
+    code {
+      color: #ffd66d;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.95em;
+    }
+    .notice { border-color: #b88718; background: #2a2315; }
+    .notice strong { color: #ffd66d; }
+    .facts { display: grid; gap: 10px; }
+    .fact::before { content: "\2713"; color: #4bc48a; margin-right: 10px; }
+    .small { color: #aeb4bd; font-size: 14px; }
+    @media (max-width: 680px) {
+      main { margin: 24px auto; }
+      .hero { padding: 14px 14px 15px; }
+      .logo-crop { width: min(100%, 500px); aspect-ratio: 1.43 / 1; }
+      .hero-copy { padding-top: 12px; }
+      h1 { font-size: 25px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="hero">
+      <div class="logo-crop">
+        <img class="logo-lockup"
+             src="data:image/png;base64,$guideLogoBase64"
+             alt="PC-SPA - System Performance Accelerator">
+      </div>
+      <div class="hero-copy">
+        <h1>Install PC-SPA Controlled Beta</h1>
+        <p class="subtitle">Version $version for invited Windows 10/11 x64 testers</p>
+      </div>
+    </div>
+
+    <section class="card">
+      <h2>Install in three steps</h2>
+      <ol>
+        <li>Make sure the downloaded ZIP has been fully extracted.</li>
+        <li>In this folder, double-click <code>$bundleInstallerName</code>.</li>
+        <li>Approve the Windows administrator prompt and follow the installer.</li>
+      </ol>
+    </section>
+
+    <section class="card notice">
+      <h2>Windows protection notice</h2>
+      <p><strong>This controlled-beta installer is currently unsigned.</strong>
+      Windows may show Unknown Publisher or a SmartScreen warning. If this
+      package came directly from the PC-SPA beta programme, select
+      <strong>More info</strong>, verify that the application is PC-SPA, and
+      then select <strong>Run anyway</strong>.</p>
+    </section>
+
+    <section class="card">
+      <h2>What PC-SPA will not do automatically</h2>
+      <div class="facts">
+        <div class="fact">It will not restart Windows automatically.</div>
+        <div class="fact">It will not upload personal files or file contents.</div>
+        <div class="fact">Beta feedback is sent only after review and consent.</div>
+        <div class="fact">Uninstall retains local settings and history.</div>
+      </div>
+    </section>
+
+    <p class="small">Optional security information and the tester feedback
+    checklist are available in the <strong>Beta-Information</strong> folder.
+    This page contains no scripts, tracking, or network content.</p>
+  </main>
+</body>
+</html>
+"@
+
 Set-Content `
-    -LiteralPath (Join-Path $stagingDirectory "BETA-README.txt") `
+    -LiteralPath (Join-Path $informationDirectory "BETA-README.txt") `
     -Value $betaReadme `
     -Encoding UTF8
 
 Set-Content `
-    -LiteralPath (Join-Path $stagingDirectory "BETA-FEEDBACK-CHECKLIST.txt") `
+    -LiteralPath (Join-Path $informationDirectory "BETA-FEEDBACK-CHECKLIST.txt") `
     -Value $feedbackChecklist `
+    -Encoding UTF8
+
+Set-Content `
+    -LiteralPath (Join-Path $stagingDirectory "1-READ-ME-FIRST.html") `
+    -Value $installationGuide `
     -Encoding UTF8
 
 Compress-Archive `
@@ -197,15 +351,28 @@ try {
             ForEach-Object { $_.FullName.Replace('\', '/') }
     )
 
-    foreach ($requiredEntry in @(
-        "$bundleName/$installerName",
-        "$bundleName/$installerName.sha256",
-        "$bundleName/BETA-README.txt",
-        "$bundleName/BETA-FEEDBACK-CHECKLIST.txt"
-    )) {
+    $requiredEntries = @(
+        "$bundleName/1-READ-ME-FIRST.html",
+        "$bundleName/$bundleInstallerName",
+        "$bundleName/Beta-Information/BETA-README.txt",
+        "$bundleName/Beta-Information/BETA-FEEDBACK-CHECKLIST.txt",
+        "$bundleName/Beta-Information/$bundleInstallerName.sha256"
+    )
+
+    foreach ($requiredEntry in $requiredEntries) {
         if ($entryNames -notcontains $requiredEntry) {
             throw "Controlled-beta ZIP is missing: $requiredEntry"
         }
+    }
+
+    $fileEntries = @($entryNames | Where-Object { -not $_.EndsWith('/') })
+    $unexpectedEntries = @(
+        $fileEntries | Where-Object { $requiredEntries -notcontains $_ }
+    )
+
+    if ($fileEntries.Count -ne $requiredEntries.Count -or
+        $unexpectedEntries.Count -ne 0) {
+        throw "Controlled-beta ZIP must contain exactly five documented files."
     }
 }
 finally {

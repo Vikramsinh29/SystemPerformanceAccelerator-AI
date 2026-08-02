@@ -380,7 +380,8 @@ All selectable result tables must use the same application-wide behaviour:
 ### Controlled beta distribution
 
 - `scripts/Publish-Controlled-Beta.ps1` reruns the verified installer pipeline and creates a local controlled-beta ZIP without publishing it externally.
-- The bundle contains the installer, its SHA-256 file, controlled-beta installation and security instructions, and a focused tester feedback checklist.
+- The bundle contains exactly five files in a customer-oriented layout: a self-contained HTML installation guide using the approved exact original PC-SPA full lockup in a seamless responsive hero, plus a numbered installer at the root, with the installer hash, controlled-beta security information, and tester feedback checklist organized under `Beta-Information`.
+- Nested portable and installer publishers suppress their intermediate Desktop copies, so controlled-beta publishing leaves only the final beta ZIP and its bundle hash on the Desktop.
 - The publisher independently verifies the installer hash before bundling and validates every required ZIP entry afterward.
 - Instructions disclose administrator permission, unsigned-publisher and SmartScreen warnings, offline core operation, no telemetry, the explicitly initiated Beta Error Feedback network exception, no automatic restart, and retained local data.
 - Beta instructions state that nothing is sent automatically, personal files are never attached, and an unavailable feedback service falls back to the reviewed local ZIP workflow.

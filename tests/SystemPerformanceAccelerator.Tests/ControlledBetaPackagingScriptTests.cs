@@ -22,6 +22,22 @@ public sealed class ControlledBetaPackagingScriptTests
 
         Assert.Contains("BETA-README.txt", script);
         Assert.Contains("BETA-FEEDBACK-CHECKLIST.txt", script);
+        Assert.Contains("1-READ-ME-FIRST.html", script);
+        Assert.Contains("2-INSTALL-PC-SPA.exe", script);
+        Assert.Contains("Beta-Information", script);
+        Assert.Contains("font-family: \"Segoe UI\"", script);
+        Assert.Contains("PC-SPA-Exact-Original-2048x2048.png", script);
+        Assert.Contains("guideLogoBase64", script);
+        Assert.Contains("data:image/png;base64", script);
+        Assert.Contains("aspect-ratio: 1.43 / 1", script);
+        Assert.Contains("@media (max-width: 680px)", script);
+        Assert.Contains("background: #02090d", script);
+        Assert.Contains("transform: translateY(-15.5%)", script);
+        Assert.DoesNotContain("guidePhoenixBase64", script);
+        Assert.DoesNotContain("guideWordmarkBase64", script);
+        Assert.Contains("Required installation-guide branding asset is missing", script);
+        Assert.Contains("This page contains no scripts, tracking, or network content", script);
+        Assert.Contains("More info", script);
         Assert.Contains("Unknown Publisher", script);
         Assert.Contains("never automatically restarts Windows", script);
         Assert.Contains("Do not fabricate repair results", script);
@@ -30,6 +46,8 @@ public sealed class ControlledBetaPackagingScriptTests
         Assert.Contains("Personal files and file contents are never attached or uploaded", script);
         Assert.Contains("Nothing is sent automatically", script);
         Assert.Contains("local ZIP fallback was offered", script);
+        Assert.Contains("exactly five documented files", script);
+        Assert.Contains("$installerArguments.SkipDesktopCopy = $true", script);
     }
 
     [Fact]

@@ -1,5 +1,6 @@
 param(
-    [switch]$AllowDirtyWorkingTree
+    [switch]$AllowDirtyWorkingTree,
+    [switch]$SkipDesktopCopy
 )
 
 $ErrorActionPreference = "Stop"
@@ -307,17 +308,19 @@ Remove-Item -LiteralPath $launchTestRoot -Recurse -Force
 
 Remove-Item -LiteralPath $stagingRoot -Recurse -Force
 
-if ([string]::IsNullOrWhiteSpace($desktopDirectory) -or
-    -not (Test-Path -LiteralPath $desktopDirectory -PathType Container)) {
-    throw "Windows Desktop folder could not be resolved: $desktopDirectory"
-}
+if (-not $SkipDesktopCopy) {
+    if ([string]::IsNullOrWhiteSpace($desktopDirectory) -or
+        -not (Test-Path -LiteralPath $desktopDirectory -PathType Container)) {
+        throw "Windows Desktop folder could not be resolved: $desktopDirectory"
+    }
 
-Copy-Item -LiteralPath $zipPath -Destination $desktopZipPath -Force
-Copy-Item -LiteralPath $hashPath -Destination $desktopHashPath -Force
+    Copy-Item -LiteralPath $zipPath -Destination $desktopZipPath -Force
+    Copy-Item -LiteralPath $hashPath -Destination $desktopHashPath -Force
 
-foreach ($desktopCopy in @($desktopZipPath, $desktopHashPath)) {
-    if (-not (Test-Path -LiteralPath $desktopCopy -PathType Leaf)) {
-        throw "Desktop release copy was not created: $desktopCopy"
+    foreach ($desktopCopy in @($desktopZipPath, $desktopHashPath)) {
+        if (-not (Test-Path -LiteralPath $desktopCopy -PathType Leaf)) {
+            throw "Desktop release copy was not created: $desktopCopy"
+        }
     }
 }
 
@@ -331,8 +334,10 @@ Write-Host "Executable signature: $($signature.Status)" -ForegroundColor Yellow
 Write-Host "ZIP: $zipPath" -ForegroundColor Green
 Write-Host "SHA-256: $zipHash" -ForegroundColor Green
 Write-Host "Hash file: $hashPath" -ForegroundColor Green
-Write-Host "Desktop ZIP: $desktopZipPath" -ForegroundColor Green
-Write-Host "Desktop hash: $desktopHashPath" -ForegroundColor Green
+if (-not $SkipDesktopCopy) {
+    Write-Host "Desktop ZIP: $desktopZipPath" -ForegroundColor Green
+    Write-Host "Desktop hash: $desktopHashPath" -ForegroundColor Green
+}
 Write-Host "Extracted portable launch: Passed" -ForegroundColor Green
 Write-Host ""
 Write-Host "Full automated test suite passed before packaging." -ForegroundColor Cyan
