@@ -23,6 +23,14 @@
         "limit": 10,
         "period": 60
       }
+    },
+    {
+      "name": "BETA_ACCESS_RATE_LIMITER",
+      "namespace_id": "1002",
+      "simple": {
+        "limit": 10,
+        "period": 60
+      }
     }
   ],
   "triggers": {
