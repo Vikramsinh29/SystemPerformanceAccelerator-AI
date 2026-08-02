@@ -354,6 +354,17 @@ All selectable result tables must use the same application-wide behaviour:
 - The final manually verified portable ZIP has SHA-256 `2390cee212f559d9fd7cdf3d3a6cb8589dba968b905ee5e5c84db94fc348ab18`.
 - The unsigned executable is expected to report `NotSigned`; Windows may therefore show an Unknown Publisher or SmartScreen warning.
 
+### Windows x64 installer foundation
+
+- `installer/PC-SPA.iss` defines a standalone Inno Setup installer for the verified self-contained Windows x64 publish.
+- Installation is per-machine under `Program Files`, requests administrator permission, creates a Start Menu shortcut, and offers an unchecked desktop-shortcut option.
+- Silent installation and uninstallation are supported. Silent installation never launches PC-SPA automatically.
+- Installation and uninstallation do not automatically restart Windows.
+- User-created settings, diagnostics, and history under local application data are not installer-managed and remain available across upgrades and uninstall unless the user deletes them separately.
+- `scripts/Publish-Windows-x64-Installer.ps1` reruns the verified portable release pipeline before compiling the installer, then generates a SHA-256 file and reports installer and published-PE signature status.
+- Inno Setup 6 must already be installed, or `INNO_SETUP_COMPILER` must identify `ISCC.exe`; the packaging script never downloads build tools.
+- Code signing remains required before public or Microsoft Store distribution.
+
 ## Verified state
 
 - Release build succeeds.
