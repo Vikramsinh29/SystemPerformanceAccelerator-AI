@@ -169,6 +169,45 @@ public sealed class DiagnosticPackageExporterTests
             entry => entry.FullName.StartsWith("events/", StringComparison.Ordinal));
     }
 
+    [Fact]
+    public async Task CreateFeedbackSubmission_SanitizesAndBoundsRemoteReport()
+    {
+        using var location = new TemporaryDiagnosticLocation();
+        var sanitizer = new DiagnosticPathSanitizer(
+            userProfile: @"C:\Users\Alice",
+            userName: "Alice");
+        var service = CreateService(location.DiagnosticsRoot, sanitizer);
+        service.Configure(true, false);
+
+        for (var index = 0; index < 7; index++)
+        {
+            await service.RecordExceptionAsync(
+                new InvalidOperationException(
+                    @"Failed at C:\Users\Alice\Documents\file.txt"),
+                "Cleaner",
+                "Scan",
+                false,
+                false);
+        }
+
+        var report = service.CreateFeedbackSubmission(
+            new DiagnosticFeedbackRequest(
+                service.LatestErrorReference!,
+                "Cleaner",
+                @"Failed for Alice at C:\Users\Alice\Documents\file.txt",
+                "Scan completes",
+                true));
+
+        Assert.Equal(1, report.SchemaVersion);
+        Assert.Equal(service.InstallationId, report.InstallationId);
+        Assert.Equal(5, report.DiagnosticEvents.Count);
+        Assert.Contains("%USERPROFILE%", report.Description);
+        Assert.DoesNotContain("Alice", report.Description);
+        Assert.All(
+            report.DiagnosticEvents,
+            item => Assert.DoesNotContain("Alice", item.Message));
+    }
+
     private static LocalDiagnosticService CreateService(
         string root,
         DiagnosticPathSanitizer? sanitizer = null) =>

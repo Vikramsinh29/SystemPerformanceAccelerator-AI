@@ -18,6 +18,9 @@ internal sealed class NonInteractiveDiagnosticInteractionService :
         DiagnosticFeedbackRequest feedback,
         DiagnosticExportPreview preview) => false;
 
+    public bool ConfirmLocalFeedbackFallback(
+        string submissionFailure) => false;
+
     public bool ConfirmDeleteHistory(int eventCount) =>
         false;
 

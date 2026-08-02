@@ -40,6 +40,9 @@ public interface IDiagnosticService
         DiagnosticFeedbackRequest feedback,
         CancellationToken cancellationToken = default);
 
+    DiagnosticFeedbackSubmissionRequest CreateFeedbackSubmission(
+        DiagnosticFeedbackRequest feedback);
+
     void DeleteHistory();
 
     void ResetInstallationId();

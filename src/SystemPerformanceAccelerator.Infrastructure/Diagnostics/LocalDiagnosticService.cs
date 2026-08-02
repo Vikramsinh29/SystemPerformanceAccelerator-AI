@@ -248,6 +248,12 @@ public sealed class LocalDiagnosticService : IDiagnosticService
             IncludeHardwareSummary,
             cancellationToken);
 
+    public DiagnosticFeedbackSubmissionRequest CreateFeedbackSubmission(
+        DiagnosticFeedbackRequest feedback) =>
+        _packageExporter.CreateFeedbackSubmission(
+            feedback,
+            InstallationId);
+
     public void DeleteHistory()
     {
         DeleteDirectoryIfPresent(_eventsDirectory);

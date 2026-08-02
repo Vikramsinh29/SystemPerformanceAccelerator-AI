@@ -14,6 +14,8 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     private readonly IApplicationSettingsService _settingsService;
     private readonly IDiagnosticService _diagnosticService;
     private readonly IDiagnosticInteractionService _diagnosticInteractionService;
+    private readonly IDiagnosticFeedbackSubmissionService
+        _feedbackSubmissionService;
     private readonly Action<ApplicationSettings> _applySettings;
     private ApplicationTheme _selectedTheme;
     private string _largeFileMinimumSizeText;
@@ -25,6 +27,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     private string _feedbackExpectedResult = string.Empty;
     private bool _includeSanitizedDiagnosticsInFeedback = true;
     private bool _feedbackConsent;
+    private string? _lastSubmittedFeedbackReference;
     private string _lastReviewedDiagnosticErrorReference;
     private string _status;
 
@@ -34,7 +37,8 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         Action<ApplicationSettings> applySettings,
         IFeatureAccessGuard featureAccessGuard,
         IDiagnosticService? diagnosticService = null,
-        IDiagnosticInteractionService? diagnosticInteractionService = null)
+        IDiagnosticInteractionService? diagnosticInteractionService = null,
+        IDiagnosticFeedbackSubmissionService? feedbackSubmissionService = null)
     {
         _settingsService = settingsService ??
             throw new ArgumentNullException(nameof(settingsService));
@@ -47,6 +51,8 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         _diagnosticInteractionService =
             diagnosticInteractionService ??
             new NonInteractiveDiagnosticInteractionService();
+        _feedbackSubmissionService = feedbackSubmissionService ??
+            new DisabledDiagnosticFeedbackSubmissionService();
 
         _selectedTheme = loadResult.Settings.Theme;
         _largeFileMinimumSizeText =
@@ -91,6 +97,9 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             featureAccessGuard,
             ApplicationFeature.Settings,
             FeatureAccessRequirement.Execute);
+        CopySubmittedFeedbackReferenceCommand = new RelayCommand(
+            CopySubmittedFeedbackReference,
+            () => HasSubmittedFeedbackReference);
         DismissRecordedErrorCommand = new RelayCommand(
             DismissRecordedError,
             () => HasUnreviewedDiagnosticError);
@@ -123,6 +132,8 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     public AsyncRelayCommand ExportDiagnosticPackageCommand { get; }
 
     public AsyncRelayCommand CreateFeedbackPackageCommand { get; }
+
+    public RelayCommand CopySubmittedFeedbackReferenceCommand { get; }
 
     public RelayCommand DismissRecordedErrorCommand { get; }
 
@@ -227,6 +238,12 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         get => _feedbackConsent;
         set => SetField(ref _feedbackConsent, value);
     }
+
+    public bool HasSubmittedFeedbackReference =>
+        !string.IsNullOrWhiteSpace(_lastSubmittedFeedbackReference);
+
+    public string SubmittedFeedbackReferenceText =>
+        _lastSubmittedFeedbackReference ?? string.Empty;
 
     public string SettingsPath => _settingsService.SettingsPath;
 
@@ -453,30 +470,34 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
                 return;
             }
 
-            var destination = _diagnosticInteractionService.SelectExportPath(
-                $"PC-SPA-Error-Report-{DateTime.Now:yyyyMMdd-HHmmss}.zip");
-            if (string.IsNullOrWhiteSpace(destination))
+            var submission = _diagnosticService
+                .CreateFeedbackSubmission(feedback);
+            var result = await _feedbackSubmissionService.SubmitAsync(
+                submission);
+
+            if (result.Success)
             {
-                Status = "Error report creation cancelled.";
+                SetSubmittedFeedbackReference(result.Reference);
+                Status = result.Message;
+                TryMarkLatestErrorReviewed(result.Message);
+                FeedbackConsent = false;
                 return;
             }
 
-            var result = await _diagnosticService.ExportFeedbackAsync(
-                destination,
-                feedback);
-            Status = result.Message;
-            try
-            {
-                MarkLatestErrorReviewed();
-            }
-            catch (Exception ex) when (
-                ex is IOException or
-                UnauthorizedAccessException or
-                InvalidOperationException)
+            if (!_diagnosticInteractionService
+                    .ConfirmLocalFeedbackFallback(result.Message))
             {
                 Status = result.Message +
-                    " The Settings action badge could not be cleared. " +
-                    ex.Message;
+                    " No information was sent or saved.";
+                return;
+            }
+
+            var localResult = await CreateLocalFeedbackFallbackAsync(
+                feedback);
+            Status = result.Message + " " + localResult.Message;
+            if (localResult.Success)
+            {
+                TryMarkLatestErrorReviewed(Status);
             }
             FeedbackConsent = false;
         }
@@ -489,6 +510,72 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             System.Security.SecurityException)
         {
             Status = "The error report could not be created. " + ex.Message;
+        }
+    }
+
+    private async Task<DiagnosticExportResult>
+        CreateLocalFeedbackFallbackAsync(
+            DiagnosticFeedbackRequest feedback)
+    {
+        var destination = _diagnosticInteractionService.SelectExportPath(
+            $"PC-SPA-Error-Report-{DateTime.Now:yyyyMMdd-HHmmss}.zip");
+        if (string.IsNullOrWhiteSpace(destination))
+        {
+            return new DiagnosticExportResult(
+                false,
+                string.Empty,
+                0,
+                "Local ZIP creation was cancelled.");
+        }
+
+        return await _diagnosticService.ExportFeedbackAsync(
+            destination,
+            feedback);
+    }
+
+    private void SetSubmittedFeedbackReference(string? reference)
+    {
+        _lastSubmittedFeedbackReference = reference;
+        OnPropertyChanged(nameof(HasSubmittedFeedbackReference));
+        OnPropertyChanged(nameof(SubmittedFeedbackReferenceText));
+        CopySubmittedFeedbackReferenceCommand.RaiseCanExecuteChanged();
+    }
+
+    private void CopySubmittedFeedbackReference()
+    {
+        if (!HasSubmittedFeedbackReference)
+        {
+            Status = "No submitted feedback reference is available.";
+            return;
+        }
+
+        try
+        {
+            _diagnosticInteractionService.CopyText(
+                _lastSubmittedFeedbackReference!);
+            Status = $"Copied feedback reference {_lastSubmittedFeedbackReference}.";
+        }
+        catch (ExternalException ex)
+        {
+            Status = "The feedback reference could not be copied. " +
+                ex.Message;
+        }
+    }
+
+    private void TryMarkLatestErrorReviewed(string successMessage)
+    {
+        try
+        {
+            MarkLatestErrorReviewed();
+        }
+        catch (Exception ex) when (
+            ex is IOException or
+            UnauthorizedAccessException or
+            InvalidOperationException)
+        {
+            Status = successMessage +
+                " The Settings action badge could not be cleared. " +
+                ex.Message;
         }
     }
 

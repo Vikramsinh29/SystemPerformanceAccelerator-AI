@@ -70,6 +70,11 @@ internal sealed class DisabledDiagnosticService : IDiagnosticService
         CancellationToken cancellationToken = default) =>
         ExportAsync(destinationZipPath, cancellationToken);
 
+    public DiagnosticFeedbackSubmissionRequest CreateFeedbackSubmission(
+        DiagnosticFeedbackRequest feedback) =>
+        throw new InvalidOperationException(
+            "Diagnostics are unavailable in this non-production composition.");
+
     public void DeleteHistory()
     {
     }

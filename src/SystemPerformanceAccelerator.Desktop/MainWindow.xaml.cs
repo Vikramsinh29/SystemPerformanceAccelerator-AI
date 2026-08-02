@@ -37,27 +37,32 @@ public partial class MainWindow : Window
             settingsService,
             settingsLoadResult,
             diagnosticService,
-            new DiagnosticInteractionService());
+            new DiagnosticInteractionService(),
+            new DiagnosticFeedbackSubmissionService());
     }
 
     internal MainWindow(
         IApplicationSettingsService applicationSettingsService,
         ApplicationSettingsLoadResult settingsLoadResult,
         IDiagnosticService diagnosticService,
-        IDiagnosticInteractionService diagnosticInteractionService)
+        IDiagnosticInteractionService diagnosticInteractionService,
+        IDiagnosticFeedbackSubmissionService? feedbackSubmissionService = null)
     {
         InitializeWindow(
             applicationSettingsService,
             settingsLoadResult,
             diagnosticService,
-            diagnosticInteractionService);
+            diagnosticInteractionService,
+            feedbackSubmissionService ??
+                new DisabledDiagnosticFeedbackSubmissionService());
     }
 
     private void InitializeWindow(
         IApplicationSettingsService applicationSettingsService,
         ApplicationSettingsLoadResult settingsLoadResult,
         IDiagnosticService diagnosticService,
-        IDiagnosticInteractionService diagnosticInteractionService)
+        IDiagnosticInteractionService diagnosticInteractionService,
+        IDiagnosticFeedbackSubmissionService feedbackSubmissionService)
     {
         ArgumentNullException.ThrowIfNull(
             applicationSettingsService);
@@ -65,6 +70,8 @@ public partial class MainWindow : Window
         ArgumentNullException.ThrowIfNull(diagnosticService);
         ArgumentNullException.ThrowIfNull(
             diagnosticInteractionService);
+        ArgumentNullException.ThrowIfNull(
+            feedbackSubmissionService);
 
         ThemeManager.Apply(settingsLoadResult.Settings.Theme);
 
@@ -138,7 +145,8 @@ public partial class MainWindow : Window
             windowsRepairPlanService,
             windowsRepairPlanHistoryService,
             windowsRepairExecutionService,
-            windowsRepairExecutionHistoryService);
+            windowsRepairExecutionHistoryService,
+            feedbackSubmissionService);
         DataContext = viewModel;
         viewModel.PropertyChanged +=
             OnMainViewModelPropertyChanged;

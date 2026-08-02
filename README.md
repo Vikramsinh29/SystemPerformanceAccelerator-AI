@@ -10,7 +10,7 @@ PC-SPA (System Performance Accelerator) is a safe, offline Windows 10/11 desktop
 - Compact, sharp, practical controls with clear system status and actions.
 - Preserve the existing WPF/MVVM architecture.
 - Work through narrow, separately verified sprints.
-- No cloud APIs, telemetry, or external account requirement.
+- No telemetry or external account requirement. Core tools remain offline; the optional beta error-report action is the only user-initiated network feature.
 - Never delete user data without explicit confirmation.
 - Report partial failures and skipped files honestly.
 
@@ -899,3 +899,15 @@ Attention assessments.
   background repair, command shell, script, or user-supplied argument is added.
 - Sanitized repair-execution history is local and bounded to 20 records and
   90 days.
+
+## Sprint 37C - Explicit beta feedback submission
+
+- The existing Settings error-report form remains review-first and requires explicit consent.
+- Nothing is uploaded automatically; only the user pressing `Preview & send error report` can start a request.
+- The desktop sends a bounded JSON report over HTTPS to the separately deployed PC-SPA beta feedback service.
+- User-entered text and up to the five newest selected diagnostic events are sanitized locally before transmission; the service sanitizes them again before private storage.
+- Personal files and file contents are never attached or uploaded.
+- The request has a finite timeout and no automatic retry, background queue, telemetry, account, or silent resend.
+- A successful response must contain a valid `BETA-...` receipt, which is displayed and can be copied.
+- If the service is unavailable, rejected, rate-limited, times out, or returns an invalid receipt, PC-SPA offers the existing reviewed local ZIP workflow.
+- Cleaner, repair, startup, monitoring, scheduling, safety, command, runner, and execution-service behaviour is unchanged.

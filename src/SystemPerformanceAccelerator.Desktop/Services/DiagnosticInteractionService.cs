@@ -64,22 +64,31 @@ public sealed class DiagnosticInteractionService :
         ArgumentNullException.ThrowIfNull(preview);
 
         var message =
-            "Review the complete error report before creating it.\n\n" +
+            "Review the complete error report before sending it.\n\n" +
             $"Error reference: {feedback.ErrorReference}\n" +
             $"Affected area: {feedback.AffectedArea}\n" +
             $"What happened: {feedback.Description}\n" +
             $"Expected result: {feedback.ExpectedResult}\n" +
             $"Sanitized diagnostic events: {(feedback.IncludeSanitizedDiagnostics ? preview.EventCount : 0):N0}\n\n" +
             "PC-SPA includes only these user-entered details and minimum technical context. Personal files, file contents, passwords, browser activity, email addresses, licence keys, cookies, Windows username, computer name, and full personal paths are excluded or redacted.\n\n" +
-            "Nothing is sent automatically. Create this local package?";
+            "Nothing is sent automatically. Only this reviewed report will be sent securely to the PC-SPA beta feedback service. Continue?";
 
         return MessageBox.Show(
             message,
-            "Preview privacy-safe error report",
+            "Preview and send privacy-safe error report",
             MessageBoxButton.YesNo,
             MessageBoxImage.Information,
             MessageBoxResult.No) == MessageBoxResult.Yes;
     }
+
+    public bool ConfirmLocalFeedbackFallback(string submissionFailure) =>
+        MessageBox.Show(
+            submissionFailure + "\n\n" +
+            "PC-SPA can create the same reviewed information as a local ZIP. Nothing will be uploaded. Create the local ZIP now?",
+            "Online feedback unavailable",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Information,
+            MessageBoxResult.Yes) == MessageBoxResult.Yes;
 
     public bool ConfirmDeleteHistory(int eventCount) =>
         MessageBox.Show(

@@ -45,7 +45,8 @@ public partial class App : Application
                             settingsService,
                             settingsLoadResult,
                             diagnosticService,
-                            new DiagnosticInteractionService());
+                            new DiagnosticInteractionService(),
+                            new DiagnosticFeedbackSubmissionService());
                         MainWindow = mainWindow;
                         mainWindow.Show();
 

@@ -8,6 +8,7 @@ namespace SystemPerformanceAccelerator.Infrastructure.Diagnostics;
 
 public sealed class DiagnosticPackageExporter
 {
+    private const int MaximumSubmittedEventCount = 5;
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
         WriteIndented = true,
@@ -244,6 +245,43 @@ public sealed class DiagnosticPackageExporter
         };
     }
 
+    public DiagnosticFeedbackSubmissionRequest CreateFeedbackSubmission(
+        DiagnosticFeedbackRequest feedback,
+        string? installationId)
+    {
+        ArgumentNullException.ThrowIfNull(feedback);
+
+        var environment = _environmentProvider();
+        var events = feedback.IncludeSanitizedDiagnostics
+            ? ReadEvents()
+                .OrderByDescending(item => item.TimestampUtc)
+                .Take(MaximumSubmittedEventCount)
+                .Select(item => new DiagnosticFeedbackEvent(
+                    Limit(_sanitizer.Sanitize(item.ReferenceId), 64),
+                    Limit(_sanitizer.Sanitize(item.ExceptionType), 160),
+                    RequiredText(
+                        _sanitizer.Sanitize(item.Message),
+                        "No diagnostic message recorded.",
+                        2000),
+                    Limit(_sanitizer.Sanitize(item.StackTrace), 4000)))
+                .ToArray()
+            : [];
+
+        return new DiagnosticFeedbackSubmissionRequest(
+            1,
+            Limit(_sanitizer.Sanitize(environment.ApplicationVersion), 40),
+            Limit(_sanitizer.Sanitize(environment.BuildIdentifier), 100),
+            Limit(_sanitizer.Sanitize(feedback.ErrorReference), 64),
+            Limit(_sanitizer.Sanitize(feedback.AffectedArea), 80),
+            Limit(_sanitizer.Sanitize(feedback.Description), 2000),
+            Limit(_sanitizer.Sanitize(feedback.ExpectedResult), 1000),
+            Limit(_sanitizer.Sanitize(environment.WindowsVersion), 160),
+            Limit(_sanitizer.Sanitize(environment.RuntimeVersion), 100),
+            environment.IsElevated,
+            NormalizeInstallationId(installationId),
+            events);
+    }
+
     private IReadOnlyList<DiagnosticEvent> ReadEvents()
     {
         if (!Directory.Exists(_eventsDirectory))
@@ -352,6 +390,19 @@ public sealed class DiagnosticPackageExporter
         Guid.TryParseExact(value, "N", out var identity)
             ? identity.ToString("N")
             : "invalid-installation-id";
+
+    private static string Limit(string value, int maximumLength) =>
+        value.Length <= maximumLength
+            ? value
+            : value[..maximumLength];
+
+    private static string RequiredText(
+        string value,
+        string fallback,
+        int maximumLength) =>
+        string.IsNullOrWhiteSpace(value)
+            ? fallback
+            : Limit(value, maximumLength);
 
     private static async Task WriteJsonEntryAsync<T>(
         ZipArchive archive,

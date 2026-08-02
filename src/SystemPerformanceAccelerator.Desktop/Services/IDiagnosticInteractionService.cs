@@ -10,6 +10,8 @@ public interface IDiagnosticInteractionService
         DiagnosticFeedbackRequest feedback,
         DiagnosticExportPreview preview);
 
+    bool ConfirmLocalFeedbackFallback(string submissionFailure);
+
     string? SelectExportPath(string suggestedFileName);
 
     bool ConfirmDeleteHistory(int eventCount);
