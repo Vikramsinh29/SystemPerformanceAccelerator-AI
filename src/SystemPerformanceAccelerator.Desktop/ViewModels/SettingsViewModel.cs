@@ -20,6 +20,12 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     private string _systemMonitorRefreshIntervalText;
     private bool _localDiagnosticsEnabled;
     private bool _includeHardwareSummaryInDiagnosticExport;
+    private string _feedbackAffectedArea = string.Empty;
+    private string _feedbackDescription = string.Empty;
+    private string _feedbackExpectedResult = string.Empty;
+    private bool _includeSanitizedDiagnosticsInFeedback = true;
+    private bool _feedbackConsent;
+    private string _lastReviewedDiagnosticErrorReference;
     private string _status;
 
     public SettingsViewModel(
@@ -51,6 +57,8 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             loadResult.Settings.LocalDiagnosticsEnabled;
         _includeHardwareSummaryInDiagnosticExport =
             loadResult.Settings.IncludeHardwareSummaryInDiagnosticExport;
+        _lastReviewedDiagnosticErrorReference =
+            loadResult.Settings.LastReviewedDiagnosticErrorReference;
         _status = loadResult.HasWarning
             ? loadResult.Warning
             : loadResult.Settings.LocalDiagnosticsEnabled &&
@@ -78,6 +86,14 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             featureAccessGuard,
             ApplicationFeature.Settings,
             FeatureAccessRequirement.Execute);
+        CreateFeedbackPackageCommand = new AsyncRelayCommand(
+            CreateFeedbackPackageAsync,
+            featureAccessGuard,
+            ApplicationFeature.Settings,
+            FeatureAccessRequirement.Execute);
+        DismissRecordedErrorCommand = new RelayCommand(
+            DismissRecordedError,
+            () => HasUnreviewedDiagnosticError);
         CopyLatestErrorReferenceCommand = new RelayCommand(
             CopyLatestErrorReference,
             featureAccessGuard,
@@ -105,6 +121,10 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     public RelayCommand OpenDiagnosticsFolderCommand { get; }
 
     public AsyncRelayCommand ExportDiagnosticPackageCommand { get; }
+
+    public AsyncRelayCommand CreateFeedbackPackageCommand { get; }
+
+    public RelayCommand DismissRecordedErrorCommand { get; }
 
     public RelayCommand CopyLatestErrorReferenceCommand { get; }
 
@@ -159,6 +179,54 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     }
 
     public bool ConfirmBeforeCleanup => true;
+
+    public bool HasUnreviewedDiagnosticError
+    {
+        get
+        {
+            var reference = _diagnosticService.LatestErrorReference;
+            return !string.IsNullOrWhiteSpace(reference) &&
+                   !string.Equals(
+                       reference,
+                       _lastReviewedDiagnosticErrorReference,
+                       StringComparison.Ordinal);
+        }
+    }
+
+    public string RecordedErrorActionText =>
+        HasUnreviewedDiagnosticError
+            ? "A recorded error is available for review."
+            : "Create a privacy-safe error report after reviewing exactly what it contains. Nothing is sent automatically.";
+
+    public string FeedbackAffectedArea
+    {
+        get => _feedbackAffectedArea;
+        set => SetField(ref _feedbackAffectedArea, value);
+    }
+
+    public string FeedbackDescription
+    {
+        get => _feedbackDescription;
+        set => SetField(ref _feedbackDescription, value);
+    }
+
+    public string FeedbackExpectedResult
+    {
+        get => _feedbackExpectedResult;
+        set => SetField(ref _feedbackExpectedResult, value);
+    }
+
+    public bool IncludeSanitizedDiagnosticsInFeedback
+    {
+        get => _includeSanitizedDiagnosticsInFeedback;
+        set => SetField(ref _includeSanitizedDiagnosticsInFeedback, value);
+    }
+
+    public bool FeedbackConsent
+    {
+        get => _feedbackConsent;
+        set => SetField(ref _feedbackConsent, value);
+    }
 
     public string SettingsPath => _settingsService.SettingsPath;
 
@@ -253,6 +321,8 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             defaults.LocalDiagnosticsEnabled;
         IncludeHardwareSummaryInDiagnosticExport =
             defaults.IncludeHardwareSummaryInDiagnosticExport;
+        _lastReviewedDiagnosticErrorReference =
+            defaults.LastReviewedDiagnosticErrorReference;
 
         try
         {
@@ -341,6 +411,137 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
                 "The diagnostic package could not be exported. " +
                 ex.Message;
         }
+    }
+
+    private async Task CreateFeedbackPackageAsync()
+    {
+        if (!_diagnosticService.IsEnabled)
+        {
+            Status = "Enable local diagnostics and save Settings before creating an error report.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(FeedbackAffectedArea) ||
+            string.IsNullOrWhiteSpace(FeedbackDescription))
+        {
+            Status = "Enter the affected tool or page and describe what happened.";
+            return;
+        }
+
+        if (!FeedbackConsent)
+        {
+            Status = "Review the privacy notice and select the consent checkbox before creating the report.";
+            return;
+        }
+
+        try
+        {
+            var preview = _diagnosticService.CreateExportPreview();
+            var feedback = new DiagnosticFeedbackRequest(
+                _diagnosticService.LatestErrorReference ??
+                    "No recorded error reference",
+                FeedbackAffectedArea.Trim(),
+                FeedbackDescription.Trim(),
+                FeedbackExpectedResult.Trim(),
+                IncludeSanitizedDiagnosticsInFeedback);
+
+            if (!_diagnosticInteractionService.ConfirmFeedback(
+                    feedback,
+                    preview))
+            {
+                Status = "Error report not created.";
+                return;
+            }
+
+            var destination = _diagnosticInteractionService.SelectExportPath(
+                $"PC-SPA-Error-Report-{DateTime.Now:yyyyMMdd-HHmmss}.zip");
+            if (string.IsNullOrWhiteSpace(destination))
+            {
+                Status = "Error report creation cancelled.";
+                return;
+            }
+
+            var result = await _diagnosticService.ExportFeedbackAsync(
+                destination,
+                feedback);
+            Status = result.Message;
+            try
+            {
+                MarkLatestErrorReviewed();
+            }
+            catch (Exception ex) when (
+                ex is IOException or
+                UnauthorizedAccessException or
+                InvalidOperationException)
+            {
+                Status = result.Message +
+                    " The Settings action badge could not be cleared. " +
+                    ex.Message;
+            }
+            FeedbackConsent = false;
+        }
+        catch (Exception ex) when (
+            ex is IOException or
+            UnauthorizedAccessException or
+            InvalidOperationException or
+            ArgumentException or
+            NotSupportedException or
+            System.Security.SecurityException)
+        {
+            Status = "The error report could not be created. " + ex.Message;
+        }
+    }
+
+    private void DismissRecordedError()
+    {
+        if (!HasUnreviewedDiagnosticError)
+        {
+            Status = "No unreviewed diagnostic error is available.";
+            return;
+        }
+
+        try
+        {
+            MarkLatestErrorReviewed();
+            Status = "The recorded error was dismissed. Its local diagnostic evidence was retained.";
+        }
+        catch (Exception ex) when (
+            ex is IOException or
+            UnauthorizedAccessException or
+            InvalidOperationException)
+        {
+            Status = "The recorded error could not be dismissed. " + ex.Message;
+        }
+    }
+
+    private void MarkLatestErrorReviewed()
+    {
+        var reference = _diagnosticService.LatestErrorReference;
+        if (string.IsNullOrWhiteSpace(reference))
+        {
+            return;
+        }
+
+        var stored = _settingsService.Load().Settings with
+        {
+            LastReviewedDiagnosticErrorReference = reference
+        };
+        _settingsService.Save(stored);
+        _lastReviewedDiagnosticErrorReference = reference;
+        RefreshRecordedErrorProperties();
+    }
+
+    public void RefreshDiagnosticState()
+    {
+        RefreshDiagnosticProperties();
+        RefreshRecordedErrorProperties();
+    }
+
+    private void RefreshRecordedErrorProperties()
+    {
+        OnPropertyChanged(nameof(HasUnreviewedDiagnosticError));
+        OnPropertyChanged(nameof(RecordedErrorActionText));
+        DismissRecordedErrorCommand.RaiseCanExecuteChanged();
     }
 
     private void CopyLatestErrorReference()
@@ -463,7 +664,9 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             LocalDiagnosticsEnabled =
                 LocalDiagnosticsEnabled,
             IncludeHardwareSummaryInDiagnosticExport =
-                IncludeHardwareSummaryInDiagnosticExport
+                IncludeHardwareSummaryInDiagnosticExport,
+            LastReviewedDiagnosticErrorReference =
+                _lastReviewedDiagnosticErrorReference
         };
         error = string.Empty;
         return true;
@@ -479,6 +682,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(DiagnosticWindowsText));
         OnPropertyChanged(nameof(DiagnosticRuntimeText));
         OnPropertyChanged(nameof(DiagnosticElevationText));
+        RefreshRecordedErrorProperties();
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

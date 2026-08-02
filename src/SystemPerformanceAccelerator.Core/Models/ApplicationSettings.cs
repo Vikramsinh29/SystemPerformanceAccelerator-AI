@@ -15,6 +15,9 @@ public sealed record ApplicationSettings(
 
     public bool IncludeHardwareSummaryInDiagnosticExport { get; init; }
 
+    public string LastReviewedDiagnosticErrorReference { get; init; } =
+        string.Empty;
+
     public static ApplicationSettings Default { get; } = new(
         ApplicationTheme.System,
         true,
@@ -22,6 +25,7 @@ public sealed record ApplicationSettings(
         1)
     {
         LocalDiagnosticsEnabled = false,
-        IncludeHardwareSummaryInDiagnosticExport = false
+        IncludeHardwareSummaryInDiagnosticExport = false,
+        LastReviewedDiagnosticErrorReference = string.Empty
     };
 }

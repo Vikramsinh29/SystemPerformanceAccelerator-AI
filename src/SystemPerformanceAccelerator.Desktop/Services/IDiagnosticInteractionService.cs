@@ -6,6 +6,10 @@ public interface IDiagnosticInteractionService
 {
     bool ConfirmExport(DiagnosticExportPreview preview);
 
+    bool ConfirmFeedback(
+        DiagnosticFeedbackRequest feedback,
+        DiagnosticExportPreview preview);
+
     string? SelectExportPath(string suggestedFileName);
 
     bool ConfirmDeleteHistory(int eventCount);

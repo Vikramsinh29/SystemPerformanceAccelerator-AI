@@ -238,6 +238,16 @@ public sealed class LocalDiagnosticService : IDiagnosticService
             IncludeHardwareSummary,
             cancellationToken);
 
+    public Task<DiagnosticExportResult> ExportFeedbackAsync(
+        string destinationZipPath,
+        DiagnosticFeedbackRequest feedback,
+        CancellationToken cancellationToken = default) =>
+        _packageExporter.ExportFeedbackAsync(
+            destinationZipPath,
+            feedback,
+            IncludeHardwareSummary,
+            cancellationToken);
+
     public void DeleteHistory()
     {
         DeleteDirectoryIfPresent(_eventsDirectory);

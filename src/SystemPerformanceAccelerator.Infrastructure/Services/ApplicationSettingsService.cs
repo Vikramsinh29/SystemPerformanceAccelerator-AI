@@ -138,9 +138,22 @@ public sealed class ApplicationSettingsService :
             LocalDiagnosticsEnabled =
                 settings.LocalDiagnosticsEnabled,
             IncludeHardwareSummaryInDiagnosticExport =
-                settings.IncludeHardwareSummaryInDiagnosticExport
+                settings.IncludeHardwareSummaryInDiagnosticExport,
+            LastReviewedDiagnosticErrorReference =
+                NormalizeErrorReference(
+                    settings.LastReviewedDiagnosticErrorReference)
         };
     }
+
+    private static string NormalizeErrorReference(string? value) =>
+        !string.IsNullOrWhiteSpace(value) &&
+        value.Length is >= 12 and <= 64 &&
+        value.StartsWith("ERR-", StringComparison.Ordinal) &&
+        value.All(character =>
+            char.IsAsciiLetterOrDigit(character) ||
+            character == '-')
+            ? value
+            : string.Empty;
 
     private static ApplicationSettingsLoadResult
         DefaultWithWarning(string warning) =>

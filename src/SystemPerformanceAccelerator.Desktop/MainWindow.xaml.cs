@@ -16,6 +16,13 @@ namespace SystemPerformanceAccelerator.Desktop;
 
 public partial class MainWindow : Window
 {
+    private void OnReportErrorClick(
+        object sender,
+        RoutedEventArgs e)
+    {
+        BetaErrorFeedbackCard.BringIntoView();
+    }
+
     public MainWindow()
     {
         var settingsService = new ApplicationSettingsService();

@@ -162,6 +162,88 @@ public sealed class DiagnosticPackageExporter
         }
     }
 
+    public async Task<DiagnosticExportResult> ExportFeedbackAsync(
+        string destinationZipPath,
+        DiagnosticFeedbackRequest feedback,
+        bool includeHardwareSummary,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(feedback);
+        if (string.IsNullOrWhiteSpace(feedback.Description))
+        {
+            throw new ArgumentException(
+                "A description of the error is required.",
+                nameof(feedback));
+        }
+
+        var result = await ExportAsync(
+            destinationZipPath,
+            includeHardwareSummary && feedback.IncludeSanitizedDiagnostics,
+            cancellationToken);
+
+        using var archive = ZipFile.Open(
+            result.ExportPath,
+            ZipArchiveMode.Update);
+        if (!feedback.IncludeSanitizedDiagnostics)
+        {
+            foreach (var entry in archive.Entries
+                         .Where(entry => entry.FullName.StartsWith(
+                             "events/",
+                             StringComparison.Ordinal))
+                         .ToArray())
+            {
+                entry.Delete();
+            }
+
+            archive.GetEntry("README.txt")?.Delete();
+            archive.GetEntry("manifest.json")?.Delete();
+            await WriteTextEntryAsync(
+                archive,
+                "README.txt",
+                BuildReadme(0, includeHardwareSummary: false),
+                cancellationToken);
+            await WriteJsonEntryAsync(
+                archive,
+                "manifest.json",
+                new
+                {
+                    Product = "PC-SPA",
+                    FormatVersion = 1,
+                    CreatedUtc = DateTimeOffset.UtcNow,
+                    EventCount = 0,
+                    IncludesHardwareSummary = false,
+                    Privacy = "Local-only manual feedback package. Review the ZIP before sharing."
+                },
+                cancellationToken);
+        }
+        var sanitizedFeedback = feedback with
+        {
+            ErrorReference = _sanitizer.Sanitize(feedback.ErrorReference),
+            AffectedArea = _sanitizer.Sanitize(feedback.AffectedArea),
+            Description = _sanitizer.Sanitize(feedback.Description),
+            ExpectedResult = _sanitizer.Sanitize(feedback.ExpectedResult)
+        };
+        await WriteJsonEntryAsync(
+            archive,
+            "feedback.json",
+            new
+            {
+                FormatVersion = 1,
+                CreatedUtc = DateTimeOffset.UtcNow,
+                Feedback = sanitizedFeedback,
+                Privacy = "User-reviewed local package. PC-SPA did not transmit it."
+            },
+            cancellationToken);
+
+        return result with
+        {
+            EventCount = feedback.IncludeSanitizedDiagnostics
+                ? result.EventCount
+                : 0,
+            Message = "Privacy-safe error feedback package created. PC-SPA did not send or upload it. Review the ZIP before sharing."
+        };
+    }
+
     private IReadOnlyList<DiagnosticEvent> ReadEvents()
     {
         if (!Directory.Exists(_eventsDirectory))

@@ -64,6 +64,12 @@ internal sealed class DisabledDiagnosticService : IDiagnosticService
                 0,
                 "Diagnostics are unavailable in this non-production composition."));
 
+    public Task<DiagnosticExportResult> ExportFeedbackAsync(
+        string destinationZipPath,
+        DiagnosticFeedbackRequest feedback,
+        CancellationToken cancellationToken = default) =>
+        ExportAsync(destinationZipPath, cancellationToken);
+
     public void DeleteHistory()
     {
     }

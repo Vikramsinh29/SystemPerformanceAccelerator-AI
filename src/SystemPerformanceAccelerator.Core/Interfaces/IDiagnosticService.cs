@@ -35,6 +35,11 @@ public interface IDiagnosticService
         string destinationZipPath,
         CancellationToken cancellationToken = default);
 
+    Task<DiagnosticExportResult> ExportFeedbackAsync(
+        string destinationZipPath,
+        DiagnosticFeedbackRequest feedback,
+        CancellationToken cancellationToken = default);
+
     void DeleteHistory();
 
     void ResetInstallationId();

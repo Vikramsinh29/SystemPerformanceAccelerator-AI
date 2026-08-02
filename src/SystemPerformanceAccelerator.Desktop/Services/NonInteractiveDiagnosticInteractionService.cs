@@ -14,6 +14,10 @@ internal sealed class NonInteractiveDiagnosticInteractionService :
     public string? SelectExportPath(string suggestedFileName) =>
         null;
 
+    public bool ConfirmFeedback(
+        DiagnosticFeedbackRequest feedback,
+        DiagnosticExportPreview preview) => false;
+
     public bool ConfirmDeleteHistory(int eventCount) =>
         false;
 

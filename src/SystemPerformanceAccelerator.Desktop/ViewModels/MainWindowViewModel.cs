@@ -148,6 +148,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             featureAccessGuard,
             _diagnosticService,
             diagnosticInteractionService);
+        Settings.PropertyChanged += OnSettingsPropertyChanged;
 
         ScanCommand = new AsyncRelayCommand(
             ScanAsync,
@@ -375,7 +376,25 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
 
         _currentModule = module;
+        if (module == ApplicationModule.Settings)
+        {
+            Settings.RefreshDiagnosticState();
+        }
         RaiseModulePropertiesChanged();
+    }
+
+    public bool HasUnreviewedDiagnosticError =>
+        Settings.HasUnreviewedDiagnosticError;
+
+    private void OnSettingsPropertyChanged(
+        object? sender,
+        PropertyChangedEventArgs args)
+    {
+        if (args.PropertyName ==
+            nameof(SettingsViewModel.HasUnreviewedDiagnosticError))
+        {
+            OnPropertyChanged(nameof(HasUnreviewedDiagnosticError));
+        }
     }
 
     private RelayCommand CreateNavigationCommand(ApplicationModule module) =>

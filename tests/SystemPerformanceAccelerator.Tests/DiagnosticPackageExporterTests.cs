@@ -101,6 +101,74 @@ public sealed class DiagnosticPackageExporterTests
         Assert.NotNull(archive.GetEntry("environment.json"));
     }
 
+    [Fact]
+    public async Task ExportFeedbackAsync_AddsSanitizedUserReviewedFeedback()
+    {
+        using var location = new TemporaryDiagnosticLocation();
+        var sanitizer = new DiagnosticPathSanitizer(
+            userProfile: @"C:\Users\Alice",
+            userName: "Alice");
+        var service = CreateService(location.DiagnosticsRoot, sanitizer);
+        service.Configure(true, false);
+
+        await service.RecordExceptionAsync(
+            new InvalidOperationException("Failure"),
+            "Cleaner",
+            "Scan",
+            false,
+            false);
+
+        var result = await service.ExportFeedbackAsync(
+            location.ExportPath,
+            new DiagnosticFeedbackRequest(
+                service.LatestErrorReference!,
+                "Cleaner",
+                @"Failed for Alice at C:\Users\Alice\Documents\file.txt",
+                "Scan completes",
+                true));
+
+        Assert.True(result.Success);
+        Assert.Equal(1, result.EventCount);
+        using var archive = ZipFile.OpenRead(location.ExportPath);
+        var entry = Assert.IsType<ZipArchiveEntry>(
+            archive.GetEntry("feedback.json"));
+        using var reader = new StreamReader(entry.Open());
+        var json = reader.ReadToEnd();
+        Assert.Contains("%USERPROFILE%", json);
+        Assert.DoesNotContain("Alice", json);
+        Assert.DoesNotContain(@"C:\Users\Alice", json);
+    }
+
+    [Fact]
+    public async Task ExportFeedbackAsync_ExcludesEventsWhenNotSelected()
+    {
+        using var location = new TemporaryDiagnosticLocation();
+        var service = CreateService(location.DiagnosticsRoot);
+        service.Configure(true, false);
+        await service.RecordExceptionAsync(
+            new InvalidOperationException("Failure"),
+            "Cleaner",
+            "Scan",
+            false,
+            false);
+
+        var result = await service.ExportFeedbackAsync(
+            location.ExportPath,
+            new DiagnosticFeedbackRequest(
+                service.LatestErrorReference!,
+                "Cleaner",
+                "The scan stopped.",
+                string.Empty,
+                false));
+
+        Assert.Equal(0, result.EventCount);
+        using var archive = ZipFile.OpenRead(location.ExportPath);
+        Assert.NotNull(archive.GetEntry("feedback.json"));
+        Assert.DoesNotContain(
+            archive.Entries,
+            entry => entry.FullName.StartsWith("events/", StringComparison.Ordinal));
+    }
+
     private static LocalDiagnosticService CreateService(
         string root,
         DiagnosticPathSanitizer? sanitizer = null) =>

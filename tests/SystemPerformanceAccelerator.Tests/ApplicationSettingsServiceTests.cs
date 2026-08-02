@@ -54,7 +54,9 @@ public sealed class ApplicationSettingsServiceTests
             2)
         {
             LocalDiagnosticsEnabled = true,
-            IncludeHardwareSummaryInDiagnosticExport = true
+            IncludeHardwareSummaryInDiagnosticExport = true,
+            LastReviewedDiagnosticErrorReference =
+                "ERR-20260802120000-ABCDEF"
         };
 
         service.Save(expected);
@@ -65,7 +67,30 @@ public sealed class ApplicationSettingsServiceTests
         Assert.True(
             result.Settings
                 .IncludeHardwareSummaryInDiagnosticExport);
+        Assert.Equal(
+            "ERR-20260802120000-ABCDEF",
+            result.Settings.LastReviewedDiagnosticErrorReference);
         Assert.False(result.HasWarning);
+    }
+
+    [Fact]
+    public void Load_InvalidReviewedErrorReference_IsDiscarded()
+    {
+        using var location = new TemporarySettingsLocation();
+        var service = new ApplicationSettingsService(
+            location.SettingsPath);
+        service.Save(
+            ApplicationSettings.Default with
+            {
+                LastReviewedDiagnosticErrorReference =
+                    @"C:\Users\Someone\error.txt"
+            });
+
+        var result = service.Load();
+
+        Assert.Equal(
+            string.Empty,
+            result.Settings.LastReviewedDiagnosticErrorReference);
     }
 
     [Fact]

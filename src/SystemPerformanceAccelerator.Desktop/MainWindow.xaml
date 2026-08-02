@@ -1003,15 +1003,28 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="16" />
                             <TextBlock Grid.Column="1" Text="Settings" VerticalAlignment="Center" />
-                            <Border Grid.Column="2"
-                                    Style="{StaticResource FeatureAccessBadgeStyle}"
-                                    Visibility="{Binding SettingsAccess.IsBadgeVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                    ToolTip="{Binding SettingsAccess.Message}">
-                                <TextBlock Text="{Binding SettingsAccess.BadgeText}"
-                                           Foreground="{DynamicResource AccentBrush}"
-                                           FontSize="8"
-                                           FontWeight="Bold" />
-                            </Border>
+                            <StackPanel Grid.Column="2"
+                                        Orientation="Horizontal">
+                                <Border Margin="8,0,0,0"
+                                        Padding="7,3"
+                                        Background="{DynamicResource WarningSoftBrush}"
+                                        CornerRadius="8"
+                                        Visibility="{Binding HasUnreviewedDiagnosticError, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                        ToolTip="A recorded error is available for review.">
+                                    <TextBlock Text="ACTION"
+                                               Foreground="{DynamicResource WarningBrush}"
+                                               FontSize="8"
+                                               FontWeight="Bold" />
+                                </Border>
+                                <Border Style="{StaticResource FeatureAccessBadgeStyle}"
+                                        Visibility="{Binding SettingsAccess.IsBadgeVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                        ToolTip="{Binding SettingsAccess.Message}">
+                                    <TextBlock Text="{Binding SettingsAccess.BadgeText}"
+                                               Foreground="{DynamicResource AccentBrush}"
+                                               FontSize="8"
+                                               FontWeight="Bold" />
+                                </Border>
+                            </StackPanel>
                         </Grid>
                     </Button>
                 </StackPanel>
@@ -5871,6 +5884,56 @@
                             </Grid>
                         </Border>
 
+                        <Border Margin="0,0,0,14"
+                                Padding="18,14"
+                                Background="{DynamicResource AccentSoftBrush}"
+                                BorderBrush="{DynamicResource AccentBrush}"
+                                BorderThickness="1.5"
+                                CornerRadius="10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="42"
+                                        Height="42"
+                                        Background="{DynamicResource PanelBrush}"
+                                        CornerRadius="9">
+                                    <TextBlock Text="&#xE7BA;"
+                                               Foreground="{DynamicResource AccentBrush}"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="19"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1"
+                                            Margin="14,0,20,0"
+                                            VerticalAlignment="Center">
+                                    <TextBlock Text="Encountered a problem?"
+                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                               FontSize="15"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Margin="0,3,0,0"
+                                               Text="{Binding RecordedErrorActionText}"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               FontSize="11"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                                <Button Grid.Column="2"
+                                        Click="OnReportErrorClick"
+                                        Style="{StaticResource FluentPrimaryButtonStyle}"
+                                        VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE7BA;" Style="{StaticResource ActionButtonGlyphStyle}" />
+                                        <TextBlock Margin="8,0,0,0"
+                                                   Text="Report an error"
+                                                   VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                        </Border>
+
                         <Border Padding="18"
                                 Style="{StaticResource FluentCardStyle}">
                             <Grid>
@@ -6229,6 +6292,107 @@
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Text="&#xE777;" Style="{StaticResource ActionButtonGlyphStyle}" />
                                             <TextBlock Margin="8,0,0,0" Text="Reset installation ID" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Border x:Name="BetaErrorFeedbackCard"
+                                Margin="0,14,0,0"
+                                Padding="18"
+                                Background="{DynamicResource CardBrush}"
+                                BorderBrush="{DynamicResource AccentBrush}"
+                                BorderThickness="1.5"
+                                CornerRadius="10">
+                            <StackPanel>
+                                <TextBlock Text="BETA ERROR FEEDBACK"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           FontSize="10"
+                                           FontWeight="Bold" />
+                                <TextBlock Margin="0,5,0,0"
+                                           Text="Your privacy stays protected"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                           FontSize="15"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Margin="0,4,0,0"
+                                           Text="PC-SPA will include only your error description and the minimum application and Windows information needed to investigate it. Personal files, file contents, passwords, browser activity, email addresses, licence keys, cookies, Windows username, computer name, and full personal paths are excluded or redacted. Nothing is sent automatically."
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           FontSize="11"
+                                           TextWrapping="Wrap" />
+
+                                <Grid Margin="0,14,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="1*" />
+                                        <ColumnDefinition Width="14" />
+                                        <ColumnDefinition Width="2*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="AFFECTED TOOL OR PAGE"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontSize="10"
+                                                   FontWeight="Bold" />
+                                        <TextBox Margin="0,5,0,0"
+                                                 Text="{Binding FeedbackAffectedArea, UpdateSourceTrigger=PropertyChanged}"
+                                                 MaxLength="80"
+                                                 Style="{StaticResource FluentTextBoxStyle}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="WHAT HAPPENED"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontSize="10"
+                                                   FontWeight="Bold" />
+                                        <TextBox Margin="0,5,0,0"
+                                                 Text="{Binding FeedbackDescription, UpdateSourceTrigger=PropertyChanged}"
+                                                 MaxLength="1200"
+                                                 MinHeight="58"
+                                                 AcceptsReturn="True"
+                                                 TextWrapping="Wrap"
+                                                 VerticalScrollBarVisibility="Auto"
+                                                 Style="{StaticResource FluentTextBoxStyle}" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <TextBlock Margin="0,12,0,0"
+                                           Text="EXPECTED RESULT (OPTIONAL)"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           FontSize="10"
+                                           FontWeight="Bold" />
+                                <TextBox Margin="0,5,0,0"
+                                         Text="{Binding FeedbackExpectedResult, UpdateSourceTrigger=PropertyChanged}"
+                                         MaxLength="600"
+                                         Style="{StaticResource FluentTextBoxStyle}" />
+
+                                <CheckBox Margin="0,12,0,0"
+                                          IsChecked="{Binding IncludeSanitizedDiagnosticsInFeedback}"
+                                          Content="Include locally recorded, sanitized diagnostic events"
+                                          Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <CheckBox Margin="0,8,0,0"
+                                          IsChecked="{Binding FeedbackConsent}"
+                                          Content="I have reviewed this information and agree to create a local technical error report for the PC-SPA development team."
+                                          Foreground="{DynamicResource TextPrimaryBrush}"
+                                          FontWeight="SemiBold" />
+
+                                <WrapPanel Margin="0,14,0,0">
+                                    <Button Command="{Binding CreateFeedbackPackageCommand}"
+                                            Style="{StaticResource FluentPrimaryButtonStyle}"
+                                            Margin="0,0,8,8">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE7BA;" Style="{StaticResource ActionButtonGlyphStyle}" />
+                                            <TextBlock Margin="8,0,0,0"
+                                                       Text="Preview &amp; create error report"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Command="{Binding DismissRecordedErrorCommand}"
+                                            Style="{StaticResource FluentSecondaryButtonStyle}"
+                                            Margin="0,0,0,8"
+                                            Visibility="{Binding HasUnreviewedDiagnosticError, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE711;" Style="{StaticResource ActionButtonGlyphStyle}" />
+                                            <TextBlock Margin="8,0,0,0"
+                                                       Text="Dismiss this error"
+                                                       VerticalAlignment="Center" />
                                         </StackPanel>
                                     </Button>
                                 </WrapPanel>

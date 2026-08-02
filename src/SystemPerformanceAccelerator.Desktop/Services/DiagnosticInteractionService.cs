@@ -56,6 +56,31 @@ public sealed class DiagnosticInteractionService :
             : null;
     }
 
+    public bool ConfirmFeedback(
+        DiagnosticFeedbackRequest feedback,
+        DiagnosticExportPreview preview)
+    {
+        ArgumentNullException.ThrowIfNull(feedback);
+        ArgumentNullException.ThrowIfNull(preview);
+
+        var message =
+            "Review the complete error report before creating it.\n\n" +
+            $"Error reference: {feedback.ErrorReference}\n" +
+            $"Affected area: {feedback.AffectedArea}\n" +
+            $"What happened: {feedback.Description}\n" +
+            $"Expected result: {feedback.ExpectedResult}\n" +
+            $"Sanitized diagnostic events: {(feedback.IncludeSanitizedDiagnostics ? preview.EventCount : 0):N0}\n\n" +
+            "PC-SPA includes only these user-entered details and minimum technical context. Personal files, file contents, passwords, browser activity, email addresses, licence keys, cookies, Windows username, computer name, and full personal paths are excluded or redacted.\n\n" +
+            "Nothing is sent automatically. Create this local package?";
+
+        return MessageBox.Show(
+            message,
+            "Preview privacy-safe error report",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Information,
+            MessageBoxResult.No) == MessageBoxResult.Yes;
+    }
+
     public bool ConfirmDeleteHistory(int eventCount) =>
         MessageBox.Show(
             $"Delete {eventCount:N0} local diagnostic event(s)?\n\n" +
