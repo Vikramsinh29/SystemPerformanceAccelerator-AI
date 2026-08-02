@@ -90,7 +90,12 @@ SECURITY AND PRIVACY
 - The installer is currently unsigned. Windows may show Unknown Publisher or
   a Microsoft Defender SmartScreen warning.
 - Verify the installer SHA-256 before running it.
-- PC-SPA works locally without a cloud account or telemetry.
+- PC-SPA core tools work locally without a cloud account or telemetry.
+- Beta Error Feedback is the only optional network feature. It sends only
+  after the tester reviews the report, selects consent, and presses the send
+  action. Personal files and file contents are never attached or uploaded.
+- Nothing is sent automatically. If the feedback service is unavailable,
+  PC-SPA offers a reviewed local ZIP instead.
 - PC-SPA never automatically restarts Windows.
 - Review every cleanup selection and confirmation before continuing.
 
@@ -144,6 +149,9 @@ CHECKS
 - Windows Repair opened without forced repair activity:
 - System Monitor displayed live values:
 - Settings opened and saved normally:
+- Beta Error Feedback preview clearly disclosed the optional HTTPS send:
+- A successful send displayed a BETA reference that could be copied:
+- With the network unavailable, local ZIP fallback was offered:
 - Mouse-wheel and table scrolling worked:
 - Restored and maximized layouts remained readable:
 - Uninstall completed without requesting a restart:
@@ -157,7 +165,8 @@ PROBLEM REPORT
 - Reproducible every time: Yes / No
 
 If diagnostics are enabled, review any diagnostic export before sharing it.
-PC-SPA never uploads diagnostic evidence automatically.
+Beta Error Feedback sends only after explicit preview and consent. PC-SPA
+never uploads diagnostic evidence automatically or attaches personal files.
 "@
 
 Set-Content `

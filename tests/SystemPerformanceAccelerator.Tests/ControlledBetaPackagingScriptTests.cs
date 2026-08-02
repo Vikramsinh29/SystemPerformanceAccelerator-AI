@@ -26,6 +26,10 @@ public sealed class ControlledBetaPackagingScriptTests
         Assert.Contains("never automatically restarts Windows", script);
         Assert.Contains("Do not fabricate repair results", script);
         Assert.Contains("never uploads diagnostic evidence automatically", script);
+        Assert.Contains("Beta Error Feedback is the only optional network feature", script);
+        Assert.Contains("Personal files and file contents are never attached or uploaded", script);
+        Assert.Contains("Nothing is sent automatically", script);
+        Assert.Contains("local ZIP fallback was offered", script);
     }
 
     [Fact]

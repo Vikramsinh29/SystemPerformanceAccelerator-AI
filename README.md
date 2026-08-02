@@ -382,7 +382,8 @@ All selectable result tables must use the same application-wide behaviour:
 - `scripts/Publish-Controlled-Beta.ps1` reruns the verified installer pipeline and creates a local controlled-beta ZIP without publishing it externally.
 - The bundle contains the installer, its SHA-256 file, controlled-beta installation and security instructions, and a focused tester feedback checklist.
 - The publisher independently verifies the installer hash before bundling and validates every required ZIP entry afterward.
-- Instructions disclose administrator permission, unsigned-publisher and SmartScreen warnings, offline operation, no telemetry, no automatic restart, and retained local data.
+- Instructions disclose administrator permission, unsigned-publisher and SmartScreen warnings, offline core operation, no telemetry, the explicitly initiated Beta Error Feedback network exception, no automatic restart, and retained local data.
+- Beta instructions state that nothing is sent automatically, personal files are never attached, and an unavailable feedback service falls back to the reviewed local ZIP workflow.
 - Testers are instructed not to fabricate Windows Repair evidence, force an unhealthy assessment, or delete personal files merely for testing.
 - The bundle and its SHA-256 file are copied to the Desktop for distribution only to invited beta testers.
 - GitHub releases, public uploads, automatic updates, certificate acquisition, and actual code signing remain outside this controlled-beta packaging sprint.
