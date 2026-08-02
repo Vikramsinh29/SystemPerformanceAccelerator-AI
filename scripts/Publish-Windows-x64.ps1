@@ -16,6 +16,7 @@ $releaseName = "PC-SPA-$version-$runtimeIdentifier-portable"
 $publishDirectory = Join-Path $repo "artifacts\publish\$runtimeIdentifier"
 $releaseRoot = Join-Path $repo "artifacts\releases"
 $stagingRoot = Join-Path $releaseRoot "_staging"
+$launchTestRoot = Join-Path $releaseRoot "_launch-test"
 $releaseFolder = Join-Path $stagingRoot $releaseName
 $zipPath = Join-Path $releaseRoot "$releaseName.zip"
 $hashPath = "$zipPath.sha256"
@@ -25,6 +26,14 @@ $desktopZipPath = Join-Path $desktopDirectory (Split-Path -Leaf $zipPath)
 $desktopHashPath = Join-Path $desktopDirectory (Split-Path -Leaf $hashPath)
 
 Set-Location $repo
+
+$windowsIdentity = [Security.Principal.WindowsIdentity]::GetCurrent()
+$windowsPrincipal = [Security.Principal.WindowsPrincipal]::new($windowsIdentity)
+
+if (-not $windowsPrincipal.IsInRole(
+    [Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    throw "Release verification must run from an elevated PowerShell window."
+}
 
 if (-not $AllowDirtyWorkingTree) {
     $workingTreeChanges = @(git status --porcelain=v1 -uall)
@@ -50,6 +59,7 @@ Get-Process -Name "PC-SPA", "SystemPerformanceAccelerator.Desktop" -ErrorAction 
 
 Remove-Item -LiteralPath $publishDirectory -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath $stagingRoot -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath $launchTestRoot -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath $zipPath -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath $hashPath -Force -ErrorAction SilentlyContinue
 
@@ -224,6 +234,77 @@ finally {
     $archive.Dispose()
 }
 
+Write-Host ""
+Write-Host "Extracted portable launch verification..." -ForegroundColor Cyan
+
+Expand-Archive `
+    -LiteralPath $zipPath `
+    -DestinationPath $launchTestRoot
+
+$extractedExecutable = Join-Path `
+    $launchTestRoot `
+    "$releaseName\PC-SPA.exe"
+
+if (-not (Test-Path -LiteralPath $extractedExecutable -PathType Leaf)) {
+    throw "Extracted portable executable is missing: $extractedExecutable"
+}
+
+$launchProcess = $null
+$mainWindowTitlePattern = "*System Performance Accelerator"
+
+try {
+    $launchProcess = Start-Process `
+        -FilePath $extractedExecutable `
+        -WorkingDirectory (Split-Path -Parent $extractedExecutable) `
+        -PassThru
+
+    $launchDeadline = [DateTime]::UtcNow.AddSeconds(30)
+
+    while ([DateTime]::UtcNow -lt $launchDeadline) {
+        $launchProcess.Refresh()
+
+        if ($launchProcess.HasExited) {
+            throw "Extracted PC-SPA exited before its main window opened. Exit code: $($launchProcess.ExitCode)"
+        }
+
+        if ($launchProcess.MainWindowHandle -ne [IntPtr]::Zero -and
+            $launchProcess.MainWindowTitle -like $mainWindowTitlePattern) {
+            break
+        }
+
+        Start-Sleep -Milliseconds 250
+    }
+
+    $launchProcess.Refresh()
+    if ($launchProcess.MainWindowHandle -eq [IntPtr]::Zero -or
+        $launchProcess.MainWindowTitle -notlike $mainWindowTitlePattern) {
+        throw "Extracted PC-SPA did not open its main window within 30 seconds."
+    }
+
+    if (-not $launchProcess.CloseMainWindow()) {
+        throw "Extracted PC-SPA did not accept a normal window-close request."
+    }
+
+    if (-not $launchProcess.WaitForExit(10000)) {
+        throw "Extracted PC-SPA did not close normally within 10 seconds."
+    }
+
+    if ($launchProcess.ExitCode -ne 0) {
+        throw "Extracted PC-SPA returned exit code $($launchProcess.ExitCode) after normal close."
+    }
+}
+finally {
+    if ($null -ne $launchProcess) {
+        $launchProcess.Refresh()
+        if (-not $launchProcess.HasExited) {
+            Stop-Process -Id $launchProcess.Id -Force -ErrorAction SilentlyContinue
+        }
+        $launchProcess.Dispose()
+    }
+}
+
+Remove-Item -LiteralPath $launchTestRoot -Recurse -Force
+
 Remove-Item -LiteralPath $stagingRoot -Recurse -Force
 
 if ([string]::IsNullOrWhiteSpace($desktopDirectory) -or
@@ -252,5 +333,6 @@ Write-Host "SHA-256: $zipHash" -ForegroundColor Green
 Write-Host "Hash file: $hashPath" -ForegroundColor Green
 Write-Host "Desktop ZIP: $desktopZipPath" -ForegroundColor Green
 Write-Host "Desktop hash: $desktopHashPath" -ForegroundColor Green
+Write-Host "Extracted portable launch: Passed" -ForegroundColor Green
 Write-Host ""
 Write-Host "Full automated test suite passed before packaging." -ForegroundColor Cyan
