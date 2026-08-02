@@ -11,7 +11,7 @@
     {
       "binding": "FEEDBACK_DB",
       "database_name": "pc-spa-feedback",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "database_id": "d1b96514-c9da-4ac2-a2de-c7fa2509a020",
       "migrations_dir": "migrations"
     }
   ],
