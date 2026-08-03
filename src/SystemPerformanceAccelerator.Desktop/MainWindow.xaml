@@ -16,6 +16,7 @@
         WindowStyle="None"
         ResizeMode="CanResize"
         Closing="Window_Closing"
+        Loaded="Window_Loaded"
         StateChanged="Window_StateChanged"
         Style="{StaticResource FluentWindowStyle}"
         Background="{DynamicResource AppBackgroundBrush}">
@@ -5882,6 +5883,90 @@
                                 <StackPanel Grid.Column="1" Margin="16,0,22,0" VerticalAlignment="Center"><TextBlock Text="Local application settings" Style="{StaticResource ModuleHeroTitleStyle}" /><TextBlock Text="Choose appearance and safe operating defaults. Settings remain local and cleanup confirmation stays mandatory." Style="{StaticResource ModuleHeroDescriptionStyle}" /></StackPanel>
                                 <Border Grid.Column="2" Padding="10,6" Background="{DynamicResource AccentSoftBrush}" CornerRadius="12" VerticalAlignment="Center"><TextBlock Text="Local only • immediate theme preview" Foreground="{DynamicResource AccentBrush}" FontSize="10.5" FontWeight="SemiBold" /></Border>
                             </Grid>
+                        </Border>
+
+                        <Border Margin="0,0,0,14"
+                                Padding="18"
+                                Style="{StaticResource FluentCardStyle}">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="CONTROLLED BETA ACCESS"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontSize="10"
+                                                   FontWeight="Bold" />
+                                        <TextBlock Margin="0,5,0,0"
+                                                   Text="Activate PC-SPA on this computer"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                   FontSize="15"
+                                                   FontWeight="SemiBold" />
+                                    </StackPanel>
+                                    <Border Grid.Column="1"
+                                            Padding="10,6"
+                                            Background="{DynamicResource AccentSoftBrush}"
+                                            CornerRadius="12"
+                                            VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding BetaAccessStateText}"
+                                                   Foreground="{DynamicResource AccentBrush}"
+                                                   FontSize="10.5"
+                                                   FontWeight="SemiBold" />
+                                    </Border>
+                                </Grid>
+
+                                <TextBlock Margin="0,10,0,0"
+                                           Text="{Binding BetaAccessMessage}"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           FontSize="11"
+                                           TextWrapping="Wrap" />
+
+                                <Grid Margin="0,14,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="10" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="8" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Text="{Binding BetaAccessCode, UpdateSourceTrigger=PropertyChanged}"
+                                             MaxLength="64"
+                                             ToolTip="Enter the PCSPA access code supplied by the beta administrator"
+                                             Style="{StaticResource FluentTextBoxStyle}" />
+                                    <Button Grid.Column="2"
+                                            Command="{Binding ActivateBetaAccessCommand}"
+                                            Style="{StaticResource FluentPrimaryButtonStyle}">
+                                        <TextBlock Text="{Binding BetaAccessActionText}" />
+                                    </Button>
+                                    <Button Grid.Column="4"
+                                            Command="{Binding RefreshBetaAccessCommand}"
+                                            Style="{StaticResource FluentSecondaryButtonStyle}">
+                                        <TextBlock Text="Verify status" />
+                                    </Button>
+                                </Grid>
+
+                                <WrapPanel Margin="0,12,0,0">
+                                    <Border Margin="0,0,8,6"
+                                            Style="{StaticResource OperationMetaChipStyle}">
+                                        <TextBlock Text="{Binding BetaAccessReferenceText}"
+                                                   Foreground="{DynamicResource MetaTextBrush}"
+                                                   FontSize="10.5" />
+                                    </Border>
+                                    <Border Margin="0,0,0,6"
+                                            Style="{StaticResource OperationMetaChipStyle}">
+                                        <TextBlock Text="{Binding BetaAccessExpiryText}"
+                                                   Foreground="{DynamicResource MetaTextBrush}"
+                                                   FontSize="10.5" />
+                                    </Border>
+                                </WrapPanel>
+                                <TextBlock Margin="0,5,0,0"
+                                           Text="The access code is used once. The returned entitlement is encrypted for the current Windows user and verified automatically when PC-SPA starts."
+                                           Foreground="{DynamicResource TextTertiaryBrush}"
+                                           FontSize="10.5"
+                                           TextWrapping="Wrap" />
+                            </StackPanel>
                         </Border>
 
                         <Border Margin="0,0,0,14"

@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -121,6 +122,15 @@ public partial class MainWindow : Window
             developmentEditionOverrideProvider);
         var featureAccessGuard = new FeatureAccessGuard(
             featureAccessService);
+        var betaDataRoot = Path.Combine(
+            Environment.GetFolderPath(
+                Environment.SpecialFolder.LocalApplicationData),
+            "SystemPerformanceAccelerator",
+            "beta-access");
+        var betaAccessService = new BetaAccessService(
+            new InstallationIdentityService(
+                Path.Combine(betaDataRoot, "installation.json")),
+            Path.Combine(betaDataRoot, "entitlement.dat"));
 
         var viewModel = new MainWindowViewModel(
             temporaryFileService,
@@ -146,10 +156,19 @@ public partial class MainWindow : Window
             windowsRepairPlanHistoryService,
             windowsRepairExecutionService,
             windowsRepairExecutionHistoryService,
-            feedbackSubmissionService);
+            feedbackSubmissionService,
+            betaAccessService);
         DataContext = viewModel;
         viewModel.PropertyChanged +=
             OnMainViewModelPropertyChanged;
+    }
+
+    private async void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel viewModel)
+        {
+            await viewModel.Settings.InitializeBetaAccessAsync();
+        }
     }
 
     private void OnMainViewModelPropertyChanged(
