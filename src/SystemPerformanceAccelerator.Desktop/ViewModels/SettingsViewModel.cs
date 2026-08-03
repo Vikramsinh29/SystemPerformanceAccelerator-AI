@@ -63,7 +63,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             new DisabledDiagnosticFeedbackSubmissionService();
         _betaAccessService = betaAccessService;
         _applicationVersion = string.IsNullOrWhiteSpace(applicationVersion)
-            ? "1.0.0"
+            ? "1.0.0-beta.1"
             : applicationVersion;
 
         _selectedTheme = loadResult.Settings.Theme;

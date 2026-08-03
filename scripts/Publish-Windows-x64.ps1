@@ -10,7 +10,7 @@ $repo = Split-Path -Parent $PSScriptRoot
 $solution = Join-Path $repo "SystemPerformanceAccelerator.slnx"
 $desktopProject = Join-Path $repo "src\SystemPerformanceAccelerator.Desktop\SystemPerformanceAccelerator.Desktop.csproj"
 
-$version = "1.0.0"
+$version = "1.0.0-beta.1"
 $runtimeIdentifier = "win-x64"
 $releaseName = "PC-SPA-$version-$runtimeIdentifier-portable"
 

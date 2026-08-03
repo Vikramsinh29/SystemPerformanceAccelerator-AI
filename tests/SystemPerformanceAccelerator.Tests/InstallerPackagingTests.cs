@@ -40,7 +40,7 @@ public sealed class InstallerPackagingTests
             "Publish-Windows-x64-Installer.ps1"));
 
         Assert.Contains("Publish-Windows-x64.ps1", script);
-        Assert.Contains("PC-SPA-1.0.0-win-x64-setup.exe", script);
+        Assert.Contains("PC-SPA-1.0.0-beta.1-win-x64-setup.exe", script);
         Assert.Contains("INNO_SETUP_COMPILER", script);
         Assert.Contains("Programs\\Inno Setup 6\\ISCC.exe", script);
         Assert.Contains("Get-FileHash", script);

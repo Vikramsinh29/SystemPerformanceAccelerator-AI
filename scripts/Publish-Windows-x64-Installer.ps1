@@ -11,7 +11,7 @@ $portablePublisher = Join-Path $PSScriptRoot "Publish-Windows-x64.ps1"
 $installerDefinition = Join-Path $repo "installer\PC-SPA.iss"
 $publishDirectory = Join-Path $repo "artifacts\publish\win-x64"
 $installerDirectory = Join-Path $repo "artifacts\installer"
-$installerName = "PC-SPA-1.0.0-win-x64-setup.exe"
+$installerName = "PC-SPA-1.0.0-beta.1-win-x64-setup.exe"
 $installerPath = Join-Path $installerDirectory $installerName
 $hashPath = "$installerPath.sha256"
 $desktopDirectory = [Environment]::GetFolderPath(
@@ -89,8 +89,8 @@ if (-not (Test-Path -LiteralPath $installerPath -PathType Leaf)) {
 }
 
 $installerVersion = (Get-Item -LiteralPath $installerPath).VersionInfo
-if (-not $installerVersion.ProductVersion.StartsWith("1.0.0")) {
-    throw "Installer ProductVersion is '$($installerVersion.ProductVersion)', expected 1.0.0."
+if (-not $installerVersion.ProductVersion.StartsWith("1.0.0.1")) {
+    throw "Installer ProductVersion is '$($installerVersion.ProductVersion)', expected 1.0.0.1."
 }
 
 $installerHash = (
