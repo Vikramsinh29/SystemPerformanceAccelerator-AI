@@ -1,0 +1,39 @@
+﻿name: Windows Build and Test
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build and test PC-SPA
+    runs-on: windows-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install .NET 10 SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Display .NET information
+        run: dotnet --info
+
+      - name: Restore dependencies
+        run: dotnet restore SystemPerformanceAccelerator.slnx
+
+      - name: Build solution
+        run: dotnet build SystemPerformanceAccelerator.slnx --configuration Debug --no-restore
+
+      - name: Run tests
+        run: dotnet test tests/SystemPerformanceAccelerator.Tests/SystemPerformanceAccelerator.Tests.csproj --configuration Debug --no-build
