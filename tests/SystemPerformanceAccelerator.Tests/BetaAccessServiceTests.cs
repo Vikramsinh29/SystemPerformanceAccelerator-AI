@@ -100,7 +100,8 @@ public sealed class BetaAccessServiceTests
     {
         using var location = new TemporaryLocation();
         var handler = new StubHttpMessageHandler(_ =>
-            throw new InvalidOperationException("HTTP must not be called."));
+            Task.FromException<HttpResponseMessage>(
+                new InvalidOperationException("HTTP must not be called.")));
         var service = CreateService(
             location,
             handler,
@@ -110,6 +111,71 @@ public sealed class BetaAccessServiceTests
 
         Assert.False(result.IsActive);
         Assert.Equal("not_activated", result.Status);
+    }
+
+    [Fact]
+    public async Task GetStatusAsync_WhenOfflineAndCredentialUnexpired_AllowsOfflineUse()
+    {
+        using var location = new TemporaryLocation();
+        var onlineHandler = new StubHttpMessageHandler(_ =>
+            JsonResponse(HttpStatusCode.Created, new
+            {
+                activated = true,
+                entitlementReference = "ENT-OFFLINE",
+                entitlementToken = new string('c', 64),
+                activatedUtc = DateTimeOffset.UtcNow.AddDays(-1),
+                expiresUtc = DateTimeOffset.UtcNow.AddDays(2),
+                accessDays = 3,
+                gracePeriodDays = 0
+            }));
+        var protector = new PrefixCredentialProtector();
+        var activationService = CreateService(location, onlineHandler, protector);
+        await activationService.ActivateAsync("PCSPA-OFFLINE", "1.0.0");
+
+        var offlineService = CreateService(
+            location,
+            new StubHttpMessageHandler(_ =>
+                Task.FromException<HttpResponseMessage>(
+                    new HttpRequestException("offline"))),
+            protector);
+
+        var result = await offlineService.GetStatusAsync();
+
+        Assert.True(result.IsActive);
+        Assert.Equal("offline_grace", result.Status);
+        Assert.Equal("ENT-OFFLINE", result.EntitlementReference);
+    }
+
+    [Fact]
+    public async Task GetStatusAsync_WhenOfflineAndCredentialExpired_DeniesAccess()
+    {
+        using var location = new TemporaryLocation();
+        var onlineHandler = new StubHttpMessageHandler(_ =>
+            JsonResponse(HttpStatusCode.Created, new
+            {
+                activated = true,
+                entitlementReference = "ENT-EXPIRED",
+                entitlementToken = new string('d', 64),
+                activatedUtc = DateTimeOffset.UtcNow.AddDays(-3),
+                expiresUtc = DateTimeOffset.UtcNow.AddDays(-1),
+                accessDays = 2,
+                gracePeriodDays = 0
+            }));
+        var protector = new PrefixCredentialProtector();
+        var activationService = CreateService(location, onlineHandler, protector);
+        await activationService.ActivateAsync("PCSPA-EXPIRED", "1.0.0");
+
+        var offlineService = CreateService(
+            location,
+            new StubHttpMessageHandler(_ =>
+                Task.FromException<HttpResponseMessage>(
+                    new HttpRequestException("offline"))),
+            protector);
+
+        var result = await offlineService.GetStatusAsync();
+
+        Assert.False(result.IsActive);
+        Assert.Equal("service_unavailable", result.Status);
     }
 
     private static BetaAccessService CreateService(
@@ -141,11 +207,40 @@ public sealed class BetaAccessServiceTests
     private sealed class PrefixCredentialProtector : ICredentialProtector
     {
         private static readonly byte[] Prefix = "protected:"u8.ToArray();
+        private const byte TestMask = 0xA5;
 
-        public byte[] Protect(byte[] plaintext) => [.. Prefix, .. plaintext];
+        public byte[] Protect(byte[] plaintext)
+        {
+            var protectedData = new byte[Prefix.Length + plaintext.Length];
+            Prefix.CopyTo(protectedData, 0);
 
-        public byte[] Unprotect(byte[] protectedData) =>
-            protectedData[Prefix.Length..];
+            for (var index = 0; index < plaintext.Length; index++)
+            {
+                protectedData[Prefix.Length + index] =
+                    (byte)(plaintext[index] ^ TestMask);
+            }
+
+            return protectedData;
+        }
+
+        public byte[] Unprotect(byte[] protectedData)
+        {
+            if (protectedData.Length < Prefix.Length ||
+                !protectedData.AsSpan(0, Prefix.Length).SequenceEqual(Prefix))
+            {
+                throw new InvalidOperationException(
+                    "The test credential is invalid.");
+            }
+
+            var plaintext = new byte[protectedData.Length - Prefix.Length];
+            for (var index = 0; index < plaintext.Length; index++)
+            {
+                plaintext[index] =
+                    (byte)(protectedData[Prefix.Length + index] ^ TestMask);
+            }
+
+            return plaintext;
+        }
     }
 
     private sealed class StubHttpMessageHandler : HttpMessageHandler

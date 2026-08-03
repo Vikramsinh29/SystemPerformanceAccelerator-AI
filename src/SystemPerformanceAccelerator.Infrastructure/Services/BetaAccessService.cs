@@ -89,8 +89,7 @@ public sealed class BetaAccessService : IBetaAccessService
         }
         catch (Exception ex) when (IsConnectivityFailure(ex))
         {
-            return Unavailable(
-                "Beta access could not be verified. Check the internet connection and try again.");
+            return CreateOfflineStatus(credential);
         }
     }
 
@@ -274,6 +273,27 @@ public sealed class BetaAccessService : IBetaAccessService
         null,
         0,
         message);
+
+    private static BetaAccessStatus CreateOfflineStatus(
+        StoredCredential credential)
+    {
+        var now = DateTimeOffset.UtcNow;
+        if (credential.ExpiresUtc is not null &&
+            credential.ExpiresUtc.Value > now)
+        {
+            return new BetaAccessStatus(
+                true,
+                "offline_grace",
+                credential.EntitlementReference,
+                credential.ActivatedUtc,
+                credential.ExpiresUtc,
+                0,
+                "PC-SPA is using the securely stored beta entitlement because the verification service could not be reached. Online verification will be retried at the next launch.");
+        }
+
+        return Unavailable(
+            "Beta access could not be verified and no unexpired local entitlement is available. Check the internet connection and try again.");
+    }
 
     private static void TryDelete(string path)
     {
