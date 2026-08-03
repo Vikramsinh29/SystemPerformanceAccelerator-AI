@@ -6654,6 +6654,105 @@
             </ScrollViewer>
         </Grid>
             </Grid>
+
+            <Grid Grid.Row="1"
+                  Grid.ColumnSpan="2"
+                  Panel.ZIndex="100"
+                  Background="{DynamicResource AppBackgroundBrush}"
+                  Visibility="{Binding IsBetaAccessGateVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Border Width="560"
+                        MaxWidth="560"
+                        Margin="32"
+                        Padding="34"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Background="{DynamicResource SurfaceBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="14">
+                    <StackPanel>
+                        <TextBlock Text="CONTROLLED BETA ACCESS"
+                                   Foreground="{DynamicResource AccentBrush}"
+                                   FontSize="11"
+                                   FontWeight="Bold" />
+                        <TextBlock Margin="0,10,0,0"
+                                   Text="Activate PC-SPA on this computer"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   FontSize="24"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Margin="0,9,0,0"
+                                   Text="This controlled beta requires a valid invitation. Enter your one-use access code, or retry verification if this PC was already activated."
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   FontSize="12"
+                                   TextWrapping="Wrap" />
+
+                        <Border Margin="0,22,0,0"
+                                Padding="14,11"
+                                Background="{DynamicResource SurfaceMutedBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Settings.BetaAccessStateText}"
+                                           Foreground="{DynamicResource AccentBrush}"
+                                           FontSize="11"
+                                           FontWeight="Bold" />
+                                <TextBlock Margin="0,5,0,0"
+                                           Text="{Binding Settings.BetaAccessMessage}"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                           FontSize="12"
+                                           TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+
+                        <TextBox Margin="0,18,0,0"
+                                 Text="{Binding Settings.BetaAccessCode, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource InputTextBoxStyle}"
+                                 ToolTip="Enter the controlled-beta invitation code" />
+
+                        <StackPanel Margin="0,14,0,0" Orientation="Horizontal">
+                            <Button Command="{Binding Settings.ActivateBetaAccessCommand}"
+                                    Style="{StaticResource FluentPrimaryButtonStyle}">
+                                <TextBlock Text="{Binding Settings.BetaAccessActionText}" />
+                            </Button>
+                            <Button Margin="10,0,0,0"
+                                    Command="{Binding Settings.RefreshBetaAccessCommand}"
+                                    Style="{StaticResource FluentSecondaryButtonStyle}"
+                                    Content="Retry verification" />
+                        </StackPanel>
+
+                        <TextBlock Margin="0,18,0,0"
+                                   Text="Temporary service outages will not interrupt an unexpired entitlement stored securely for this Windows user. Expired or revoked access requires online recovery or support."
+                                   Foreground="{DynamicResource TextTertiaryBrush}"
+                                   FontSize="10.5"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Grid Grid.Row="1"
+                  Grid.ColumnSpan="2"
+                  Panel.ZIndex="101"
+                  Background="{DynamicResource AppBackgroundBrush}"
+                  Visibility="{Binding IsBetaAccessInitializing, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="PC-SPA"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource AccentBrush}"
+                               FontSize="24"
+                               FontWeight="SemiBold" />
+                    <ProgressBar Width="220"
+                                 Height="3"
+                                 Margin="0,18,0,0"
+                                 IsIndeterminate="True" />
+                    <TextBlock Margin="0,12,0,0"
+                               Text="Checking access…"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               FontSize="12" />
+                </StackPanel>
+            </Grid>
         </Grid>
     </Border>
 </Window>

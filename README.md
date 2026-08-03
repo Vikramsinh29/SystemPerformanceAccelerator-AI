@@ -190,6 +190,8 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 
 ### Controlled beta access
 
+The desktop client enforces controlled-beta access at startup. Optimizer controls remain behind an activation gate until the server verifies an active entitlement. If the service is temporarily unreachable, a DPAPI-protected local entitlement remains usable only until its server-issued expiry; missing, expired, revoked, or unreadable credentials remain locked with activation and retry recovery available.
+
 - One-time invitation-code activation from the Settings screen
 - Stable anonymous Installation ID generated automatically for the beta entitlement
 - Live activation and verification through the separately deployed Cloudflare Worker

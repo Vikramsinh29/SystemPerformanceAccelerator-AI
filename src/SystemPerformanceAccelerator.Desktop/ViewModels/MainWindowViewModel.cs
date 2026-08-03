@@ -238,6 +238,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public bool IsSystemMonitorContentVisible => IsSystemMonitorActive && SystemMonitorAccess.IsAvailable;
     public bool IsSettingsContentVisible => IsSettingsActive && SettingsAccess.IsAvailable;
 
+    public bool IsBetaAccessInitializing =>
+        !Settings.IsBetaAccessInitialized;
+
+    public bool IsBetaAccessGateVisible =>
+        Settings.IsBetaAccessInitialized && !Settings.IsBetaAccessActive;
+
     public FeatureAccessPresentation CurrentFeatureAccess =>
         GetAccessPresentation(_currentModule);
 
@@ -401,6 +407,14 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             nameof(SettingsViewModel.HasUnreviewedDiagnosticError))
         {
             OnPropertyChanged(nameof(HasUnreviewedDiagnosticError));
+        }
+
+        if (args.PropertyName is
+            nameof(SettingsViewModel.IsBetaAccessInitialized) or
+            nameof(SettingsViewModel.IsBetaAccessActive))
+        {
+            OnPropertyChanged(nameof(IsBetaAccessInitializing));
+            OnPropertyChanged(nameof(IsBetaAccessGateVisible));
         }
     }
 

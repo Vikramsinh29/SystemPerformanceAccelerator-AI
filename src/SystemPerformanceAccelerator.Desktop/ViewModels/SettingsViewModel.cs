@@ -35,6 +35,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     private string _betaAccessCode = string.Empty;
     private BetaAccessStatus _betaAccessStatus = BetaAccessStatus.NotActivated;
     private bool _isBetaAccessBusy;
+    private bool _isBetaAccessInitialized;
 
     public SettingsViewModel(
         IApplicationSettingsService settingsService,
@@ -193,9 +194,16 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 
     public bool IsBetaAccessActive => _betaAccessStatus.IsActive;
 
+    public bool IsBetaAccessInitialized
+    {
+        get => _isBetaAccessInitialized;
+        private set => SetField(ref _isBetaAccessInitialized, value);
+    }
+
     public string BetaAccessStateText => _betaAccessStatus.Status switch
     {
         "active" => "ACTIVE",
+        "offline_grace" => "ACTIVE — OFFLINE",
         "expired" => "EXPIRED",
         "service_unavailable" => "VERIFICATION UNAVAILABLE",
         "activation_rejected" => "ACTIVATION REJECTED",
@@ -220,8 +228,11 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             ? "Verify access"
             : "Activate this PC";
 
-    public async Task InitializeBetaAccessAsync() =>
+    public async Task InitializeBetaAccessAsync()
+    {
         await RefreshBetaAccessAsync();
+        IsBetaAccessInitialized = true;
+    }
 
     public ApplicationTheme SelectedTheme
     {
@@ -438,6 +449,9 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     {
         if (_betaAccessService is null)
         {
+            ApplyBetaAccessStatus(new BetaAccessStatus(
+                false, "service_unavailable", null, null, null, 0,
+                "Beta access is not configured in this build."));
             return;
         }
 
