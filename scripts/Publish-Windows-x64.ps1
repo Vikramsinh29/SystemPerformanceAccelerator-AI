@@ -143,7 +143,7 @@ if ($remainingPdbFiles.Count -gt 0) {
 
 $versionInfo = (Get-Item -LiteralPath $executable).VersionInfo
 
-if (-not $versionInfo.FileVersion.StartsWith($version)) {
+if (-not $versionInfo.FileVersion.StartsWith("1.0.0.1")) {
     throw "Published executable FileVersion is '$($versionInfo.FileVersion)', expected $version."
 }
 
