@@ -60,7 +60,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         IWindowsRepairPlanHistoryService? windowsRepairPlanHistoryService = null,
         IWindowsRepairExecutionService? windowsRepairExecutionService = null,
         IWindowsRepairExecutionHistoryService? windowsRepairExecutionHistoryService = null,
-        IDiagnosticFeedbackSubmissionService? feedbackSubmissionService = null)
+        IDiagnosticFeedbackSubmissionService? feedbackSubmissionService = null,
+        IBetaAccessService? betaAccessService = null)
     {
         _temporaryFileService = temporaryFileService;
         _featureAccessGuard = featureAccessGuard ??
@@ -151,7 +152,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             featureAccessGuard,
             _diagnosticService,
             diagnosticInteractionService,
-            feedbackSubmissionService);
+            feedbackSubmissionService,
+            betaAccessService,
+            ApplicationVersion.Replace("Version ", string.Empty));
         Settings.PropertyChanged += OnSettingsPropertyChanged;
 
         ScanCommand = new AsyncRelayCommand(

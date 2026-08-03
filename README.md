@@ -10,7 +10,7 @@ PC-SPA (System Performance Accelerator) is a safe, offline Windows 10/11 desktop
 - Compact, sharp, practical controls with clear system status and actions.
 - Preserve the existing WPF/MVVM architecture.
 - Work through narrow, separately verified sprints.
-- No telemetry or external account requirement. Core tools remain offline; the optional beta error-report action is the only user-initiated network feature.
+- No telemetry or external account requirement. Core tools remain offline; controlled-beta activation/verification and the optional beta error-report action are the only network features.
 - Never delete user data without explicit confirmation.
 - Report partial failures and skipped files honestly.
 
@@ -22,7 +22,7 @@ PC-SPA (System Performance Accelerator) is a safe, offline Windows 10/11 desktop
 - WPF
 - MVVM
 - xUnit
-- Offline only
+- Offline-first; controlled-beta access verification and optional feedback use the PC-SPA Cloudflare Worker
 
 ## Solution structure
 
@@ -187,6 +187,19 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Invalid, missing, or malformed settings fall back safely to defaults
 - Cleanup confirmation remains permanently enabled as a non-disableable safety rule
 - No cloud account, telemetry, registry writing, startup modification, or automatic optimization
+
+### Controlled beta access
+
+- One-time invitation-code activation from the Settings screen
+- Stable anonymous Installation ID generated automatically for the beta entitlement
+- Live activation and verification through the separately deployed Cloudflare Worker
+- Readable entitlement token stored only on the Windows PC
+- Token encrypted for the current Windows user with Windows Data Protection (DPAPI)
+- Cloudflare stores only hashes and entitlement metadata, not the readable token
+- Status, entitlement reference, and local-time expiry displayed in Settings
+- Automatic verification at application startup and manual retry from Settings
+- Clear unavailable messaging when the service or internet connection cannot be reached
+- Core cleanup and analysis services remain independently operable during a temporary service outage
 
 ### Edition and feature access foundation
 

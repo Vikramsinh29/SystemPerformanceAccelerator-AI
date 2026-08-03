@@ -16,6 +16,8 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     private readonly IDiagnosticInteractionService _diagnosticInteractionService;
     private readonly IDiagnosticFeedbackSubmissionService
         _feedbackSubmissionService;
+    private readonly IBetaAccessService? _betaAccessService;
+    private readonly string _applicationVersion;
     private readonly Action<ApplicationSettings> _applySettings;
     private ApplicationTheme _selectedTheme;
     private string _largeFileMinimumSizeText;
@@ -30,6 +32,9 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     private string? _lastSubmittedFeedbackReference;
     private string _lastReviewedDiagnosticErrorReference;
     private string _status;
+    private string _betaAccessCode = string.Empty;
+    private BetaAccessStatus _betaAccessStatus = BetaAccessStatus.NotActivated;
+    private bool _isBetaAccessBusy;
 
     public SettingsViewModel(
         IApplicationSettingsService settingsService,
@@ -38,7 +43,9 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         IFeatureAccessGuard featureAccessGuard,
         IDiagnosticService? diagnosticService = null,
         IDiagnosticInteractionService? diagnosticInteractionService = null,
-        IDiagnosticFeedbackSubmissionService? feedbackSubmissionService = null)
+        IDiagnosticFeedbackSubmissionService? feedbackSubmissionService = null,
+        IBetaAccessService? betaAccessService = null,
+        string? applicationVersion = null)
     {
         _settingsService = settingsService ??
             throw new ArgumentNullException(nameof(settingsService));
@@ -53,6 +60,10 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             new NonInteractiveDiagnosticInteractionService();
         _feedbackSubmissionService = feedbackSubmissionService ??
             new DisabledDiagnosticFeedbackSubmissionService();
+        _betaAccessService = betaAccessService;
+        _applicationVersion = string.IsNullOrWhiteSpace(applicationVersion)
+            ? "1.0.0"
+            : applicationVersion;
 
         _selectedTheme = loadResult.Settings.Theme;
         _largeFileMinimumSizeText =
@@ -118,6 +129,13 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             featureAccessGuard,
             ApplicationFeature.Settings,
             FeatureAccessRequirement.Execute);
+        ActivateBetaAccessCommand = new AsyncRelayCommand(
+            ActivateBetaAccessAsync,
+            () => !IsBetaAccessBusy &&
+                  !string.IsNullOrWhiteSpace(BetaAccessCode));
+        RefreshBetaAccessCommand = new AsyncRelayCommand(
+            RefreshBetaAccessAsync,
+            () => !IsBetaAccessBusy);
     }
 
     public IReadOnlyList<ApplicationTheme> ThemeOptions { get; } =
@@ -142,6 +160,68 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     public RelayCommand DeleteDiagnosticHistoryCommand { get; }
 
     public RelayCommand ResetInstallationIdCommand { get; }
+
+    public AsyncRelayCommand ActivateBetaAccessCommand { get; }
+
+    public AsyncRelayCommand RefreshBetaAccessCommand { get; }
+
+    public string BetaAccessCode
+    {
+        get => _betaAccessCode;
+        set
+        {
+            if (SetField(ref _betaAccessCode, value))
+            {
+                ActivateBetaAccessCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public bool IsBetaAccessBusy
+    {
+        get => _isBetaAccessBusy;
+        private set
+        {
+            if (SetField(ref _isBetaAccessBusy, value))
+            {
+                ActivateBetaAccessCommand.RaiseCanExecuteChanged();
+                RefreshBetaAccessCommand.RaiseCanExecuteChanged();
+                OnPropertyChanged(nameof(BetaAccessActionText));
+            }
+        }
+    }
+
+    public bool IsBetaAccessActive => _betaAccessStatus.IsActive;
+
+    public string BetaAccessStateText => _betaAccessStatus.Status switch
+    {
+        "active" => "ACTIVE",
+        "expired" => "EXPIRED",
+        "service_unavailable" => "VERIFICATION UNAVAILABLE",
+        "activation_rejected" => "ACTIVATION REJECTED",
+        _ => "NOT ACTIVATED"
+    };
+
+    public string BetaAccessMessage =>
+        _betaAccessStatus.Message ?? "Beta access status is unavailable.";
+
+    public string BetaAccessReferenceText =>
+        string.IsNullOrWhiteSpace(_betaAccessStatus.EntitlementReference)
+            ? "No entitlement reference"
+            : _betaAccessStatus.EntitlementReference;
+
+    public string BetaAccessExpiryText => _betaAccessStatus.ExpiresUtc is null
+        ? "No expiry date available"
+        : $"Access until {_betaAccessStatus.ExpiresUtc.Value.ToLocalTime():dd MMMM yyyy, h:mm tt}";
+
+    public string BetaAccessActionText => IsBetaAccessBusy
+        ? "Please wait…"
+        : IsBetaAccessActive
+            ? "Verify access"
+            : "Activate this PC";
+
+    public async Task InitializeBetaAccessAsync() =>
+        await RefreshBetaAccessAsync();
 
     public ApplicationTheme SelectedTheme
     {
@@ -324,6 +404,64 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
                 "Settings could not be saved. Existing settings remain active. " +
                 ex.Message;
         }
+    }
+
+    private async Task ActivateBetaAccessAsync()
+    {
+        if (_betaAccessService is null)
+        {
+            ApplyBetaAccessStatus(new BetaAccessStatus(
+                false, "service_unavailable", null, null, null, 0,
+                "Beta access is not configured in this build."));
+            return;
+        }
+
+        IsBetaAccessBusy = true;
+        try
+        {
+            var result = await _betaAccessService.ActivateAsync(
+                BetaAccessCode,
+                _applicationVersion);
+            ApplyBetaAccessStatus(result);
+            if (result.IsActive)
+            {
+                BetaAccessCode = string.Empty;
+            }
+        }
+        finally
+        {
+            IsBetaAccessBusy = false;
+        }
+    }
+
+    private async Task RefreshBetaAccessAsync()
+    {
+        if (_betaAccessService is null)
+        {
+            return;
+        }
+
+        IsBetaAccessBusy = true;
+        try
+        {
+            ApplyBetaAccessStatus(
+                await _betaAccessService.GetStatusAsync());
+        }
+        finally
+        {
+            IsBetaAccessBusy = false;
+        }
+    }
+
+    private void ApplyBetaAccessStatus(BetaAccessStatus status)
+    {
+        _betaAccessStatus = status;
+        OnPropertyChanged(nameof(IsBetaAccessActive));
+        OnPropertyChanged(nameof(BetaAccessStateText));
+        OnPropertyChanged(nameof(BetaAccessMessage));
+        OnPropertyChanged(nameof(BetaAccessReferenceText));
+        OnPropertyChanged(nameof(BetaAccessExpiryText));
+        OnPropertyChanged(nameof(BetaAccessActionText));
     }
 
     private void RestoreDefaults()
