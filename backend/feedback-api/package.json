@@ -5,15 +5,10 @@
   "type": "module",
   "scripts": {
     "test": "node --test test/*.test.mjs",
-    "lint": "eslint src test",
-    "build": "node --check src/index.js",
-    "cloudflare:build": "wrangler deploy --dry-run",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy"
   },
   "devDependencies": {
-    "eslint": "^10.8.0",
-    "wrangler": "^4.36.0",
-    "zod": "^4.4.3"
+    "wrangler": "^4.36.0"
   }
 }
