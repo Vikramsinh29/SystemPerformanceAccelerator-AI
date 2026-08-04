@@ -30,11 +30,13 @@ public sealed class LicenseActivationService : ILicenseActivationService
         ArgumentNullException.ThrowIfNull(request);
         var deviceId = await _deviceIdentityProvider.GetDeviceIdAsync(
             cancellationToken);
+        var sessionToken = await _tokenStorage.GetSessionTokenAsync(
+            cancellationToken);
         var response = await _apiClient.SendAsync<ActivateApiRequest, ActivateApiResponse>(
             HttpMethod.Post,
             "api/licenses/activate",
             new ActivateApiRequest(request.ActivationKey, deviceId),
-            bearerToken: null,
+            bearerToken: sessionToken,
             allowRetry: false,
             cancellationToken);
 

@@ -61,7 +61,10 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         IWindowsRepairExecutionService? windowsRepairExecutionService = null,
         IWindowsRepairExecutionHistoryService? windowsRepairExecutionHistoryService = null,
         IDiagnosticFeedbackSubmissionService? feedbackSubmissionService = null,
-        IBetaAccessService? betaAccessService = null)
+        IAccessInteractionService? accessInteractionService = null,
+        IAuthenticationService? authenticationService = null,
+        ILicenseActivationService? licenseActivationService = null,
+        ISecureTokenStorage? secureTokenStorage = null)
     {
         _temporaryFileService = temporaryFileService;
         _featureAccessGuard = featureAccessGuard ??
@@ -153,7 +156,10 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             _diagnosticService,
             diagnosticInteractionService,
             feedbackSubmissionService,
-            betaAccessService,
+            accessInteractionService,
+            authenticationService,
+            licenseActivationService,
+            secureTokenStorage,
             ApplicationVersion.Replace("Version ", string.Empty));
         Settings.PropertyChanged += OnSettingsPropertyChanged;
 
