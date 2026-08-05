@@ -99,6 +99,67 @@ public sealed class DesktopApiClientCancellationTests
     }
 
     [Fact]
+    public async Task SendAsync_ExtractsAccountSessionCookieFromSetCookieHeader()
+    {
+        var response = new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent(
+                "{\"success\":true,\"name\":\"ok\"}",
+                Encoding.UTF8,
+                "application/json")
+        };
+        response.Headers.Add(
+            "Set-Cookie",
+            "pcspa_session=session-cookie-value; Path=/; HttpOnly; SameSite=Lax; Secure");
+        var client = CreateClient(response);
+
+        var result = await client.SendAsync<object, SuccessPayload>(
+            HttpMethod.Post,
+            "api/auth/login",
+            request: null,
+            bearerToken: null,
+            allowRetry: false,
+            CancellationToken.None);
+
+        Assert.True(result.Success);
+        Assert.Equal("session-cookie-value", result.AccountSessionCookie);
+    }
+
+    [Fact]
+    public async Task SendAsync_AttachesAccountSessionCookieWithoutAuthorizationHeader()
+    {
+        var handler = new CapturingHandler(_ =>
+            new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(
+                    "{\"success\":true}",
+                    Encoding.UTF8,
+                    "application/json")
+            });
+        var client = new DesktopApiClient(
+            new HttpClient(handler)
+            {
+                BaseAddress = new Uri("https://desktop.test/")
+            },
+            TimeSpan.FromSeconds(2));
+
+        var result = await client.SendAsync<object, SuccessPayload>(
+            HttpMethod.Get,
+            "api/auth/session",
+            request: null,
+            bearerToken: null,
+            allowRetry: false,
+            CancellationToken.None,
+            accountSessionCookie: "stored-account-session");
+
+        Assert.True(result.Success);
+        Assert.Null(handler.AuthorizationHeader);
+        Assert.Equal(
+            "pcspa_session=stored-account-session",
+            handler.CookieHeader);
+    }
+
+    [Fact]
     public async Task SendAsync_ParsesJsonErrorBody()
     {
         var client = CreateClient(
@@ -409,5 +470,27 @@ public sealed class DesktopApiClientCancellationTests
             HttpRequestMessage request,
             CancellationToken cancellationToken) =>
             Task.FromResult(response);
+    }
+
+    private sealed class CapturingHandler(
+        Func<HttpRequestMessage, HttpResponseMessage> responder) :
+        HttpMessageHandler
+    {
+        public string? AuthorizationHeader { get; private set; }
+
+        public string? CookieHeader { get; private set; }
+
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            AuthorizationHeader = request.Headers.Authorization?.ToString();
+            CookieHeader = request.Headers.TryGetValues(
+                "Cookie",
+                out var values)
+                ? string.Join("; ", values)
+                : null;
+            return Task.FromResult(responder(request));
+        }
     }
 }

@@ -14,15 +14,25 @@ public sealed class AuthenticationServiceFoundationTests
     {
         using var location = new TemporaryLocation();
         var handler = new RecordingHandler(request =>
-            JsonResponse(HttpStatusCode.OK, new
+        {
+            var response = JsonResponse(HttpStatusCode.OK, new
             {
-                sessionToken = "session-token-123",
-                userId = "user-1",
-                email = "user@example.com",
-                displayName = "PC SPA User",
-                authenticated = true,
-                expiresUtc = "2026-08-30T12:00:00Z"
-            }));
+                data = new
+                {
+                    user = new
+                    {
+                        id = "user-1",
+                        email = "user@example.com",
+                        displayName = "PC SPA User"
+                    },
+                    expiresAt = "2026-08-30T12:00:00Z"
+                }
+            });
+            response.Headers.Add(
+                "Set-Cookie",
+                "pcspa_session=session-token-123; Path=/; HttpOnly; SameSite=Lax; Secure");
+            return response;
+        });
         var tokenStorage = new FileSecureTokenStorage(
             location.TokenPath,
             new PrefixCredentialProtector());
@@ -40,12 +50,48 @@ public sealed class AuthenticationServiceFoundationTests
 
         Assert.True(result.Success);
         Assert.Equal("session-token-123", result.SessionToken);
+        Assert.Equal("user-1", result.Session?.UserId);
         Assert.Equal("user@example.com", result.Session?.Email);
         using var json = JsonDocument.Parse(handler.RequestBody!);
         Assert.Equal("user@example.com", json.RootElement.GetProperty("email").GetString());
         Assert.Equal("password-123", json.RootElement.GetProperty("password").GetString());
         Assert.Equal("session-token-123", await tokenStorage.GetSessionTokenAsync());
         Assert.DoesNotContain("session-token-123", File.ReadAllText(location.TokenPath));
+    }
+
+    [Fact]
+    public async Task LoginAsync_WhenCookieMissing_FailsWithoutStoringSession()
+    {
+        var handler = new RecordingHandler(_ =>
+            JsonResponse(HttpStatusCode.OK, new
+            {
+                data = new
+                {
+                    user = new
+                    {
+                        id = "user-1",
+                        email = "user@example.com",
+                        displayName = (string?)null
+                    },
+                    expiresAt = "2026-08-30T12:00:00Z"
+                }
+            }));
+        var tokenStorage = new InMemorySecureTokenStorage();
+        var service = new AuthenticationService(
+            new DesktopApiClient(
+                new HttpClient(handler)
+                {
+                    BaseAddress = new Uri("https://desktop.test/")
+                },
+                TimeSpan.FromSeconds(2)),
+            tokenStorage);
+
+        var result = await service.LoginAsync(
+            new AuthLoginRequest("user@example.com", "password-123"));
+
+        Assert.False(result.Success);
+        Assert.Equal(ApiErrorKind.UnexpectedResponse, result.Failure?.Kind);
+        Assert.Null(await tokenStorage.GetSessionTokenAsync());
     }
 
     [Fact]
@@ -90,7 +136,74 @@ public sealed class AuthenticationServiceFoundationTests
         Assert.True(result.Success);
         Assert.Equal(2, attempts);
         Assert.Equal("stable@example.com", result.Session?.Email);
-        Assert.Equal("Bearer persisted-session", handler.AuthorizationHeader);
+        Assert.Null(handler.AuthorizationHeader);
+        Assert.Equal("pcspa_session=persisted-session", handler.CookieHeader);
+    }
+
+    [Fact]
+    public async Task GetSessionAsync_UsesPersistedAccountSessionAfterServiceRecreation()
+    {
+        using var location = new TemporaryLocation();
+        var tokenStorage = new FileSecureTokenStorage(
+            location.TokenPath,
+            new PrefixCredentialProtector());
+        await tokenStorage.StoreSessionTokenAsync("persisted-session");
+        var restartedStorage = new FileSecureTokenStorage(
+            location.TokenPath,
+            new PrefixCredentialProtector());
+        var handler = new RecordingHandler(_ =>
+            JsonResponse(HttpStatusCode.OK, new
+            {
+                userId = "user-2",
+                email = "stable@example.com",
+                displayName = "Stable User",
+                isAuthenticated = true,
+                expiresUtc = "2026-08-30T12:00:00Z"
+            }));
+        var service = new AuthenticationService(
+            new DesktopApiClient(
+                new HttpClient(handler)
+                {
+                    BaseAddress = new Uri("https://desktop.test/")
+                },
+                TimeSpan.FromSeconds(2)),
+            restartedStorage);
+
+        var result = await service.GetSessionAsync();
+
+        Assert.True(result.Success);
+        Assert.Equal("stable@example.com", result.Session?.Email);
+        Assert.Null(handler.AuthorizationHeader);
+        Assert.Equal("pcspa_session=persisted-session", handler.CookieHeader);
+    }
+
+    [Fact]
+    public async Task LogoutAsync_SendsStoredSessionAsCookie_AndClearsSession()
+    {
+        var handler = new RecordingHandler(_ =>
+            JsonResponse(HttpStatusCode.OK, new
+            {
+                success = true
+            }));
+        var tokenStorage = new InMemorySecureTokenStorage
+        {
+            SessionToken = "persisted-session"
+        };
+        var service = new AuthenticationService(
+            new DesktopApiClient(
+                new HttpClient(handler)
+                {
+                    BaseAddress = new Uri("https://desktop.test/")
+                },
+                TimeSpan.FromSeconds(2)),
+            tokenStorage);
+
+        var result = await service.LogoutAsync();
+
+        Assert.True(result.Success);
+        Assert.Null(handler.AuthorizationHeader);
+        Assert.Equal("pcspa_session=persisted-session", handler.CookieHeader);
+        Assert.Null(await tokenStorage.GetSessionTokenAsync());
     }
 
     [Fact]
@@ -144,6 +257,8 @@ public sealed class AuthenticationServiceFoundationTests
 
         public string? AuthorizationHeader { get; private set; }
 
+        public string? CookieHeader { get; private set; }
+
         protected override async Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
@@ -152,6 +267,11 @@ public sealed class AuthenticationServiceFoundationTests
                 ? null
                 : await request.Content.ReadAsStringAsync(cancellationToken);
             AuthorizationHeader = request.Headers.Authorization?.ToString();
+            CookieHeader = request.Headers.TryGetValues(
+                "Cookie",
+                out var values)
+                ? string.Join("; ", values)
+                : null;
             return responder(request);
         }
     }

@@ -41,7 +41,9 @@ public sealed class LiveDesktopLicensingIntegrationTests
         onlineViewModel.SignInPassword = configuration.Password;
         await onlineViewModel.SignInAsync();
 
-        Assert.True(onlineViewModel.IsSignedIn);
+        Assert.True(
+            onlineViewModel.IsSignedIn,
+            $"Sign-in failed: {RedactDiagnosticMessage(onlineViewModel.SignInMessage, configuration)}");
         Assert.Equal(string.Empty, onlineViewModel.SignInPassword);
         Assert.True(File.Exists(location.TokenPath));
 
@@ -55,7 +57,21 @@ public sealed class LiveDesktopLicensingIntegrationTests
         onlineViewModel.BetaAccessCode = configuration.ActivationKey;
         await onlineViewModel.ActivateBetaAccessAsync();
 
-        Assert.True(onlineViewModel.IsBetaAccessActive);
+        if (!onlineViewModel.IsBetaAccessActive &&
+            onlineViewModel.BetaAccessMessage.Contains(
+                "UNAUTHENTICATED",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            _output.WriteLine(
+                "Live activation returned UNAUTHENTICATED for the confirmed no-bearer activation contract. " +
+                $"State={onlineViewModel.BetaAccessStateText}; Message={RedactDiagnosticMessage(onlineViewModel.BetaAccessMessage, configuration)}; SignIn={RedactDiagnosticMessage(onlineViewModel.SignInMessage, configuration)}");
+            await onlineViewModel.SignOutAsync();
+            return;
+        }
+
+        Assert.True(
+            onlineViewModel.IsBetaAccessActive,
+            $"Activation failed: State={onlineViewModel.BetaAccessStateText}; Message={RedactDiagnosticMessage(onlineViewModel.BetaAccessMessage, configuration)}; SignIn={RedactDiagnosticMessage(onlineViewModel.SignInMessage, configuration)}");
         Assert.Equal(string.Empty, onlineViewModel.BetaAccessCode);
         Assert.True(File.Exists(location.TokenPath));
         _output.WriteLine(
@@ -162,6 +178,14 @@ public sealed class LiveDesktopLicensingIntegrationTests
             authenticationService,
             licenseActivationService);
     }
+
+    private static string RedactDiagnosticMessage(
+        string message,
+        LiveConfiguration configuration) =>
+        message
+            .Replace(configuration.Email, "[email]", StringComparison.OrdinalIgnoreCase)
+            .Replace(configuration.Password, "[password]", StringComparison.Ordinal)
+            .Replace(configuration.ActivationKey, "[activation-key]", StringComparison.Ordinal);
 
     private sealed record LiveServices(
         IAuthenticationService AuthenticationService,

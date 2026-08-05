@@ -45,7 +45,8 @@ public sealed class DesktopApiClient
         TRequest? request,
         string? bearerToken,
         bool allowRetry,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        string? accountSessionCookie = null)
     {
         ArgumentNullException.ThrowIfNull(method);
         if (string.IsNullOrWhiteSpace(relativePath))
@@ -70,7 +71,8 @@ public sealed class DesktopApiClient
                     method,
                     relativePath,
                     request,
-                    bearerToken);
+                    bearerToken,
+                    accountSessionCookie);
                 using var response = await _httpClient.SendAsync(
                     message,
                     HttpCompletionOption.ResponseHeadersRead,
@@ -179,7 +181,8 @@ public sealed class DesktopApiClient
         HttpMethod method,
         string relativePath,
         TRequest? request,
-        string? bearerToken)
+        string? bearerToken,
+        string? accountSessionCookie)
     {
         var message = new HttpRequestMessage(method, relativePath);
         if (!string.IsNullOrWhiteSpace(bearerToken))
@@ -188,6 +191,13 @@ public sealed class DesktopApiClient
                 new AuthenticationHeaderValue(
                     "Bearer",
                     bearerToken);
+        }
+
+        if (!string.IsNullOrWhiteSpace(accountSessionCookie))
+        {
+            message.Headers.TryAddWithoutValidation(
+                "Cookie",
+                $"pcspa_session={accountSessionCookie}");
         }
 
         if (request is not null)
@@ -205,10 +215,13 @@ public sealed class DesktopApiClient
         HttpResponseMessage response,
         CancellationToken cancellationToken)
     {
+        var accountSessionCookie = ExtractAccountSessionCookie(response);
         if (response.Content is null)
         {
             return response.IsSuccessStatusCode
-                ? ApiResponse<TResponse>.SuccessResult(default)
+                ? ApiResponse<TResponse>.SuccessResult(
+                    default,
+                    accountSessionCookie)
                 : ApiResponse<TResponse>.FailureResult(
                     MapFailure(response.StatusCode, null));
         }
@@ -217,7 +230,9 @@ public sealed class DesktopApiClient
             response.Content.Headers.ContentLength == 0)
         {
             return response.IsSuccessStatusCode
-                ? ApiResponse<TResponse>.SuccessResult(default)
+                ? ApiResponse<TResponse>.SuccessResult(
+                    default,
+                    accountSessionCookie)
                 : ApiResponse<TResponse>.FailureResult(
                     MapFailure(response.StatusCode, null));
         }
@@ -227,7 +242,9 @@ public sealed class DesktopApiClient
         if (string.IsNullOrWhiteSpace(responseBody))
         {
             return response.IsSuccessStatusCode
-                ? ApiResponse<TResponse>.SuccessResult(default)
+                ? ApiResponse<TResponse>.SuccessResult(
+                    default,
+                    accountSessionCookie)
                 : ApiResponse<TResponse>.FailureResult(
                     MapFailure(response.StatusCode, null));
         }
@@ -240,7 +257,9 @@ public sealed class DesktopApiClient
                 var payload = JsonSerializer.Deserialize<TResponse>(
                     responseBody,
                     SerializerOptions);
-                return ApiResponse<TResponse>.SuccessResult(payload);
+                return ApiResponse<TResponse>.SuccessResult(
+                    payload,
+                    accountSessionCookie);
             }
             catch (JsonException)
             {
@@ -338,6 +357,41 @@ public sealed class DesktopApiClient
         };
     }
 
+    private static string? ExtractAccountSessionCookie(
+        HttpResponseMessage response)
+    {
+        if (!response.Headers.TryGetValues("Set-Cookie", out var values))
+        {
+            return null;
+        }
+
+        foreach (var value in values)
+        {
+            var cookie = value.Split(';', 2)[0].Trim();
+            var separatorIndex = cookie.IndexOf('=');
+            if (separatorIndex <= 0)
+            {
+                continue;
+            }
+
+            var name = cookie[..separatorIndex].Trim();
+            if (!string.Equals(
+                    name,
+                    "pcspa_session",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var cookieValue = cookie[(separatorIndex + 1)..].Trim();
+            return string.IsNullOrWhiteSpace(cookieValue)
+                ? null
+                : cookieValue;
+        }
+
+        return null;
+    }
+
     private sealed record ApiErrorEnvelope(
         string? Error,
         string? Code,
@@ -346,14 +400,16 @@ public sealed class DesktopApiClient
     public sealed record ApiResponse<TResponse>(
         bool Success,
         TResponse? Payload,
-        ApiFailure? Failure)
+        ApiFailure? Failure,
+        string? AccountSessionCookie)
     {
         public static ApiResponse<TResponse> SuccessResult(
-            TResponse? payload) =>
-            new(true, payload, null);
+            TResponse? payload,
+            string? accountSessionCookie = null) =>
+            new(true, payload, null, accountSessionCookie);
 
         public static ApiResponse<TResponse> FailureResult(
             ApiFailure failure) =>
-            new(false, default, failure);
+            new(false, default, failure, null);
     }
 }

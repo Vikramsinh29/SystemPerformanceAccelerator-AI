@@ -16,14 +16,26 @@ public sealed class LicenseActivationServiceFoundationTests
         var handler = new RecordingHandler(request =>
             JsonResponse(HttpStatusCode.OK, new
             {
-                licenseToken = "license-token-456",
-                licenseId = "lic-1",
-                plan = "pro",
-                status = "active",
-                deviceId = "device-abc",
-                activatedUtc = "2026-08-04T12:00:00Z",
-                expiresUtc = "2026-09-04T12:00:00Z",
-                validatedUtc = "2026-08-04T12:00:00Z"
+                data = new
+                {
+                    status = "activated",
+                    sessionToken = "license-token-456",
+                    expiresAt = "2026-09-04T12:00:00Z",
+                    license = new
+                    {
+                        id = "lic-1",
+                        state = "active",
+                        expiresAt = "2026-09-04T12:00:00Z"
+                    },
+                    device = new
+                    {
+                        id = "device-abc"
+                    },
+                    activation = new
+                    {
+                        id = "activation-1"
+                    }
+                }
             }));
         var tokenStorage = new FileSecureTokenStorage(
             location.TokenPath,
@@ -44,14 +56,63 @@ public sealed class LicenseActivationServiceFoundationTests
 
         Assert.True(result.Success);
         Assert.Equal("license-token-456", result.LicenseToken);
+        Assert.Equal("lic-1", result.License?.LicenseId);
+        Assert.Equal("active", result.License?.Status);
+        Assert.Equal("device-abc", result.License?.DeviceId);
+        Assert.Null(result.License?.Plan);
         Assert.Equal(HttpMethod.Post, handler.Method);
         Assert.Equal("/api/licenses/activate", handler.Path);
-        Assert.Equal("Bearer session-token-123", handler.AuthorizationHeader);
+        Assert.Null(handler.AuthorizationHeader);
+        Assert.Null(handler.CookieHeader);
         using var json = JsonDocument.Parse(handler.RequestBody!);
         Assert.Equal("D1-Key.MixedCase-123", json.RootElement.GetProperty("activationKey").GetString());
         Assert.Equal("device-abc", json.RootElement.GetProperty("deviceId").GetString());
         Assert.Equal("license-token-456", await tokenStorage.GetLicenseTokenAsync());
         Assert.DoesNotContain("D1-Key.MixedCase-123", File.ReadAllText(location.TokenPath));
+    }
+
+    [Fact]
+    public async Task ActivateAsync_WhenSessionTokenMissing_FailsWithoutStoringLicenseToken()
+    {
+        var handler = new RecordingHandler(_ =>
+            JsonResponse(HttpStatusCode.OK, new
+            {
+                data = new
+                {
+                    status = "activated",
+                    license = new
+                    {
+                        id = "lic-1",
+                        state = "active"
+                    },
+                    device = new
+                    {
+                        id = "device-abc"
+                    }
+                }
+            }));
+        var tokenStorage = new InMemorySecureTokenStorage
+        {
+            SessionToken = "session-token"
+        };
+        var service = new LicenseActivationService(
+            new DesktopApiClient(
+                new HttpClient(handler)
+                {
+                    BaseAddress = new Uri("https://desktop.test/")
+                },
+                TimeSpan.FromSeconds(2)),
+            tokenStorage,
+            new StableDeviceIdentityProvider("device-abc"));
+
+        var result = await service.ActivateAsync(
+            new LicenseActivationRequest("d1-issued-key"));
+
+        Assert.False(result.Success);
+        Assert.Equal(ApiErrorKind.UnexpectedResponse, result.Failure?.Kind);
+        Assert.Null(await tokenStorage.GetLicenseTokenAsync());
+        Assert.Null(handler.AuthorizationHeader);
+        Assert.Null(handler.CookieHeader);
     }
 
     [Fact]
@@ -205,7 +266,7 @@ public sealed class LicenseActivationServiceFoundationTests
         Assert.False(result.Success);
         Assert.Equal(expectedKind, result.Failure?.Kind);
         Assert.Equal(code, result.Failure?.Code);
-        Assert.Equal("Bearer session-token", handler.AuthorizationHeader);
+        Assert.Null(handler.AuthorizationHeader);
     }
 
     [Fact]
@@ -215,13 +276,24 @@ public sealed class LicenseActivationServiceFoundationTests
         var activationHandler = new RecordingHandler(_ =>
             JsonResponse(HttpStatusCode.OK, new
             {
-                licenseToken = "license-token-after-restart",
-                licenseId = "lic-restart",
-                plan = "pro",
-                status = "active",
-                deviceId = "device-restart",
-                activatedUtc = "2026-08-04T12:00:00Z",
-                validatedUtc = "2026-08-04T12:00:00Z"
+                data = new
+                {
+                    status = "activated",
+                    sessionToken = "license-token-after-restart",
+                    license = new
+                    {
+                        id = "lic-restart",
+                        state = "active"
+                    },
+                    device = new
+                    {
+                        id = "device-restart"
+                    },
+                    activation = new
+                    {
+                        id = "activation-restart"
+                    }
+                }
             }));
         var tokenStorage = new FileSecureTokenStorage(
             location.TokenPath,
@@ -280,9 +352,15 @@ public sealed class LicenseActivationServiceFoundationTests
         var handler = new RecordingHandler(_ =>
             JsonResponse(HttpStatusCode.OK, new
             {
-                licenseToken = "license-token",
-                status = "active",
-                deviceId = "device-abc"
+                data = new
+                {
+                    status = "activated",
+                    sessionToken = "license-token",
+                    device = new
+                    {
+                        id = "device-abc"
+                    }
+                }
             }));
         var tokenStorage = new InMemorySecureTokenStorage
         {
@@ -324,6 +402,8 @@ public sealed class LicenseActivationServiceFoundationTests
 
         public string? AuthorizationHeader { get; private set; }
 
+        public string? CookieHeader { get; private set; }
+
         public HttpMethod? Method { get; private set; }
 
         public string? Path { get; private set; }
@@ -338,6 +418,11 @@ public sealed class LicenseActivationServiceFoundationTests
                 ? null
                 : await request.Content.ReadAsStringAsync(cancellationToken);
             AuthorizationHeader = request.Headers.Authorization?.ToString();
+            CookieHeader = request.Headers.TryGetValues(
+                "Cookie",
+                out var values)
+                ? string.Join("; ", values)
+                : null;
             return responder(request);
         }
     }

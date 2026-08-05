@@ -30,13 +30,11 @@ public sealed class LicenseActivationService : ILicenseActivationService
         ArgumentNullException.ThrowIfNull(request);
         var deviceId = await _deviceIdentityProvider.GetDeviceIdAsync(
             cancellationToken);
-        var sessionToken = await _tokenStorage.GetSessionTokenAsync(
-            cancellationToken);
         var response = await _apiClient.SendAsync<ActivateApiRequest, ActivateApiResponse>(
             HttpMethod.Post,
             "api/licenses/activate",
             new ActivateApiRequest(request.ActivationKey.Trim(), deviceId),
-            bearerToken: sessionToken,
+            bearerToken: null,
             allowRetry: false,
             cancellationToken);
 
@@ -49,7 +47,8 @@ public sealed class LicenseActivationService : ILicenseActivationService
                 response.Failure);
         }
 
-        if (string.IsNullOrWhiteSpace(response.Payload?.LicenseToken))
+        var licenseToken = response.Payload?.Data?.SessionToken;
+        if (string.IsNullOrWhiteSpace(licenseToken))
         {
             return new LicenseActivationResult(
                 false,
@@ -64,12 +63,12 @@ public sealed class LicenseActivationService : ILicenseActivationService
         }
 
         await _tokenStorage.StoreLicenseTokenAsync(
-            response.Payload.LicenseToken,
+            licenseToken,
             cancellationToken);
         return new LicenseActivationResult(
             true,
-            response.Payload.LicenseToken,
-            response.Payload.ToModel(),
+            licenseToken,
+            response.Payload?.ToModel(),
             null);
     }
 
@@ -146,24 +145,47 @@ public sealed class LicenseActivationService : ILicenseActivationService
         string DeviceId);
 
     internal sealed record ActivateApiResponse(
-        string? LicenseToken,
-        string? LicenseId,
-        string? Plan,
+        ActivateApiData? Data)
+    {
+        public LicenseStatus? ToModel() => Data?.ToModel();
+    }
+
+    internal sealed record ActivateApiData(
         string? Status,
-        string? DeviceId,
-        DateTimeOffset? ActivatedUtc,
-        DateTimeOffset? ExpiresUtc,
-        DateTimeOffset? ValidatedUtc)
+        string? SessionToken,
+        DateTimeOffset? ExpiresAt,
+        ActivateApiLicense? License,
+        ActivateApiDevice? Device,
+        ActivateApiActivation? Activation)
     {
         public LicenseStatus ToModel() => new(
-            LicenseId,
-            Plan,
-            Status,
-            DeviceId,
-            ActivatedUtc,
-            ExpiresUtc,
-            ValidatedUtc);
+            License?.Id,
+            null,
+            License?.State ?? MapActivationStatus(Status),
+            Device?.Id,
+            null,
+            License?.ExpiresAt ?? ExpiresAt,
+            null);
+
+        private static string? MapActivationStatus(string? status) =>
+            string.Equals(
+                status,
+                "activated",
+                StringComparison.OrdinalIgnoreCase)
+                ? "active"
+                : status;
     }
+
+    internal sealed record ActivateApiLicense(
+        string? Id,
+        string? State,
+        DateTimeOffset? ExpiresAt);
+
+    internal sealed record ActivateApiDevice(
+        string? Id);
+
+    internal sealed record ActivateApiActivation(
+        string? Id);
 
     internal sealed record ValidateApiRequest(
         string DeviceId);

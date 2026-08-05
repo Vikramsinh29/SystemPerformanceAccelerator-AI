@@ -38,7 +38,12 @@ public sealed class AuthenticationService : IAuthenticationService
             return new AuthLoginResult(false, null, null, response.Failure);
         }
 
-        if (string.IsNullOrWhiteSpace(response.Payload?.SessionToken))
+        var session = response.Payload?.ToModel();
+        if (session is null ||
+            string.IsNullOrWhiteSpace(session.UserId) ||
+            string.IsNullOrWhiteSpace(session.Email) ||
+            !session.IsAuthenticated ||
+            string.IsNullOrWhiteSpace(response.AccountSessionCookie))
         {
             return new AuthLoginResult(
                 false,
@@ -48,17 +53,17 @@ public sealed class AuthenticationService : IAuthenticationService
                     ApiErrorKind.UnexpectedResponse,
                     null,
                     null,
-                    "The authentication response did not include a session token.",
+                    "The authentication response did not include a valid account session.",
                     false));
         }
 
         await _tokenStorage.StoreSessionTokenAsync(
-            response.Payload.SessionToken,
+            response.AccountSessionCookie,
             cancellationToken);
         return new AuthLoginResult(
             true,
-            response.Payload.SessionToken,
-            response.Payload.ToModel(),
+            response.AccountSessionCookie,
+            session,
             null);
     }
 
@@ -71,9 +76,10 @@ public sealed class AuthenticationService : IAuthenticationService
             HttpMethod.Post,
             "api/auth/logout",
             request: null,
-            bearerToken: token,
+            bearerToken: null,
             allowRetry: false,
-            cancellationToken);
+            cancellationToken,
+            accountSessionCookie: token);
 
         if (!response.Success)
         {
@@ -93,9 +99,10 @@ public sealed class AuthenticationService : IAuthenticationService
             HttpMethod.Get,
             "api/auth/session",
             request: null,
-            bearerToken: token,
+            bearerToken: null,
             allowRetry: true,
-            cancellationToken);
+            cancellationToken,
+            accountSessionCookie: token);
 
         return response.Success
             ? new AuthSessionResult(true, response.Payload?.ToModel(), null)
@@ -107,20 +114,30 @@ public sealed class AuthenticationService : IAuthenticationService
         string Password);
 
     internal sealed record LoginApiResponse(
-        string? SessionToken,
-        string? UserId,
-        string? Email,
-        string? DisplayName,
-        bool Authenticated,
-        DateTimeOffset? ExpiresUtc)
+        LoginApiData? Data)
     {
-        public AuthSession ToModel() => new(
-            UserId,
-            Email,
-            DisplayName,
-            Authenticated,
-            ExpiresUtc);
+        public AuthSession? ToModel() => Data?.ToModel();
     }
+
+    internal sealed record LoginApiData(
+        LoginApiUser? User,
+        DateTimeOffset? ExpiresAt)
+    {
+        public AuthSession? ToModel() => User is null
+            ? null
+            : new AuthSession(
+                User.Id,
+                User.Email,
+                User.DisplayName,
+                !string.IsNullOrWhiteSpace(User.Id) &&
+                !string.IsNullOrWhiteSpace(User.Email),
+                ExpiresAt);
+    }
+
+    internal sealed record LoginApiUser(
+        string? Id,
+        string? Email,
+        string? DisplayName);
 
     internal sealed record LogoutApiResponse(
         bool Success);
