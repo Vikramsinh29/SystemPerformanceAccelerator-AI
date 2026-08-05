@@ -213,22 +213,33 @@ public sealed class DesktopApiClient
                     MapFailure(response.StatusCode, null));
         }
 
-        await using var stream = await response.Content.ReadAsStreamAsync(
+        if (response.StatusCode == HttpStatusCode.NoContent ||
+            response.Content.Headers.ContentLength == 0)
+        {
+            return response.IsSuccessStatusCode
+                ? ApiResponse<TResponse>.SuccessResult(default)
+                : ApiResponse<TResponse>.FailureResult(
+                    MapFailure(response.StatusCode, null));
+        }
+
+        var responseBody = await response.Content.ReadAsStringAsync(
             cancellationToken);
+        if (string.IsNullOrWhiteSpace(responseBody))
+        {
+            return response.IsSuccessStatusCode
+                ? ApiResponse<TResponse>.SuccessResult(default)
+                : ApiResponse<TResponse>.FailureResult(
+                    MapFailure(response.StatusCode, null));
+        }
 
         if (response.IsSuccessStatusCode)
         {
-            if (stream.Length == 0)
-            {
-                return ApiResponse<TResponse>.SuccessResult(default);
-            }
-
             try
             {
-                var payload = await JsonSerializer.DeserializeAsync<TResponse>(
-                    stream,
-                    SerializerOptions,
-                    cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
+                var payload = JsonSerializer.Deserialize<TResponse>(
+                    responseBody,
+                    SerializerOptions);
                 return ApiResponse<TResponse>.SuccessResult(payload);
             }
             catch (JsonException)
@@ -245,10 +256,10 @@ public sealed class DesktopApiClient
 
         try
         {
-            var error = await JsonSerializer.DeserializeAsync<ApiErrorEnvelope>(
-                stream,
-                SerializerOptions,
-                cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            var error = JsonSerializer.Deserialize<ApiErrorEnvelope>(
+                responseBody,
+                SerializerOptions);
             return ApiResponse<TResponse>.FailureResult(
                 MapFailure(response.StatusCode, error));
         }
