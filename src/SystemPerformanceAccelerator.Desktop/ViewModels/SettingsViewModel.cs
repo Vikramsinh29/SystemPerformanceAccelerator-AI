@@ -1493,38 +1493,63 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
                 null,
                 null,
                 0,
-                "PC-SPA could not activate this computer.");
+                WithDiagnosticCode(
+                    "PC-SPA could not activate this computer.",
+                    "NETWORK_ERROR"));
         }
 
-        var message = failure.Kind switch
+        var diagnosticCode = GetDiagnosticCode(failure);
+        var message = diagnosticCode switch
         {
-            ApiErrorKind.ValidationFailed when HasMarker(
-                failure,
-                "device_limit",
-                "activation_limit",
-                "limit") =>
-                "This activation key has reached its device limit for PC-SPA.",
-            ApiErrorKind.ValidationFailed or
-            ApiErrorKind.Conflict or
-            ApiErrorKind.InvalidRequest =>
-                "The activation key is invalid, expired, or not eligible for this computer.",
-            ApiErrorKind.AuthenticationFailed =>
+            "INVALID_KEY" =>
+                "The activation key is not valid for PC-SPA.",
+            "UNAUTHENTICATED" =>
                 "Sign in again before activating this computer.",
-            ApiErrorKind.NetworkUnavailable =>
+            "WRONG_USER" =>
+                "This activation key belongs to a different signed-in account.",
+            "PENDING" =>
+                "This PC-SPA license is pending activation or approval.",
+            "REVOKED" =>
+                "This PC-SPA license was revoked.",
+            "EXPIRED" =>
+                "This PC-SPA license expired.",
+            "ACTIVATION_LIMIT" =>
+                "This activation key has reached its device limit for PC-SPA.",
+            "DEVICE_ALREADY_ACTIVE" =>
+                "This PC is already active for this license.",
+            "NETWORK_ERROR" =>
                 "PC-SPA could not reach the activation service. Check the connection and try again.",
-            ApiErrorKind.Timeout =>
-                "The activation service did not respond in time. Try again.",
-            _ => failure.Message
+            _ => failure.Kind switch
+            {
+                ApiErrorKind.ValidationFailed when HasMarker(
+                    failure,
+                    "device_limit",
+                    "activation_limit",
+                    "limit") =>
+                    "This activation key has reached its device limit for PC-SPA.",
+                ApiErrorKind.ValidationFailed or
+                ApiErrorKind.Conflict or
+                ApiErrorKind.InvalidRequest =>
+                    "The activation key is invalid, expired, or not eligible for this computer.",
+                ApiErrorKind.AuthenticationFailed =>
+                    "Sign in again before activating this computer.",
+                ApiErrorKind.NetworkUnavailable =>
+                    "PC-SPA could not reach the activation service. Check the connection and try again.",
+                ApiErrorKind.Timeout =>
+                    "The activation service did not respond in time. Try again.",
+                _ => failure.Message
+            }
         };
 
+        var status = diagnosticCode.ToLowerInvariant();
         return new BetaAccessStatus(
             false,
-            "activation_rejected",
+            status == "network_error" ? "activation_rejected" : status,
             null,
             null,
             null,
             0,
-            message);
+            WithDiagnosticCode(message, diagnosticCode));
     }
 
     private static BetaAccessStatus MapValidationFailure(ApiFailure? failure)
@@ -1533,32 +1558,104 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         {
             return BetaAccessStatus.NotActivated with
             {
-                Message = "PC-SPA could not validate the saved license."
+                Message = WithDiagnosticCode(
+                    "PC-SPA could not validate the saved license.",
+                    "NETWORK_ERROR")
             };
         }
 
-        if (failure.StatusCode == HttpStatusCode.Unauthorized ||
-            failure.Kind == ApiErrorKind.AuthenticationFailed)
+        var diagnosticCode = GetDiagnosticCode(failure);
+        var message = diagnosticCode switch
         {
-            return new BetaAccessStatus(
-                false,
-                "invalid",
-                null,
-                null,
-                null,
-                0,
-                "The saved PC-SPA license is no longer valid on this computer.");
-        }
+            "UNAUTHENTICATED" =>
+                "Sign in again to validate the saved PC-SPA license.",
+            "WRONG_USER" =>
+                "The saved PC-SPA license belongs to a different account.",
+            "PENDING" =>
+                "The saved PC-SPA license is pending activation or approval.",
+            "REVOKED" =>
+                "The saved PC-SPA license was revoked.",
+            "EXPIRED" =>
+                "The saved PC-SPA license expired.",
+            "ACTIVATION_LIMIT" =>
+                "The saved PC-SPA license has reached its device limit.",
+            "DEVICE_ALREADY_ACTIVE" =>
+                "This PC is already active for this license.",
+            "INVALID_KEY" =>
+                "The saved PC-SPA license is no longer valid on this computer.",
+            "NETWORK_ERROR" =>
+                "PC-SPA could not reach the licensing service. Check the connection and try again.",
+            _ => failure.Message
+        };
 
         return new BetaAccessStatus(
             false,
-            "service_unavailable",
+            diagnosticCode.ToLowerInvariant(),
             null,
             null,
             null,
             0,
-            failure.Message);
+            WithDiagnosticCode(message, diagnosticCode));
     }
+
+    private static string GetDiagnosticCode(ApiFailure failure)
+    {
+        var normalized = NormalizeDiagnosticCode(failure.Code);
+        if (normalized is not null)
+        {
+            return normalized;
+        }
+
+        return failure.Kind switch
+        {
+            ApiErrorKind.AuthenticationFailed => "UNAUTHENTICATED",
+            ApiErrorKind.AuthorizationFailed => "WRONG_USER",
+            ApiErrorKind.NetworkUnavailable or
+            ApiErrorKind.Timeout or
+            ApiErrorKind.Transient or
+            ApiErrorKind.ServerError => "NETWORK_ERROR",
+            _ => "INVALID_KEY"
+        };
+    }
+
+    private static string? NormalizeDiagnosticCode(string? code)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            return null;
+        }
+
+        var normalized = code.Trim().ToUpperInvariant().Replace('-', '_');
+        return normalized switch
+        {
+            "INVALID_KEY" or
+            "INVALID_ACTIVATION_KEY" or
+            "INVALID_LICENSE" => "INVALID_KEY",
+            "UNAUTHENTICATED" or
+            "AUTHENTICATION_REQUIRED" or
+            "SESSION_REQUIRED" => "UNAUTHENTICATED",
+            "WRONG_USER" or
+            "LICENSE_USER_MISMATCH" => "WRONG_USER",
+            "PENDING" or
+            "LICENSE_PENDING" => "PENDING",
+            "REVOKED" or
+            "LICENSE_REVOKED" => "REVOKED",
+            "EXPIRED" or
+            "LICENSE_EXPIRED" => "EXPIRED",
+            "ACTIVATION_LIMIT" or
+            "DEVICE_LIMIT" or
+            "DEVICE_LIMIT_REACHED" => "ACTIVATION_LIMIT",
+            "DEVICE_ALREADY_ACTIVE" or
+            "INSTALLATION_ALREADY_ACTIVATED" => "DEVICE_ALREADY_ACTIVE",
+            "NETWORK_ERROR" => "NETWORK_ERROR",
+            _ => normalized
+        };
+    }
+
+    private static string WithDiagnosticCode(
+        string message,
+        string diagnosticCode) =>
+        $"{message} [{diagnosticCode}]";
 
     private static string MapLocalCleanupWarning(
         string fallbackMessage,

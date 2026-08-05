@@ -35,7 +35,7 @@ public sealed class LicenseActivationService : ILicenseActivationService
         var response = await _apiClient.SendAsync<ActivateApiRequest, ActivateApiResponse>(
             HttpMethod.Post,
             "api/licenses/activate",
-            new ActivateApiRequest(request.ActivationKey, deviceId),
+            new ActivateApiRequest(request.ActivationKey.Trim(), deviceId),
             bearerToken: sessionToken,
             allowRetry: false,
             cancellationToken);

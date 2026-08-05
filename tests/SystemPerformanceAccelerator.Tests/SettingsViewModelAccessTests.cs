@@ -102,6 +102,34 @@ public sealed class SettingsViewModelAccessTests
     }
 
     [Fact]
+    public async Task ActivateBetaAccessAsync_SendsTrimmedKeyWithoutOtherNormalization()
+    {
+        var licenseService = new StubLicenseActivationService
+        {
+            ActivateResult = new LicenseActivationResult(
+                true,
+                "license-token",
+                new LicenseStatus(
+                    "LIC-001",
+                    "pro",
+                    "active",
+                    "device-1",
+                    null,
+                    null,
+                    null),
+                null)
+        };
+        var viewModel = CreateViewModel(
+            licenseActivationService: licenseService,
+            secureTokenStorage: new InMemorySecureTokenStorage());
+        viewModel.BetaAccessCode = "  D1-Key.MixedCase-123  ";
+
+        await viewModel.ActivateBetaAccessAsync();
+
+        Assert.Equal("D1-Key.MixedCase-123", licenseService.LastActivationRequest?.ActivationKey);
+    }
+
+    [Fact]
     public async Task ActivateBetaAccessAsync_InvalidKey_ClearsActivationKeyAndShowsFriendlyError()
     {
         var licenseService = new StubLicenseActivationService
@@ -127,6 +155,7 @@ public sealed class SettingsViewModelAccessTests
         Assert.False(viewModel.IsBetaAccessActive);
         Assert.Equal(string.Empty, viewModel.BetaAccessCode);
         Assert.Contains("invalid", viewModel.BetaAccessMessage, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("INVALID_KEY", viewModel.BetaAccessMessage, StringComparison.Ordinal);
     }
 
     [Theory]
@@ -190,6 +219,83 @@ public sealed class SettingsViewModelAccessTests
         await viewModel.ActivateBetaAccessAsync();
 
         Assert.Contains("device limit", viewModel.BetaAccessMessage, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("ACTIVATION_LIMIT", viewModel.BetaAccessMessage, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("INVALID_KEY", "not valid")]
+    [InlineData("UNAUTHENTICATED", "Sign in again")]
+    [InlineData("WRONG_USER", "different signed-in account")]
+    [InlineData("PENDING", "pending")]
+    [InlineData("REVOKED", "revoked")]
+    [InlineData("EXPIRED", "expired")]
+    [InlineData("ACTIVATION_LIMIT", "device limit")]
+    [InlineData("DEVICE_ALREADY_ACTIVE", "already active")]
+    public async Task ActivateBetaAccessAsync_DistinguishesBackendErrorCodes(
+        string code,
+        string expectedMessageFragment)
+    {
+        var licenseService = new StubLicenseActivationService
+        {
+            ActivateResult = new LicenseActivationResult(
+                false,
+                null,
+                null,
+                new ApiFailure(
+                    ApiErrorKind.Conflict,
+                    null,
+                    code,
+                    "Backend rejection.",
+                    false))
+        };
+        var viewModel = CreateViewModel(
+            licenseActivationService: licenseService,
+            secureTokenStorage: new InMemorySecureTokenStorage());
+        viewModel.BetaAccessCode = "ACT-123";
+
+        await viewModel.ActivateBetaAccessAsync();
+
+        Assert.False(viewModel.IsBetaAccessActive);
+        Assert.Contains(expectedMessageFragment, viewModel.BetaAccessMessage, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains(code, viewModel.BetaAccessMessage, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("PENDING", "pending")]
+    [InlineData("REVOKED", "revoked")]
+    [InlineData("EXPIRED", "expired")]
+    [InlineData("WRONG_USER", "different account")]
+    [InlineData("ACTIVATION_LIMIT", "device limit")]
+    public async Task RefreshBetaAccessAsync_DistinguishesValidationErrorCodes(
+        string code,
+        string expectedMessageFragment)
+    {
+        var secureTokenStorage = new InMemorySecureTokenStorage
+        {
+            LicenseToken = "license-token"
+        };
+        var licenseService = new StubLicenseActivationService
+        {
+            ValidateResult = new LicenseValidationResult(
+                false,
+                null,
+                new ApiFailure(
+                    ApiErrorKind.Conflict,
+                    null,
+                    code,
+                    "Backend rejection.",
+                    false))
+        };
+        var viewModel = CreateViewModel(
+            licenseActivationService: licenseService,
+            secureTokenStorage: secureTokenStorage);
+
+        await viewModel.RefreshBetaAccessAsync();
+
+        Assert.False(viewModel.IsBetaAccessActive);
+        Assert.Equal(string.Empty, secureTokenStorage.LicenseToken);
+        Assert.Contains(expectedMessageFragment, viewModel.BetaAccessMessage, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains(code, viewModel.BetaAccessMessage, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -636,10 +742,15 @@ public sealed class SettingsViewModelAccessTests
         public Func<CancellationToken, Task<LicenseValidationResult>>?
             ValidateAsyncHandler { get; set; }
 
+        public LicenseActivationRequest? LastActivationRequest { get; private set; }
+
         public Task<LicenseActivationResult> ActivateAsync(
             LicenseActivationRequest request,
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult(ActivateResult);
+            CancellationToken cancellationToken = default)
+        {
+            LastActivationRequest = request;
+            return Task.FromResult(ActivateResult);
+        }
 
         public Task<LicenseValidationResult> ValidateAsync(
             CancellationToken cancellationToken = default) =>

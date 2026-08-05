@@ -2,6 +2,8 @@ using SystemPerformanceAccelerator.Core.Models;
 
 namespace SystemPerformanceAccelerator.Core.Interfaces;
 
+[Obsolete(
+    "Legacy controlled-beta access-code activation is not part of the production licensing runtime. Use ILicenseActivationService.")]
 public interface IBetaAccessService
 {
     Task<BetaAccessStatus> GetStatusAsync(
