@@ -7,7 +7,7 @@ Set-StrictMode -Version Latest
 
 $repo = Split-Path -Parent $PSScriptRoot
 $installerPublisher = Join-Path $PSScriptRoot "Publish-Windows-x64-Installer.ps1"
-$version = "1.0.0"
+$version = "1.0.0-beta.1"
 $bundleName = "PC-SPA-$version-win-x64-controlled-beta"
 $installerName = "PC-SPA-$version-win-x64-setup.exe"
 $bundleInstallerName = "2-INSTALL-PC-SPA.exe"

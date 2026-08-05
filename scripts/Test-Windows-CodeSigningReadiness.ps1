@@ -14,7 +14,7 @@ Set-StrictMode -Version Latest
 
 $repo = Split-Path -Parent $PSScriptRoot
 $publishDirectory = Join-Path $repo "artifacts\publish\win-x64"
-$installerPath = Join-Path $repo "artifacts\installer\PC-SPA-1.0.0-win-x64-setup.exe"
+$installerPath = Join-Path $repo "artifacts\installer\PC-SPA-1.0.0-beta.1-win-x64-setup.exe"
 $issues = [System.Collections.Generic.List[string]]::new()
 
 if ($env:OS -ne "Windows_NT") {

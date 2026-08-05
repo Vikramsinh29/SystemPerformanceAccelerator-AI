@@ -10,7 +10,7 @@ $repo = Split-Path -Parent $PSScriptRoot
 $solution = Join-Path $repo "SystemPerformanceAccelerator.slnx"
 $desktopProject = Join-Path $repo "src\SystemPerformanceAccelerator.Desktop\SystemPerformanceAccelerator.Desktop.csproj"
 
-$version = "1.0.0"
+$version = "1.0.0-beta.1"
 $runtimeIdentifier = "win-x64"
 $releaseName = "PC-SPA-$version-$runtimeIdentifier-portable"
 
@@ -143,7 +143,7 @@ if ($remainingPdbFiles.Count -gt 0) {
 
 $versionInfo = (Get-Item -LiteralPath $executable).VersionInfo
 
-if (-not $versionInfo.FileVersion.StartsWith($version)) {
+if (-not $versionInfo.FileVersion.StartsWith("1.0.0.1")) {
     throw "Published executable FileVersion is '$($versionInfo.FileVersion)', expected $version."
 }
 
