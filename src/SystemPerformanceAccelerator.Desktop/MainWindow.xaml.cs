@@ -184,14 +184,6 @@ public partial class MainWindow : Window
             OnMainViewModelPropertyChanged;
     }
 
-    private async void Window_Loaded(object sender, RoutedEventArgs e)
-    {
-        if (DataContext is MainWindowViewModel viewModel)
-        {
-            await viewModel.Settings.InitializeBetaAccessAsync();
-        }
-    }
-
     private void OnMainViewModelPropertyChanged(
         object? sender,
         PropertyChangedEventArgs e)

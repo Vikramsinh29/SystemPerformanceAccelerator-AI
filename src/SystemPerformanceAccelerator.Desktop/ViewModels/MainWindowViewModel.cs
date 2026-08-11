@@ -309,11 +309,27 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         _ => string.Empty
     };
 
-    public bool IsBetaAccessInitializing =>
-        !Settings.IsBetaAccessInitialized;
+    public bool IsBetaAccessInitializing => false;
 
-    public bool IsBetaAccessGateVisible =>
-        Settings.IsBetaAccessInitialized && !Settings.IsBetaAccessActive;
+    public bool IsBetaAccessGateVisible => false;
+
+    public string BetaBuildReleaseText
+    {
+        get
+        {
+            var status = BetaBuildPolicy.EvaluateCurrentBuild();
+            return $"Official release: {status.ReleaseUtc:d MMMM yyyy} UTC";
+        }
+    }
+
+    public string BetaBuildExpiryText
+    {
+        get
+        {
+            var status = BetaBuildPolicy.EvaluateCurrentBuild();
+            return $"Expires: {status.ExpiresUtc:d MMMM yyyy HH:mm} UTC";
+        }
+    }
 
     public FeatureAccessPresentation CurrentFeatureAccess =>
         GetAccessPresentation(_currentModule);

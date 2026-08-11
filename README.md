@@ -188,20 +188,17 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Cleanup confirmation remains permanently enabled as a non-disableable safety rule
 - No cloud account, telemetry, registry writing, startup modification, or automatic optimization
 
-### Controlled beta access
+### Open Beta build policy
 
-The desktop client enforces controlled-beta access at startup. Optimizer controls remain behind an activation gate until the server verifies an active entitlement. If the service is temporarily unreachable, a DPAPI-protected local entitlement remains usable only until its server-issued expiry; missing, expired, revoked, or unreadable credentials remain locked with activation and retry recovery available.
+PC-SPA Beta builds do not require an account, activation key, entitlement check, or licensing-service connection. Each build embeds its official UTC release timestamp and works for exactly 30 days from that timestamp. Version `1.0.0-beta.1` was officially released at `2026-08-07T00:00:00Z` and expires at `2026-09-06T00:00:00Z`.
 
-- One-time invitation-code activation from the Settings screen
-- Stable anonymous Installation ID generated automatically for the beta entitlement
-- Live activation and verification through the separately deployed Cloudflare Worker
-- Readable entitlement token stored only on the Windows PC
-- Token encrypted for the current Windows user with Windows Data Protection (DPAPI)
-- Cloudflare stores only hashes and entitlement metadata, not the readable token
-- Status, entitlement reference, and local-time expiry displayed in Settings
-- Automatic verification at application startup and manual retry from Settings
-- Clear unavailable messaging when the service or internet connection cannot be reached
-- Core cleanup and analysis services remain independently operable during a temporary service outage
+- Startup licensing initialization and the activation gate are disabled for Beta builds
+- Account & Activation clearly states that Beta access is open
+- Release and expiry timestamps are displayed in Settings
+- Expired builds stop at startup and direct the tester to install a newer official Beta build
+- The controlled-Beta publisher verifies that its release timestamp matches the desktop build metadata
+- The authentication, secure-token, activation, and entitlement foundation remains dormant for a future commercial release
+- Expiry is based on the immutable official build release timestamp, not installation or first-run time
 
 ### Edition and feature access foundation
 

@@ -8,6 +8,8 @@ Set-StrictMode -Version Latest
 $repo = Split-Path -Parent $PSScriptRoot
 $installerPublisher = Join-Path $PSScriptRoot "Publish-Windows-x64-Installer.ps1"
 $version = "1.0.0-beta.1"
+$betaReleaseUtc = [DateTimeOffset]::Parse("2026-08-07T00:00:00Z")
+$betaExpiresUtc = $betaReleaseUtc.AddDays(30)
 $bundleName = "PC-SPA-$version-win-x64-controlled-beta"
 $installerName = "PC-SPA-$version-win-x64-setup.exe"
 $bundleInstallerName = "2-INSTALL-PC-SPA.exe"
@@ -15,6 +17,7 @@ $installerDirectory = Join-Path $repo "artifacts\installer"
 $installerPath = Join-Path $installerDirectory $installerName
 $installerHashPath = "$installerPath.sha256"
 $brandingDirectory = Join-Path $repo "src\SystemPerformanceAccelerator.Desktop\Assets\Branding"
+$desktopProject = Join-Path $repo "src\SystemPerformanceAccelerator.Desktop\SystemPerformanceAccelerator.Desktop.csproj"
 $guideLogoPath = Join-Path $brandingDirectory "PC-SPA-Exact-Original-2048x2048.png"
 $releaseDirectory = Join-Path $repo "artifacts\beta"
 $stagingDirectory = Join-Path $releaseDirectory "_staging\$bundleName"
@@ -29,6 +32,12 @@ Set-Location $repo
 
 if (-not (Test-Path -LiteralPath $installerPublisher -PathType Leaf)) {
     throw "Verified installer publisher is missing: $installerPublisher"
+}
+
+$projectText = Get-Content -LiteralPath $desktopProject -Raw
+$expectedReleaseElement = "<BetaReleaseUtc>$($betaReleaseUtc.ToString('yyyy-MM-ddTHH:mm:ssZ'))</BetaReleaseUtc>"
+if (-not $projectText.Contains($expectedReleaseElement)) {
+    throw "Desktop Beta release metadata does not match the controlled-beta publisher."
 }
 
 $installerArguments = @{}
@@ -100,6 +109,10 @@ $guideLogoBase64 = [Convert]::ToBase64String(
 $betaReadme = @"
 PC-SPA $version - CONTROLLED BETA
 
+OFFICIAL RELEASE (UTC): $($betaReleaseUtc.ToString("yyyy-MM-dd HH:mm"))
+BUILD EXPIRY (UTC): $($betaExpiresUtc.ToString("yyyy-MM-dd HH:mm"))
+No account or activation key is required during this Beta period.
+
 This package is for invited beta testers only. It is not a publicly trusted or
 Microsoft Store release.
 
@@ -113,6 +126,8 @@ SECURITY AND PRIVACY
   a Microsoft Defender SmartScreen warning.
 - Verify the installer SHA-256 before running it.
 - PC-SPA core tools work locally without a cloud account or telemetry.
+- This Beta build works for 30 days from its official release timestamp and
+  then requires installation of a newer official Beta build.
 - Beta Error Feedback is the only optional network feature. It sends only
   after the tester reviews the report, selects consent, and presses the send
   action. Personal files and file contents are never attached or uploaded.

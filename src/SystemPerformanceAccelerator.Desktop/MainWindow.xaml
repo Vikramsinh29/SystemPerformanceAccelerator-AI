@@ -16,7 +16,6 @@
         WindowStyle="None"
         ResizeMode="CanResize"
         Closing="Window_Closing"
-        Loaded="Window_Loaded"
         StateChanged="Window_StateChanged"
         Style="{StaticResource FluentWindowStyle}"
         Background="{DynamicResource AppBackgroundBrush}">
@@ -5966,6 +5965,60 @@
                                 Padding="18"
                                 Style="{StaticResource FluentCardStyle}"
                                 Visibility="{Binding DataContext.IsAccountActivationSettingsPage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="OPEN BETA ACCESS"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   FontSize="10"
+                                                   FontWeight="Bold" />
+                                        <TextBlock Margin="0,5,0,0"
+                                                   Text="No account or activation key is required"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                   FontSize="15"
+                                                   FontWeight="SemiBold" />
+                                    </StackPanel>
+                                    <Border Grid.Column="1"
+                                            Padding="10,6"
+                                            Background="{DynamicResource AccentSoftBrush}"
+                                            CornerRadius="12"
+                                            VerticalAlignment="Center">
+                                        <TextBlock Text="BETA ACCESS OPEN"
+                                                   Foreground="{DynamicResource AccentBrush}"
+                                                   FontSize="10.5"
+                                                   FontWeight="SemiBold" />
+                                    </Border>
+                                </Grid>
+                                <TextBlock Margin="0,12,0,0"
+                                           Text="All locally available Beta features can be used without signing in or activating this PC. This build remains available for 30 days from its official release date."
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           FontSize="11"
+                                           TextWrapping="Wrap" />
+                                <WrapPanel Margin="0,14,0,0">
+                                    <Border Margin="0,0,8,6"
+                                            Style="{StaticResource OperationMetaChipStyle}">
+                                        <TextBlock Text="{Binding DataContext.BetaBuildReleaseText, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                   Foreground="{DynamicResource MetaTextBrush}"
+                                                   FontSize="10.5" />
+                                    </Border>
+                                    <Border Margin="0,0,0,6"
+                                            Style="{StaticResource OperationMetaChipStyle}">
+                                        <TextBlock Text="{Binding DataContext.BetaBuildExpiryText, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                   Foreground="{DynamicResource MetaTextBrush}"
+                                                   FontSize="10.5" />
+                                    </Border>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Margin="0,0,0,14"
+                                Padding="18"
+                                Style="{StaticResource FluentCardStyle}"
+                                Visibility="Collapsed">
                             <StackPanel>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
