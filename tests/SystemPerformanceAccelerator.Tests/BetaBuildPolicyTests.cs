@@ -1,5 +1,6 @@
 using System.Reflection;
 using SystemPerformanceAccelerator.Desktop.Services;
+using Xunit;
 
 namespace SystemPerformanceAccelerator.Tests;
 

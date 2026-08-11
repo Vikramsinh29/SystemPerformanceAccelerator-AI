@@ -1,3 +1,5 @@
+using Xunit;
+
 namespace SystemPerformanceAccelerator.Tests;
 
 public sealed class OpenBetaPresentationTests
