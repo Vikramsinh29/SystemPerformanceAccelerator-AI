@@ -8,7 +8,6 @@ using SystemPerformanceAccelerator.Core.Interfaces;
 using SystemPerformanceAccelerator.Core.Models;
 using SystemPerformanceAccelerator.Desktop.Services;
 using SystemPerformanceAccelerator.Desktop.ViewModels;
-using SystemPerformanceAccelerator.Infrastructure.Configuration;
 using SystemPerformanceAccelerator.Infrastructure.Diagnostics;
 using SystemPerformanceAccelerator.Infrastructure.Repairs;
 using SystemPerformanceAccelerator.Infrastructure.Services;
@@ -122,34 +121,6 @@ public partial class MainWindow : Window
             developmentEditionOverrideProvider);
         var featureAccessGuard = new FeatureAccessGuard(
             featureAccessService);
-        var betaDataRoot = Path.Combine(
-            Environment.GetFolderPath(
-                Environment.SpecialFolder.LocalApplicationData),
-            "SystemPerformanceAccelerator");
-        var desktopApiOptions =
-            new DesktopApiOptionsProvider().Load();
-        var desktopApiClientFactory =
-            new DesktopApiHttpClientFactory(desktopApiOptions);
-        var desktopApiClient = new DesktopApiClient(
-            desktopApiClientFactory.GetOrCreate(),
-            desktopApiOptions.Timeout);
-        var secureTokenStorage = new FileSecureTokenStorage(
-            Path.Combine(
-                betaDataRoot,
-                "auth",
-                "tokens.dat"));
-        var authenticationService = new AuthenticationService(
-            desktopApiClient,
-            secureTokenStorage);
-        var licenseActivationService = new LicenseActivationService(
-            desktopApiClient,
-            secureTokenStorage,
-            new WindowsDeviceIdentityProvider(
-                Path.Combine(
-                    betaDataRoot,
-                    "licensing",
-                    "device-id.txt")));
-
         var viewModel = new MainWindowViewModel(
             temporaryFileService,
             customCleanService,
@@ -174,11 +145,7 @@ public partial class MainWindow : Window
             windowsRepairPlanHistoryService,
             windowsRepairExecutionService,
             windowsRepairExecutionHistoryService,
-            feedbackSubmissionService,
-            new AccessInteractionService(),
-            authenticationService,
-            licenseActivationService,
-            secureTokenStorage);
+            feedbackSubmissionService);
         DataContext = viewModel;
         viewModel.PropertyChanged +=
             OnMainViewModelPropertyChanged;
