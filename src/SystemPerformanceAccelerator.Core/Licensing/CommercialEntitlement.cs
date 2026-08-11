@@ -12,4 +12,5 @@ public sealed record CommercialEntitlement(
     DateTimeOffset? OfflineValidUntilUtc,
     int TransfersUsedInRollingWindow,
     DateTimeOffset TransferWindowStartedUtc,
-    DateTimeOffset? LastTransferUtc);
+    DateTimeOffset? LastTransferUtc,
+    DateTimeOffset? LastCommercialEventUtc = null);
