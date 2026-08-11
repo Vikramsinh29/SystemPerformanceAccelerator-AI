@@ -4,6 +4,7 @@ export { LicensingCompatibilityService } from "./licensing-compatibility-service
 export { createLicensingHttpAdapter } from "./licensing-http-adapter.js";
 export { createLicensingComposition } from "./licensing-composition.js";
 export { LicensingIdentityError, createLicensingIdentityBridge } from "./licensing-identity-bridge.js";
+export { LICENSING_RUNTIME_OPERATIONS, createLicensingWorkerRuntime } from "./licensing-worker-runtime.js";
 
 export default {
   async fetch() {
