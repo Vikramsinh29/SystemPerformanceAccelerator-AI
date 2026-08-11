@@ -5,6 +5,7 @@ export { createLicensingHttpAdapter } from "./licensing-http-adapter.js";
 export { createLicensingComposition } from "./licensing-composition.js";
 export { LicensingIdentityError, createLicensingIdentityBridge } from "./licensing-identity-bridge.js";
 export { LICENSING_RUNTIME_OPERATIONS, createLicensingWorkerRuntime } from "./licensing-worker-runtime.js";
+export { createLicensingStagingRouter } from "./licensing-staging-router.js";
 
 export default {
   async fetch() {
