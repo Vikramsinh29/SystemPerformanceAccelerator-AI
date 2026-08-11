@@ -2,6 +2,7 @@ export { D1LicensingEventStore } from "./licensing-event-store.js";
 export { D1DeviceActivationStore } from "./device-activation-store.js";
 export { LicensingCompatibilityService } from "./licensing-compatibility-service.js";
 export { createLicensingHttpAdapter } from "./licensing-http-adapter.js";
+export { createLicensingComposition } from "./licensing-composition.js";
 
 export default {
   async fetch() {
