@@ -26,11 +26,21 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         Settings
     }
 
+    private enum SettingsPage
+    {
+        General,
+        AccountActivation,
+        Diagnostics,
+        Feedback,
+        About
+    }
+
     private readonly ITemporaryFileService _temporaryFileService;
     private readonly IFeatureAccessGuard _featureAccessGuard;
     private readonly IDiagnosticService _diagnosticService;
     private CancellationTokenSource? _cancellationTokenSource;
     private ApplicationModule _currentModule = ApplicationModule.Cleaner;
+    private SettingsPage _currentSettingsPage = SettingsPage.General;
     private bool _isBusy;
     private int _progress;
     private string _status = "Ready. Scan before cleaning anything.";
@@ -186,6 +196,16 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ShowWindowsRepairAssessmentCommand = CreateNavigationCommand(ApplicationModule.WindowsRepairAssessment);
         ShowSystemMonitorCommand = CreateNavigationCommand(ApplicationModule.SystemMonitor);
         ShowSettingsCommand = CreateNavigationCommand(ApplicationModule.Settings);
+        ShowSettingsGeneralCommand = new RelayCommand(
+            () => SwitchSettingsPage(SettingsPage.General));
+        ShowSettingsAccountActivationCommand = new RelayCommand(
+            () => SwitchSettingsPage(SettingsPage.AccountActivation));
+        ShowSettingsDiagnosticsCommand = new RelayCommand(
+            () => SwitchSettingsPage(SettingsPage.Diagnostics));
+        ShowSettingsFeedbackCommand = new RelayCommand(
+            () => SwitchSettingsPage(SettingsPage.Feedback));
+        ShowSettingsAboutCommand = new RelayCommand(
+            () => SwitchSettingsPage(SettingsPage.About));
     }
 
     public ObservableCollection<CleanupCandidateViewModel> Candidates { get; } = [];
@@ -221,6 +241,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public RelayCommand ShowWindowsRepairAssessmentCommand { get; }
     public RelayCommand ShowSystemMonitorCommand { get; }
     public RelayCommand ShowSettingsCommand { get; }
+    public RelayCommand ShowSettingsGeneralCommand { get; }
+    public RelayCommand ShowSettingsAccountActivationCommand { get; }
+    public RelayCommand ShowSettingsDiagnosticsCommand { get; }
+    public RelayCommand ShowSettingsFeedbackCommand { get; }
+    public RelayCommand ShowSettingsAboutCommand { get; }
 
     public bool IsCleanerActive => _currentModule == ApplicationModule.Cleaner;
     public bool IsHealthCheckActive => _currentModule == ApplicationModule.HealthCheck;
@@ -243,6 +268,46 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public bool IsWindowsRepairAssessmentContentVisible => IsWindowsRepairAssessmentActive && WindowsRepairAssessmentAccess.IsAvailable;
     public bool IsSystemMonitorContentVisible => IsSystemMonitorActive && SystemMonitorAccess.IsAvailable;
     public bool IsSettingsContentVisible => IsSettingsActive && SettingsAccess.IsAvailable;
+
+    public bool IsGeneralSettingsPage =>
+        _currentSettingsPage == SettingsPage.General;
+
+    public bool IsAccountActivationSettingsPage =>
+        _currentSettingsPage == SettingsPage.AccountActivation;
+
+    public bool IsDiagnosticsSettingsPage =>
+        _currentSettingsPage == SettingsPage.Diagnostics;
+
+    public bool IsFeedbackSettingsPage =>
+        _currentSettingsPage == SettingsPage.Feedback;
+
+    public bool IsAboutSettingsPage =>
+        _currentSettingsPage == SettingsPage.About;
+
+    public string SettingsPageTitle => _currentSettingsPage switch
+    {
+        SettingsPage.General => "General settings",
+        SettingsPage.AccountActivation => "Account & Activation",
+        SettingsPage.Diagnostics => "Diagnostics",
+        SettingsPage.Feedback => "Feedback",
+        SettingsPage.About => "About PC-SPA",
+        _ => "Settings"
+    };
+
+    public string SettingsPageDescription => _currentSettingsPage switch
+    {
+        SettingsPage.General =>
+            "Choose appearance and safe operating defaults stored on this computer.",
+        SettingsPage.AccountActivation =>
+            "Review account and activation details without crowding the general settings page.",
+        SettingsPage.Diagnostics =>
+            "Manage privacy-safe local diagnostics and review technical evidence.",
+        SettingsPage.Feedback =>
+            "Preview and send a privacy-safe Beta error report to the PC-SPA team.",
+        SettingsPage.About =>
+            "Review the installed PC-SPA version, platform details, and local storage location.",
+        _ => string.Empty
+    };
 
     public bool IsBetaAccessInitializing =>
         !Settings.IsBetaAccessInitialized;
@@ -400,6 +465,33 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             Settings.RefreshDiagnosticState();
         }
         RaiseModulePropertiesChanged();
+    }
+
+    private void SwitchSettingsPage(SettingsPage page)
+    {
+        if (_currentSettingsPage == page)
+        {
+            return;
+        }
+
+        _currentSettingsPage = page;
+        if (page == SettingsPage.Diagnostics)
+        {
+            Settings.RefreshDiagnosticState();
+        }
+
+        RaiseSettingsPagePropertiesChanged();
+    }
+
+    private void RaiseSettingsPagePropertiesChanged()
+    {
+        OnPropertyChanged(nameof(IsGeneralSettingsPage));
+        OnPropertyChanged(nameof(IsAccountActivationSettingsPage));
+        OnPropertyChanged(nameof(IsDiagnosticsSettingsPage));
+        OnPropertyChanged(nameof(IsFeedbackSettingsPage));
+        OnPropertyChanged(nameof(IsAboutSettingsPage));
+        OnPropertyChanged(nameof(SettingsPageTitle));
+        OnPropertyChanged(nameof(SettingsPageDescription));
     }
 
     public bool HasUnreviewedDiagnosticError =>
