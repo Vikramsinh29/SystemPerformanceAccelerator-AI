@@ -3,6 +3,13 @@
   "name": "pc-spa-licensing-api-local",
   "main": "src/index.js",
   "compatibility_date": "2026-08-11",
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 0.1
+  },
+  "vars": {
+    "LICENSING_ENVIRONMENT": "local"
+  },
   "d1_databases": [
     {
       "binding": "LICENSING_DB",
@@ -10,5 +17,21 @@
       "database_id": "00000000-0000-0000-0000-000000000000",
       "migrations_dir": "migrations"
     }
-  ]
+  ],
+  "env": {
+    "staging": {
+      "name": "pc-spa-licensing-api-staging",
+      "vars": {
+        "LICENSING_ENVIRONMENT": "staging"
+      },
+      "d1_databases": [
+        {
+          "binding": "LICENSING_DB",
+          "database_name": "pc-spa-licensing-v2-staging",
+          "database_id": "00000000-0000-0000-0000-000000000000",
+          "migrations_dir": "migrations"
+        }
+      ]
+    }
+  }
 }
