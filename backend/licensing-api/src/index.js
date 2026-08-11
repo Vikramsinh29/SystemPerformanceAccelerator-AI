@@ -1,4 +1,5 @@
 export { D1LicensingEventStore } from "./licensing-event-store.js";
+export { D1DeviceActivationStore } from "./device-activation-store.js";
 
 export default {
   async fetch() {
