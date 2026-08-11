@@ -71,11 +71,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         IWindowsRepairPlanHistoryService? windowsRepairPlanHistoryService = null,
         IWindowsRepairExecutionService? windowsRepairExecutionService = null,
         IWindowsRepairExecutionHistoryService? windowsRepairExecutionHistoryService = null,
-        IDiagnosticFeedbackSubmissionService? feedbackSubmissionService = null,
-        IAccessInteractionService? accessInteractionService = null,
-        IAuthenticationService? authenticationService = null,
-        ILicenseActivationService? licenseActivationService = null,
-        ISecureTokenStorage? secureTokenStorage = null)
+        IDiagnosticFeedbackSubmissionService? feedbackSubmissionService = null)
     {
         _temporaryFileService = temporaryFileService;
         _featureAccessGuard = featureAccessGuard ??
@@ -167,10 +163,6 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             _diagnosticService,
             diagnosticInteractionService,
             feedbackSubmissionService,
-            accessInteractionService,
-            authenticationService,
-            licenseActivationService,
-            secureTokenStorage,
             ApplicationVersion.Replace("Version ", string.Empty));
         Settings.PropertyChanged += OnSettingsPropertyChanged;
 
@@ -305,7 +297,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public string SettingsPageTitle => _currentSettingsPage switch
     {
         SettingsPage.General => "General settings",
-        SettingsPage.AccountActivation => "Account & Activation",
+        SettingsPage.AccountActivation => "Beta Access",
         SettingsPage.Diagnostics => "Diagnostics",
         SettingsPage.Feedback => "Feedback",
         SettingsPage.About => "About PC-SPA",
@@ -317,7 +309,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         SettingsPage.General =>
             "Choose appearance and safe operating defaults stored on this computer.",
         SettingsPage.AccountActivation =>
-            "Review account and activation details without crowding the general settings page.",
+            "Review this build's activation-free Open Beta period.",
         SettingsPage.Diagnostics =>
             "Manage privacy-safe local diagnostics and review technical evidence.",
         SettingsPage.Feedback =>
@@ -326,10 +318,6 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             "Review the installed PC-SPA version, platform details, and local storage location.",
         _ => string.Empty
     };
-
-    public bool IsBetaAccessInitializing => false;
-
-    public bool IsBetaAccessGateVisible => false;
 
     public string BetaBuildReleaseText
     {
@@ -546,13 +534,6 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(HasUnreviewedDiagnosticError));
         }
 
-        if (args.PropertyName is
-            nameof(SettingsViewModel.IsBetaAccessInitialized) or
-            nameof(SettingsViewModel.IsBetaAccessActive))
-        {
-            OnPropertyChanged(nameof(IsBetaAccessInitializing));
-            OnPropertyChanged(nameof(IsBetaAccessGateVisible));
-        }
     }
 
     private RelayCommand CreateNavigationCommand(ApplicationModule module) =>

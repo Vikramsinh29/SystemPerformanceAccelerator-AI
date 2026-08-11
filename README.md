@@ -202,7 +202,7 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 PC-SPA Beta builds do not require an account, activation key, entitlement check, or licensing-service connection. Each build embeds its official UTC release timestamp and works for exactly 30 days from that timestamp. Version `1.0.0-beta.1` was officially released at `2026-08-07T00:00:00Z` and expires at `2026-09-06T00:00:00Z`.
 
 - Startup licensing initialization and the activation gate are disabled for Beta builds
-- Account & Activation clearly states that Beta access is open
+- Beta Access clearly states that the current build is activation-free
 - Release and expiry timestamps are displayed in Settings
 - Expired builds stop at startup and direct the tester to install a newer official Beta build
 - The controlled-Beta publisher verifies that its release timestamp matches the desktop build metadata
