@@ -4500,7 +4500,7 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="&#xE9D9;" Style="{StaticResource ActionButtonGlyphStyle}" />
                         <TextBlock Margin="8,0,0,0"
-                                   Text="Preview repair readiness"
+                                   Text="Review and repair"
                                    VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
