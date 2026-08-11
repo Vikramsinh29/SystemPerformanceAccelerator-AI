@@ -3,6 +3,7 @@ export { D1DeviceActivationStore } from "./device-activation-store.js";
 export { LicensingCompatibilityService } from "./licensing-compatibility-service.js";
 export { createLicensingHttpAdapter } from "./licensing-http-adapter.js";
 export { createLicensingComposition } from "./licensing-composition.js";
+export { LicensingIdentityError, createLicensingIdentityBridge } from "./licensing-identity-bridge.js";
 
 export default {
   async fetch() {
