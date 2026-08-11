@@ -5905,18 +5905,67 @@
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
                     <StackPanel HorizontalAlignment="Stretch">
+                        <StackPanel.Resources>
+                            <Style x:Key="SettingsPageButtonStyle"
+                                   TargetType="Button"
+                                   BasedOn="{StaticResource FluentSecondaryButtonStyle}">
+                                <Setter Property="Margin" Value="0,0,8,8" />
+                                <Setter Property="Padding" Value="14,8" />
+                                <Style.Triggers>
+                                    <Trigger Property="Tag" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+                                        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Resources>
+
                         <Border Margin="0,0,0,14" Style="{StaticResource ModuleHeroCardStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                 <Border Background="{DynamicResource AccentSoftBrush}" Style="{StaticResource ModuleHeroIconStyle}"><TextBlock Text="&#xE713;" Foreground="{DynamicResource AccentBrush}" Style="{StaticResource ModuleHeroGlyphStyle}" /></Border>
-                                <StackPanel Grid.Column="1" Margin="16,0,22,0" VerticalAlignment="Center"><TextBlock Text="Local application settings" Style="{StaticResource ModuleHeroTitleStyle}" /><TextBlock Text="Choose appearance and safe operating defaults. Settings remain local and cleanup confirmation stays mandatory." Style="{StaticResource ModuleHeroDescriptionStyle}" /></StackPanel>
-                                <Border Grid.Column="2" Padding="10,6" Background="{DynamicResource AccentSoftBrush}" CornerRadius="12" VerticalAlignment="Center"><TextBlock Text="Local only • immediate theme preview" Foreground="{DynamicResource AccentBrush}" FontSize="10.5" FontWeight="SemiBold" /></Border>
+                                <StackPanel Grid.Column="1" Margin="16,0,22,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding DataContext.SettingsPageTitle, RelativeSource={RelativeSource AncestorType=Window}}"
+                                               Style="{StaticResource ModuleHeroTitleStyle}" />
+                                    <TextBlock Text="{Binding DataContext.SettingsPageDescription, RelativeSource={RelativeSource AncestorType=Window}}"
+                                               Style="{StaticResource ModuleHeroDescriptionStyle}" />
+                                </StackPanel>
+                                <Border Grid.Column="2" Padding="10,6" Background="{DynamicResource AccentSoftBrush}" CornerRadius="12" VerticalAlignment="Center"><TextBlock Text="Focused settings pages" Foreground="{DynamicResource AccentBrush}" FontSize="10.5" FontWeight="SemiBold" /></Border>
                             </Grid>
                         </Border>
 
                         <Border Margin="0,0,0,14"
-                                Padding="18"
+                                Padding="12,12,4,4"
                                 Style="{StaticResource FluentCardStyle}">
+                            <WrapPanel>
+                                <Button Command="{Binding DataContext.ShowSettingsGeneralCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Tag="{Binding DataContext.IsGeneralSettingsPage, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Style="{StaticResource SettingsPageButtonStyle}"
+                                        Content="General" />
+                                <Button Command="{Binding DataContext.ShowSettingsAccountActivationCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Tag="{Binding DataContext.IsAccountActivationSettingsPage, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Style="{StaticResource SettingsPageButtonStyle}"
+                                        Content="Account &amp; Activation" />
+                                <Button Command="{Binding DataContext.ShowSettingsDiagnosticsCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Tag="{Binding DataContext.IsDiagnosticsSettingsPage, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Style="{StaticResource SettingsPageButtonStyle}"
+                                        Content="Diagnostics" />
+                                <Button Command="{Binding DataContext.ShowSettingsFeedbackCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Tag="{Binding DataContext.IsFeedbackSettingsPage, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Style="{StaticResource SettingsPageButtonStyle}"
+                                        Content="Feedback" />
+                                <Button Command="{Binding DataContext.ShowSettingsAboutCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Tag="{Binding DataContext.IsAboutSettingsPage, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Style="{StaticResource SettingsPageButtonStyle}"
+                                        Content="About" />
+                            </WrapPanel>
+                        </Border>
+
+                        <Border Margin="0,0,0,14"
+                                Padding="18"
+                                Style="{StaticResource FluentCardStyle}"
+                                Visibility="{Binding DataContext.IsAccountActivationSettingsPage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -6066,7 +6115,8 @@
                                 Background="{DynamicResource AccentSoftBrush}"
                                 BorderBrush="{DynamicResource AccentBrush}"
                                 BorderThickness="1.5"
-                                CornerRadius="10">
+                                CornerRadius="10"
+                                Visibility="{Binding DataContext.IsDiagnosticsSettingsPage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
@@ -6098,7 +6148,7 @@
                                                TextWrapping="Wrap" />
                                 </StackPanel>
                                 <Button Grid.Column="2"
-                                        Click="OnReportErrorClick"
+                                        Command="{Binding DataContext.ShowSettingsFeedbackCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                         Style="{StaticResource FluentPrimaryButtonStyle}"
                                         VerticalAlignment="Center">
                                     <StackPanel Orientation="Horizontal">
@@ -6112,7 +6162,8 @@
                         </Border>
 
                         <Border Padding="18"
-                                Style="{StaticResource FluentCardStyle}">
+                                Style="{StaticResource FluentCardStyle}"
+                                Visibility="{Binding DataContext.IsGeneralSettingsPage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="1.25*" MinWidth="180" />
@@ -6150,7 +6201,8 @@
 
                         <Border Margin="0,14,0,0"
                                 Padding="18"
-                                Style="{StaticResource FluentCardStyle}">
+                                Style="{StaticResource FluentCardStyle}"
+                                Visibility="{Binding DataContext.IsGeneralSettingsPage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel>
                                 <TextBlock Text="OPERATING DEFAULTS"
                                            Foreground="{DynamicResource TextSecondaryBrush}"
@@ -6251,7 +6303,8 @@
 
                         <Border Margin="0,14,0,0"
                                 Padding="18"
-                                Style="{StaticResource FluentCardStyle}">
+                                Style="{StaticResource FluentCardStyle}"
+                                Visibility="{Binding DataContext.IsGeneralSettingsPage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="1.1*" MinWidth="170" />
@@ -6288,7 +6341,8 @@
 
                         <Border Margin="0,14,0,0"
                                 Padding="18"
-                                Style="{StaticResource FluentCardStyle}">
+                                Style="{StaticResource FluentCardStyle}"
+                                Visibility="{Binding DataContext.IsDiagnosticsSettingsPage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -6481,7 +6535,8 @@
                                 Background="{DynamicResource CardBrush}"
                                 BorderBrush="{DynamicResource AccentBrush}"
                                 BorderThickness="1.5"
-                                CornerRadius="10">
+                                CornerRadius="10"
+                                Visibility="{Binding DataContext.IsFeedbackSettingsPage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel>
                                 <TextBlock Text="BETA ERROR FEEDBACK"
                                            Foreground="{DynamicResource TextSecondaryBrush}"
@@ -6608,7 +6663,8 @@
                         </Border>
 
                         <Border Margin="0,14,0,0"
-                                Style="{StaticResource BrandAboutCardStyle}">
+                                Style="{StaticResource BrandAboutCardStyle}"
+                                Visibility="{Binding DataContext.IsAboutSettingsPage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="250" />
@@ -6687,7 +6743,8 @@
                                 Background="{DynamicResource SurfaceMutedBrush}"
                                 BorderBrush="{DynamicResource BorderBrush}"
                                 BorderThickness="1"
-                                CornerRadius="8">
+                                CornerRadius="8"
+                                Visibility="{Binding DataContext.IsAboutSettingsPage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel>
                                 <TextBlock Text="LOCAL STORAGE"
                                            Foreground="{DynamicResource TextSecondaryBrush}"
