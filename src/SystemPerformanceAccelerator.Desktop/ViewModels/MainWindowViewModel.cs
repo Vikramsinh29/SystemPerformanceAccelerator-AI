@@ -23,7 +23,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         StartupManager,
         WindowsRepairAssessment,
         SystemMonitor,
-        Settings
+        Settings,
+        Help
     }
 
     private enum SettingsPage
@@ -196,6 +197,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ShowWindowsRepairAssessmentCommand = CreateNavigationCommand(ApplicationModule.WindowsRepairAssessment);
         ShowSystemMonitorCommand = CreateNavigationCommand(ApplicationModule.SystemMonitor);
         ShowSettingsCommand = CreateNavigationCommand(ApplicationModule.Settings);
+        ShowHelpCommand = new RelayCommand(
+            () => SwitchModule(ApplicationModule.Help),
+            CanSwitchModule);
         ShowSettingsGeneralCommand = new RelayCommand(
             () => SwitchSettingsPage(SettingsPage.General));
         ShowSettingsAccountActivationCommand = new RelayCommand(
@@ -206,6 +210,16 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             () => SwitchSettingsPage(SettingsPage.Feedback));
         ShowSettingsAboutCommand = new RelayCommand(
             () => SwitchSettingsPage(SettingsPage.About));
+        Help = new HelpCenterViewModel(
+            ShowCleanerCommand,
+            ShowHealthCheckCommand,
+            ShowCustomCleanCommand,
+            ShowAutoCleanScheduleCommand,
+            ShowLargeFileFinderCommand,
+            ShowDuplicateFileFinderCommand,
+            ShowStartupManagerCommand,
+            ShowWindowsRepairAssessmentCommand,
+            ShowSystemMonitorCommand);
     }
 
     public ObservableCollection<CleanupCandidateViewModel> Candidates { get; } = [];
@@ -218,6 +232,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public WindowsRepairAssessmentViewModel WindowsRepairAssessment { get; }
     public SystemMonitorViewModel SystemMonitor { get; }
     public SettingsViewModel Settings { get; }
+    public HelpCenterViewModel Help { get; }
     public FeatureAccessPresentation CleanerAccess { get; }
     public FeatureAccessPresentation HealthCheckAccess { get; }
     public FeatureAccessPresentation CustomCleanAccess { get; }
@@ -241,6 +256,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public RelayCommand ShowWindowsRepairAssessmentCommand { get; }
     public RelayCommand ShowSystemMonitorCommand { get; }
     public RelayCommand ShowSettingsCommand { get; }
+    public RelayCommand ShowHelpCommand { get; }
     public RelayCommand ShowSettingsGeneralCommand { get; }
     public RelayCommand ShowSettingsAccountActivationCommand { get; }
     public RelayCommand ShowSettingsDiagnosticsCommand { get; }
@@ -257,6 +273,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public bool IsWindowsRepairAssessmentActive => _currentModule == ApplicationModule.WindowsRepairAssessment;
     public bool IsSystemMonitorActive => _currentModule == ApplicationModule.SystemMonitor;
     public bool IsSettingsActive => _currentModule == ApplicationModule.Settings;
+    public bool IsHelpActive => _currentModule == ApplicationModule.Help;
 
     public bool IsCleanerContentVisible => IsCleanerActive && CleanerAccess.IsAvailable;
     public bool IsHealthCheckContentVisible => IsHealthCheckActive && HealthCheckAccess.IsAvailable;
@@ -268,6 +285,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public bool IsWindowsRepairAssessmentContentVisible => IsWindowsRepairAssessmentActive && WindowsRepairAssessmentAccess.IsAvailable;
     public bool IsSystemMonitorContentVisible => IsSystemMonitorActive && SystemMonitorAccess.IsAvailable;
     public bool IsSettingsContentVisible => IsSettingsActive && SettingsAccess.IsAvailable;
+    public bool IsHelpContentVisible => IsHelpActive;
 
     public bool IsGeneralSettingsPage =>
         _currentSettingsPage == SettingsPage.General;
@@ -335,7 +353,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         GetAccessPresentation(_currentModule);
 
     public bool IsLockedFeatureActive =>
-        CurrentFeatureAccess.IsVisible && !CurrentFeatureAccess.IsAvailable;
+        !IsHelpActive &&
+        CurrentFeatureAccess.IsVisible &&
+        !CurrentFeatureAccess.IsAvailable;
 
     public string ApplicationVersion
     {
@@ -372,6 +392,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ApplicationModule.WindowsRepairAssessment => "Windows Repair",
         ApplicationModule.SystemMonitor => "System Monitor",
         ApplicationModule.Settings => "Settings",
+        ApplicationModule.Help => "Help & Guides",
         _ => "PC-SPA"
     };
 
@@ -387,6 +408,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ApplicationModule.WindowsRepairAssessment => "Assess Windows component and protected-file integrity without performing repairs",
         ApplicationModule.SystemMonitor => "View live total CPU and physical-memory usage without changing the system",
         ApplicationModule.Settings => "Manage local appearance and safe operating defaults",
+        ApplicationModule.Help => "Find the right PC-SPA tool and follow its safest workflow",
         _ => string.Empty
     };
 
@@ -462,9 +484,10 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         var feature = GetFeature(module);
         if (_currentModule == module ||
             !CanSwitchModule() ||
-            !_featureAccessGuard.CanAccess(
-                feature,
-                FeatureAccessRequirement.Navigate))
+            (module != ApplicationModule.Help &&
+             !_featureAccessGuard.CanAccess(
+                 feature,
+                 FeatureAccessRequirement.Navigate)))
         {
             return;
         }
@@ -556,6 +579,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             ApplicationModule.WindowsRepairAssessment => WindowsRepairAssessmentAccess,
             ApplicationModule.SystemMonitor => SystemMonitorAccess,
             ApplicationModule.Settings => SettingsAccess,
+            ApplicationModule.Help => SettingsAccess,
             _ => CleanerAccess
         };
 
@@ -585,6 +609,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             ApplicationModule.WindowsRepairAssessment => ApplicationFeature.WindowsRepairAssessment,
             ApplicationModule.SystemMonitor => ApplicationFeature.SystemMonitor,
             ApplicationModule.Settings => ApplicationFeature.Settings,
+            ApplicationModule.Help => ApplicationFeature.Settings,
             _ => (ApplicationFeature)(-1)
         };
 
@@ -600,6 +625,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(IsWindowsRepairAssessmentActive));
         OnPropertyChanged(nameof(IsSystemMonitorActive));
         OnPropertyChanged(nameof(IsSettingsActive));
+        OnPropertyChanged(nameof(IsHelpActive));
         OnPropertyChanged(nameof(IsCleanerContentVisible));
         OnPropertyChanged(nameof(IsHealthCheckContentVisible));
         OnPropertyChanged(nameof(IsCustomCleanContentVisible));
@@ -610,6 +636,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(IsWindowsRepairAssessmentContentVisible));
         OnPropertyChanged(nameof(IsSystemMonitorContentVisible));
         OnPropertyChanged(nameof(IsSettingsContentVisible));
+        OnPropertyChanged(nameof(IsHelpContentVisible));
         OnPropertyChanged(nameof(CurrentFeatureAccess));
         OnPropertyChanged(nameof(IsLockedFeatureActive));
         OnPropertyChanged(nameof(ModuleTitle));
@@ -661,6 +688,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ShowWindowsRepairAssessmentCommand.RaiseCanExecuteChanged();
         ShowSystemMonitorCommand.RaiseCanExecuteChanged();
         ShowSettingsCommand.RaiseCanExecuteChanged();
+        ShowHelpCommand.RaiseCanExecuteChanged();
     }
 
     private void ApplySettings(ApplicationSettings settings)

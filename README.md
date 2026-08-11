@@ -188,6 +188,15 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Cleanup confirmation remains permanently enabled as a non-disableable safety rule
 - No cloud account, telemetry, registry writing, startup modification, or automatic optimization
 
+### Help & Guides
+
+- Separate Help navigation keeps instructional content out of the Tools list
+- Nine problem-based guides cover Cleaner, Health Check, Custom Clean, Auto Clean Schedule, Large File Finder, Duplicate Finder, Startup Manager, Windows Repair, and System Monitor
+- Search matches user problems, tool names, safe workflows, and safety notes
+- Every guide explains when to use the tool, when to avoid it, what to review, and what PC-SPA will not do automatically
+- `Open this tool` actions navigate directly to the selected desktop module without running an operation
+- All guidance is bundled locally and requires no account, telemetry, or internet connection
+
 ### Open Beta build policy
 
 PC-SPA Beta builds do not require an account, activation key, entitlement check, or licensing-service connection. Each build embeds its official UTC release timestamp and works for exactly 30 days from that timestamp. Version `1.0.0-beta.1` was officially released at `2026-08-07T00:00:00Z` and expires at `2026-09-06T00:00:00Z`.
