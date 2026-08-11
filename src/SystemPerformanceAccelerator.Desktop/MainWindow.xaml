@@ -1056,6 +1056,44 @@
                             </StackPanel>
                         </Grid>
                     </Button>
+
+                    <TextBlock Margin="22,14,0,7"
+                               Text="HELP"
+                               Foreground="{DynamicResource SidebarMutedTextBrush}"
+                               FontSize="10"
+                               FontWeight="Bold" />
+
+                    <Button Command="{Binding ShowHelpCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button"
+                                   BasedOn="{StaticResource NavigationButtonStyle}">
+                                <Setter Property="Cursor" Value="Hand" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsHelpActive}"
+                                                 Value="True">
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource SidebarSelectedBrush}" />
+                                        <Setter Property="Foreground"
+                                                Value="{DynamicResource SidebarSelectedForegroundBrush}" />
+                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="28" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="&#xE897;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="16" />
+                            <TextBlock Grid.Column="1"
+                                       Text="Help &amp; Guides"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+                    </Button>
                 </StackPanel>
                 </ScrollViewer>
 
@@ -4500,7 +4538,7 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="&#xE9D9;" Style="{StaticResource ActionButtonGlyphStyle}" />
                         <TextBlock Margin="8,0,0,0"
-                                   Text="Preview repair readiness"
+                                   Text="Review and repair"
                                    VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
@@ -5888,6 +5926,253 @@
                                    FontSize="11" />
                     </Grid>
                 </Border>
+            </Grid>
+
+
+            <Grid Grid.Row="1"
+                  Margin="20,16,20,18"
+                  DataContext="{Binding Help}"
+                  Visibility="{Binding DataContext.IsHelpContentVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel HorizontalAlignment="Stretch">
+                        <Border Margin="0,0,0,14"
+                                Style="{StaticResource ModuleHeroCardStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Border Background="{DynamicResource AccentSoftBrush}"
+                                        Style="{StaticResource ModuleHeroIconStyle}">
+                                    <TextBlock Text="&#xE897;"
+                                               Foreground="{DynamicResource AccentBrush}"
+                                               Style="{StaticResource ModuleHeroGlyphStyle}" />
+                                </Border>
+                                <StackPanel Grid.Column="1"
+                                            Margin="16,0,22,0"
+                                            VerticalAlignment="Center">
+                                    <TextBlock Text="Find the right tool for your problem"
+                                               Style="{StaticResource ModuleHeroTitleStyle}" />
+                                    <TextBlock Text="Search by symptom or goal, understand what each tool does, and follow its safest workflow."
+                                               Style="{StaticResource ModuleHeroDescriptionStyle}" />
+                                </StackPanel>
+                                <Border Grid.Column="2"
+                                        Style="{StaticResource OperationMetaChipStyle}">
+                                    <TextBlock Text="Offline guidance"
+                                               Foreground="{DynamicResource MetaTextBrush}"
+                                               FontSize="10.5"
+                                               FontWeight="SemiBold" />
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <Border Margin="0,0,0,14"
+                                Padding="18"
+                                Style="{StaticResource FluentCardStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="WHAT DO YOU NEED HELP WITH?"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               FontSize="10"
+                                               FontWeight="Bold" />
+                                    <TextBox Margin="0,8,0,0"
+                                             MinHeight="40"
+                                             Padding="12,8"
+                                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                             ToolTip="Try storage, startup, duplicate, Windows repair, CPU, or cleanup" />
+                                </StackPanel>
+                                <Border Grid.Column="1"
+                                        Margin="12,20,8,0"
+                                        Style="{StaticResource OperationMetaChipStyle}"
+                                        VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding VisibleGuideCountText}"
+                                               Foreground="{DynamicResource MetaTextBrush}"
+                                               FontSize="11" />
+                                </Border>
+                                <Button Grid.Column="2"
+                                        Margin="0,20,0,0"
+                                        Command="{Binding ClearSearchCommand}"
+                                        Content="Clear"
+                                        Style="{StaticResource FluentSecondaryButtonStyle}"
+                                        VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+
+                        <Border Margin="0,0,0,14"
+                                Padding="18"
+                                Background="{DynamicResource SuccessSoftBrush}"
+                                BorderBrush="{DynamicResource SuccessBrush}"
+                                BorderThickness="1"
+                                CornerRadius="10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="&#xE73E;"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="18"
+                                           Foreground="{DynamicResource SuccessBrush}"
+                                           VerticalAlignment="Top" />
+                                <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                                    <TextBlock Text="Safety first"
+                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                               FontSize="14"
+                                               FontWeight="SemiBold" />
+                                    <TextBlock Margin="0,4,0,0"
+                                               Text="Start with a scan or assessment, review full paths and results, select only items you understand, and read every confirmation. PC-SPA does not clean, recycle, disable, or repair automatically."
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               FontSize="11"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Margin="2,0,0,10"
+                                   Text="PROBLEM-BASED GUIDES"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   FontSize="10"
+                                   FontWeight="Bold" />
+
+                        <ItemsControl ItemsSource="{Binding FilteredGuides}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Width="500"
+                                            MinHeight="360"
+                                            Margin="0,0,12,12"
+                                            Padding="18"
+                                            Style="{StaticResource FluentCardStyle}">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="*" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Problem}"
+                                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                                               FontSize="15"
+                                                               FontWeight="SemiBold"
+                                                               TextWrapping="Wrap" />
+                                                    <TextBlock Margin="0,4,0,0"
+                                                               Text="{Binding Summary}"
+                                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                                               FontSize="11"
+                                                               TextWrapping="Wrap" />
+                                                </StackPanel>
+                                                <Border Grid.Column="1"
+                                                        Margin="12,0,0,0"
+                                                        Style="{StaticResource OperationMetaChipStyle}"
+                                                        VerticalAlignment="Top">
+                                                    <TextBlock Text="{Binding ToolName}"
+                                                               Foreground="{DynamicResource AccentBrush}"
+                                                               FontSize="10.5"
+                                                               FontWeight="SemiBold" />
+                                                </Border>
+                                            </Grid>
+
+                                            <TextBlock Grid.Row="1"
+                                                       Margin="0,14,0,0"
+                                                       Text="WHEN TO USE"
+                                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                                       FontSize="9.5"
+                                                       FontWeight="Bold" />
+                                            <TextBlock Grid.Row="2"
+                                                       Margin="0,4,0,0"
+                                                       Text="{Binding WhenToUse}"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                                       FontSize="11"
+                                                       TextWrapping="Wrap" />
+
+                                            <StackPanel Grid.Row="3" Margin="0,12,0,0">
+                                                <TextBlock Text="USE WITH CARE"
+                                                           Foreground="{DynamicResource WarningBrush}"
+                                                           FontSize="9.5"
+                                                           FontWeight="Bold" />
+                                                <TextBlock Margin="0,4,0,0"
+                                                           Text="{Binding WhenNotToUse}"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                                           FontSize="11"
+                                                           TextWrapping="Wrap" />
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Row="4" Margin="0,12,0,0">
+                                                <TextBlock Text="SAFE WORKFLOW"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                                           FontSize="9.5"
+                                                           FontWeight="Bold" />
+                                                <TextBlock Margin="0,4,0,0"
+                                                           Text="{Binding Steps}"
+                                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                                           FontSize="11"
+                                                           TextWrapping="Wrap" />
+                                            </StackPanel>
+
+                                            <Border Grid.Row="5"
+                                                    Margin="0,12,0,0"
+                                                    Padding="10"
+                                                    Background="{DynamicResource AccentSoftBrush}"
+                                                    CornerRadius="8"
+                                                    VerticalAlignment="Bottom">
+                                                <TextBlock Text="{Binding SafetyNote}"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                                           FontSize="10.5"
+                                                           TextWrapping="Wrap" />
+                                            </Border>
+
+                                            <Button Grid.Row="6"
+                                                    Margin="0,14,0,0"
+                                                    HorizontalAlignment="Right"
+                                                    Command="{Binding OpenToolCommand}"
+                                                    Content="Open this tool"
+                                                    Style="{StaticResource FluentPrimaryButtonStyle}" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <Border Margin="0,4,0,0"
+                                Padding="22"
+                                Style="{StaticResource FluentCardStyle}"
+                                Visibility="{Binding HasNoVisibleGuides, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="No matching guide found"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                           FontSize="15"
+                                           FontWeight="SemiBold"
+                                           HorizontalAlignment="Center" />
+                                <TextBlock Margin="0,5,0,0"
+                                           Text="Try a broader word such as storage, startup, repair, cleanup, duplicate, CPU, or memory."
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           FontSize="11"
+                                           TextWrapping="Wrap"
+                                           TextAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
             </Grid>
 
 
