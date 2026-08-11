@@ -8,6 +8,8 @@ using SystemPerformanceAccelerator.Infrastructure.Diagnostics;
 
 namespace SystemPerformanceAccelerator.Infrastructure.Services;
 
+[Obsolete(
+    "Legacy controlled-beta access-code activation is not part of the production licensing runtime. Use LicenseActivationService.")]
 public sealed class BetaAccessService : IBetaAccessService
 {
     public static readonly Uri ProductionEndpoint = new(

@@ -48,6 +48,10 @@ public sealed class ControlledBetaPackagingScriptTests
         Assert.Contains("local ZIP fallback was offered", script);
         Assert.Contains("exactly five documented files", script);
         Assert.Contains("$installerArguments.SkipDesktopCopy = $true", script);
+        Assert.Contains("2026-08-07T00:00:00Z", script);
+        Assert.Contains("$betaReleaseUtc.AddDays(30)", script);
+        Assert.Contains("No account or activation key is required", script);
+        Assert.Contains("Beta release metadata does not match", script);
     }
 
     [Fact]

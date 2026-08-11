@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.IO;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using SystemPerformanceAccelerator.Core.Interfaces;
@@ -16,7 +17,10 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     private readonly IDiagnosticInteractionService _diagnosticInteractionService;
     private readonly IDiagnosticFeedbackSubmissionService
         _feedbackSubmissionService;
-    private readonly IBetaAccessService? _betaAccessService;
+    private readonly IAccessInteractionService _accessInteractionService;
+    private readonly IAuthenticationService? _authenticationService;
+    private readonly ILicenseActivationService? _licenseActivationService;
+    private readonly ISecureTokenStorage? _secureTokenStorage;
     private readonly string _applicationVersion;
     private readonly Action<ApplicationSettings> _applySettings;
     private ApplicationTheme _selectedTheme;
@@ -32,10 +36,16 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     private string? _lastSubmittedFeedbackReference;
     private string _lastReviewedDiagnosticErrorReference;
     private string _status;
+    private string _signInEmail = string.Empty;
+    private string _signInPassword = string.Empty;
+    private string _signInMessage =
+        "Sign in with the email address used for your PC-SPA access.";
     private string _betaAccessCode = string.Empty;
     private BetaAccessStatus _betaAccessStatus = BetaAccessStatus.NotActivated;
     private bool _isBetaAccessBusy;
     private bool _isBetaAccessInitialized;
+    private AuthSession? _session;
+    private CancellationTokenSource? _betaAccessOperationSource;
 
     public SettingsViewModel(
         IApplicationSettingsService settingsService,
@@ -45,7 +55,10 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         IDiagnosticService? diagnosticService = null,
         IDiagnosticInteractionService? diagnosticInteractionService = null,
         IDiagnosticFeedbackSubmissionService? feedbackSubmissionService = null,
-        IBetaAccessService? betaAccessService = null,
+        IAccessInteractionService? accessInteractionService = null,
+        IAuthenticationService? authenticationService = null,
+        ILicenseActivationService? licenseActivationService = null,
+        ISecureTokenStorage? secureTokenStorage = null,
         string? applicationVersion = null)
     {
         _settingsService = settingsService ??
@@ -61,9 +74,13 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             new NonInteractiveDiagnosticInteractionService();
         _feedbackSubmissionService = feedbackSubmissionService ??
             new DisabledDiagnosticFeedbackSubmissionService();
-        _betaAccessService = betaAccessService;
+        _accessInteractionService = accessInteractionService ??
+            new NonInteractiveAccessInteractionService();
+        _authenticationService = authenticationService;
+        _licenseActivationService = licenseActivationService;
+        _secureTokenStorage = secureTokenStorage;
         _applicationVersion = string.IsNullOrWhiteSpace(applicationVersion)
-            ? "1.0.0"
+            ? "1.0.0-beta.1"
             : applicationVersion;
 
         _selectedTheme = loadResult.Settings.Theme;
@@ -130,6 +147,12 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             featureAccessGuard,
             ApplicationFeature.Settings,
             FeatureAccessRequirement.Execute);
+        SignInCommand = new AsyncRelayCommand(
+            SignInAsync,
+            () => !IsBetaAccessBusy && CanAttemptSignIn());
+        SignOutCommand = new AsyncRelayCommand(
+            SignOutAsync,
+            () => !IsBetaAccessBusy && IsSignedIn);
         ActivateBetaAccessCommand = new AsyncRelayCommand(
             ActivateBetaAccessAsync,
             () => !IsBetaAccessBusy &&
@@ -137,6 +160,9 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         RefreshBetaAccessCommand = new AsyncRelayCommand(
             RefreshBetaAccessAsync,
             () => !IsBetaAccessBusy);
+        DeactivateBetaAccessCommand = new AsyncRelayCommand(
+            DeactivateBetaAccessAsync,
+            () => !IsBetaAccessBusy && CanDeactivateLicense);
     }
 
     public IReadOnlyList<ApplicationTheme> ThemeOptions { get; } =
@@ -162,9 +188,60 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 
     public RelayCommand ResetInstallationIdCommand { get; }
 
+    public AsyncRelayCommand SignInCommand { get; }
+
+    public AsyncRelayCommand SignOutCommand { get; }
+
     public AsyncRelayCommand ActivateBetaAccessCommand { get; }
 
     public AsyncRelayCommand RefreshBetaAccessCommand { get; }
+
+    public AsyncRelayCommand DeactivateBetaAccessCommand { get; }
+
+    public string SignInEmail
+    {
+        get => _signInEmail;
+        set
+        {
+            if (SetField(ref _signInEmail, value))
+            {
+                SignInCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public string SignInPassword
+    {
+        get => _signInPassword;
+        set
+        {
+            if (SetField(ref _signInPassword, value))
+            {
+                SignInCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public string SignInMessage
+    {
+        get => _signInMessage;
+        private set => SetField(ref _signInMessage, value);
+    }
+
+    public string SignInStateText => IsSignedIn
+        ? "SIGNED IN"
+        : "SIGNED OUT";
+
+    public string SignedInIdentityText =>
+        IsSignedIn
+            ? string.IsNullOrWhiteSpace(_session?.Email)
+                ? "A saved PC-SPA session is active on this computer."
+                : $"Signed in as {_session!.Email}"
+            : "No saved PC-SPA session is active on this computer.";
+
+    public string SignInActionText => IsBetaAccessBusy
+        ? "Please wait..."
+        : "Sign in";
 
     public string BetaAccessCode
     {
@@ -185,14 +262,24 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         {
             if (SetField(ref _isBetaAccessBusy, value))
             {
+                SignInCommand.RaiseCanExecuteChanged();
+                SignOutCommand.RaiseCanExecuteChanged();
                 ActivateBetaAccessCommand.RaiseCanExecuteChanged();
                 RefreshBetaAccessCommand.RaiseCanExecuteChanged();
+                DeactivateBetaAccessCommand.RaiseCanExecuteChanged();
                 OnPropertyChanged(nameof(BetaAccessActionText));
+                OnPropertyChanged(nameof(SignInActionText));
             }
         }
     }
 
     public bool IsBetaAccessActive => _betaAccessStatus.IsActive;
+
+    public bool IsSignedIn => _session?.IsAuthenticated == true;
+
+    public bool CanDeactivateLicense =>
+        _betaAccessStatus.IsActive ||
+        _betaAccessStatus.Status == "verification_unavailable";
 
     public bool IsBetaAccessInitialized
     {
@@ -203,8 +290,13 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     public string BetaAccessStateText => _betaAccessStatus.Status switch
     {
         "active" => "ACTIVE",
-        "offline_grace" => "ACTIVE — OFFLINE",
+        "offline_grace" => "ACTIVE - OFFLINE",
+        "verification_unavailable" => "ACTIVE - OFFLINE",
+        "pending" => "PENDING",
         "expired" => "EXPIRED",
+        "revoked" => "REVOKED",
+        "deactivated" => "DEACTIVATED",
+        "invalid" => "INVALID",
         "service_unavailable" => "VERIFICATION UNAVAILABLE",
         "activation_rejected" => "ACTIVATION REJECTED",
         _ => "NOT ACTIVATED"
@@ -223,16 +315,27 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         : $"Access until {_betaAccessStatus.ExpiresUtc.Value.ToLocalTime():dd MMMM yyyy, h:mm tt}";
 
     public string BetaAccessActionText => IsBetaAccessBusy
-        ? "Please wait…"
+        ? "Please wait..."
         : IsBetaAccessActive
             ? "Verify access"
             : "Activate this PC";
 
     public async Task InitializeBetaAccessAsync()
     {
-        await RefreshBetaAccessAsync();
-        IsBetaAccessInitialized = true;
+        try
+        {
+            await RefreshAuthenticationStateAsync(
+                CreateOperationToken());
+            await RefreshBetaAccessAsync();
+        }
+        finally
+        {
+            IsBetaAccessInitialized = true;
+        }
     }
+
+    public void CancelBetaAccessOperations() =>
+        _betaAccessOperationSource?.Cancel();
 
     public ApplicationTheme SelectedTheme
     {
@@ -387,6 +490,319 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         private set => SetField(ref _status, value);
     }
 
+    public async Task SignInAsync()
+    {
+        var validationError = ValidateSignIn();
+        if (validationError is not null)
+        {
+            SignInMessage = validationError;
+            ClearPassword();
+            return;
+        }
+
+        if (_authenticationService is null)
+        {
+            SignInMessage =
+                "Desktop sign-in is not configured in this build.";
+            ClearPassword();
+            return;
+        }
+
+        var email = SignInEmail.Trim();
+        var password = SignInPassword;
+        ClearPassword();
+        IsBetaAccessBusy = true;
+        try
+        {
+            var result = await _authenticationService.LoginAsync(
+                new AuthLoginRequest(email, password),
+                CreateOperationToken());
+            if (result.Success)
+            {
+                _session = result.Session;
+                OnAuthenticationStateChanged();
+                SignInMessage = string.IsNullOrWhiteSpace(
+                    result.Session?.Email)
+                    ? "PC-SPA sign-in succeeded on this computer."
+                    : $"Signed in as {result.Session!.Email}.";
+                return;
+            }
+
+            SignInMessage = MapAuthenticationFailure(result.Failure);
+            if (result.Failure?.Kind is
+                ApiErrorKind.AuthenticationFailed or
+                ApiErrorKind.AuthorizationFailed)
+            {
+                await ClearSessionTokenAsync(CancellationToken.None);
+                _session = null;
+                OnAuthenticationStateChanged();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            SignInMessage = "Sign-in was cancelled before it finished.";
+        }
+        finally
+        {
+            IsBetaAccessBusy = false;
+        }
+    }
+
+    public async Task SignOutAsync()
+    {
+        if (!_accessInteractionService.ConfirmSignOut())
+        {
+            return;
+        }
+
+        IsBetaAccessBusy = true;
+        try
+        {
+            if (_authenticationService is null)
+            {
+                await ClearSessionTokenAsync(CreateOperationToken());
+                _session = null;
+                OnAuthenticationStateChanged();
+                SignInMessage =
+                    "The saved PC-SPA session was removed from this computer.";
+                return;
+            }
+
+            var result = await _authenticationService.LogoutAsync(
+                CreateOperationToken());
+            if (result.Success)
+            {
+                await ClearSessionTokenAsync(CancellationToken.None);
+                _session = null;
+                OnAuthenticationStateChanged();
+                SignInMessage =
+                    "The saved PC-SPA session was removed from this computer.";
+                return;
+            }
+
+            await ClearSessionTokenAsync(CancellationToken.None);
+            _session = null;
+            OnAuthenticationStateChanged();
+            SignInMessage = MapLocalCleanupWarning(
+                "The saved session was removed locally, but the sign-out request could not be confirmed online.",
+                result.Failure);
+        }
+        catch (OperationCanceledException)
+        {
+            SignInMessage = "Sign-out was cancelled before it finished.";
+        }
+        finally
+        {
+            IsBetaAccessBusy = false;
+        }
+    }
+
+    public async Task ActivateBetaAccessAsync()
+    {
+        var validationError = ValidateActivationKey();
+        if (validationError is not null)
+        {
+            ApplyBetaAccessStatus(new BetaAccessStatus(
+                false,
+                "activation_rejected",
+                null,
+                null,
+                null,
+                0,
+                validationError));
+            ClearActivationKey();
+            return;
+        }
+
+        if (_licenseActivationService is null)
+        {
+            ApplyBetaAccessStatus(new BetaAccessStatus(
+                false,
+                "service_unavailable",
+                null,
+                null,
+                null,
+                0,
+                "License activation is not configured in this build."));
+            ClearActivationKey();
+            return;
+        }
+
+        var activationKey = BetaAccessCode.Trim();
+        ClearActivationKey();
+        IsBetaAccessBusy = true;
+        try
+        {
+            var result = await _licenseActivationService.ActivateAsync(
+                new LicenseActivationRequest(activationKey),
+                CreateOperationToken());
+            if (result.Success)
+            {
+                ApplyLicenseStatus(
+                    result.License,
+                    "PC-SPA was activated successfully on this computer.");
+                return;
+            }
+
+            ApplyBetaAccessStatus(MapActivationFailure(result.Failure));
+        }
+        catch (OperationCanceledException)
+        {
+            ApplyBetaAccessStatus(new BetaAccessStatus(
+                false,
+                "not_activated",
+                null,
+                null,
+                null,
+                0,
+                "Activation was cancelled before it finished."));
+        }
+        finally
+        {
+            IsBetaAccessBusy = false;
+        }
+    }
+
+    public async Task RefreshBetaAccessAsync()
+    {
+        if (_licenseActivationService is null ||
+            _secureTokenStorage is null)
+        {
+            ApplyBetaAccessStatus(new BetaAccessStatus(
+                false,
+                "service_unavailable",
+                null,
+                null,
+                null,
+                0,
+                "License verification is not configured in this build."));
+            return;
+        }
+
+        IsBetaAccessBusy = true;
+        try
+        {
+            var cancellationToken = CreateOperationToken();
+            var hasStoredLicenseToken =
+                !string.IsNullOrWhiteSpace(
+                    await _secureTokenStorage.GetLicenseTokenAsync(
+                        cancellationToken));
+            if (!hasStoredLicenseToken)
+            {
+                ApplyBetaAccessStatus(new BetaAccessStatus(
+                    false,
+                    "not_activated",
+                    null,
+                    null,
+                    null,
+                    0,
+                    "Sign in if needed, then enter your activation key to unlock PC-SPA on this computer."));
+                return;
+            }
+
+            var result = await _licenseActivationService.ValidateAsync(
+                cancellationToken);
+            if (result.Success)
+            {
+                ApplyLicenseStatus(result.License);
+                if (!_betaAccessStatus.IsActive)
+                {
+                    await ClearLicenseTokenAsync(CancellationToken.None);
+                }
+
+                return;
+            }
+
+            if (IsTransientFailure(result.Failure))
+            {
+                ApplyBetaAccessStatus(new BetaAccessStatus(
+                    true,
+                    "verification_unavailable",
+                    null,
+                    null,
+                    null,
+                    0,
+                    "PC-SPA could not reach the licensing service. The saved license remains available on this computer and verification can be retried later."));
+                return;
+            }
+
+            await ClearLicenseTokenAsync(CancellationToken.None);
+            ApplyBetaAccessStatus(MapValidationFailure(result.Failure));
+        }
+        catch (OperationCanceledException)
+        {
+            ApplyBetaAccessStatus(new BetaAccessStatus(
+                false,
+                "service_unavailable",
+                null,
+                null,
+                null,
+                0,
+                "License verification was cancelled before it finished."));
+        }
+        finally
+        {
+            IsBetaAccessBusy = false;
+        }
+    }
+
+    public async Task DeactivateBetaAccessAsync()
+    {
+        if (!_accessInteractionService.ConfirmDeactivateLicense())
+        {
+            return;
+        }
+
+        IsBetaAccessBusy = true;
+        try
+        {
+            if (_licenseActivationService is null)
+            {
+                await ClearLicenseTokenAsync(CreateOperationToken());
+                ApplyBetaAccessStatus(BetaAccessStatus.NotActivated with
+                {
+                    Message = "The saved license token was removed from this computer."
+                });
+                return;
+            }
+
+            var result = await _licenseActivationService.DeactivateAsync(
+                CreateOperationToken());
+            if (result.Success)
+            {
+                await ClearLicenseTokenAsync(CancellationToken.None);
+                ApplyBetaAccessStatus(BetaAccessStatus.NotActivated with
+                {
+                    Message = "PC-SPA was deactivated on this computer."
+                });
+                return;
+            }
+
+            await ClearLicenseTokenAsync(CancellationToken.None);
+            ApplyBetaAccessStatus(BetaAccessStatus.NotActivated with
+            {
+                Message = MapLocalCleanupWarning(
+                    "The saved license was removed locally, but the deactivation request could not be confirmed online.",
+                    result.Failure)
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            ApplyBetaAccessStatus(new BetaAccessStatus(
+                _betaAccessStatus.IsActive,
+                _betaAccessStatus.Status,
+                _betaAccessStatus.EntitlementReference,
+                _betaAccessStatus.ActivatedUtc,
+                _betaAccessStatus.ExpiresUtc,
+                _betaAccessStatus.GracePeriodDays,
+                "License deactivation was cancelled before it finished."));
+        }
+        finally
+        {
+            IsBetaAccessBusy = false;
+        }
+    }
+
     private void Save()
     {
         if (!TryCreateSettings(out var settings, out var error))
@@ -417,65 +833,17 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         }
     }
 
-    private async Task ActivateBetaAccessAsync()
-    {
-        if (_betaAccessService is null)
-        {
-            ApplyBetaAccessStatus(new BetaAccessStatus(
-                false, "service_unavailable", null, null, null, 0,
-                "Beta access is not configured in this build."));
-            return;
-        }
-
-        IsBetaAccessBusy = true;
-        try
-        {
-            var result = await _betaAccessService.ActivateAsync(
-                BetaAccessCode,
-                _applicationVersion);
-            ApplyBetaAccessStatus(result);
-            if (result.IsActive)
-            {
-                BetaAccessCode = string.Empty;
-            }
-        }
-        finally
-        {
-            IsBetaAccessBusy = false;
-        }
-    }
-
-    private async Task RefreshBetaAccessAsync()
-    {
-        if (_betaAccessService is null)
-        {
-            ApplyBetaAccessStatus(new BetaAccessStatus(
-                false, "service_unavailable", null, null, null, 0,
-                "Beta access is not configured in this build."));
-            return;
-        }
-
-        IsBetaAccessBusy = true;
-        try
-        {
-            ApplyBetaAccessStatus(
-                await _betaAccessService.GetStatusAsync());
-        }
-        finally
-        {
-            IsBetaAccessBusy = false;
-        }
-    }
-
     private void ApplyBetaAccessStatus(BetaAccessStatus status)
     {
         _betaAccessStatus = status;
         OnPropertyChanged(nameof(IsBetaAccessActive));
+        OnPropertyChanged(nameof(CanDeactivateLicense));
         OnPropertyChanged(nameof(BetaAccessStateText));
         OnPropertyChanged(nameof(BetaAccessMessage));
         OnPropertyChanged(nameof(BetaAccessReferenceText));
         OnPropertyChanged(nameof(BetaAccessExpiryText));
         OnPropertyChanged(nameof(BetaAccessActionText));
+        DeactivateBetaAccessCommand.RaiseCanExecuteChanged();
     }
 
     private void RestoreDefaults()
@@ -651,6 +1019,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             {
                 TryMarkLatestErrorReviewed(Status);
             }
+
             FeedbackConsent = false;
         }
         catch (Exception ex) when (
@@ -925,6 +1294,389 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnAuthenticationStateChanged()
+    {
+        OnPropertyChanged(nameof(IsSignedIn));
+        OnPropertyChanged(nameof(SignInStateText));
+        OnPropertyChanged(nameof(SignedInIdentityText));
+        OnPropertyChanged(nameof(SignInActionText));
+        SignInCommand.RaiseCanExecuteChanged();
+        SignOutCommand.RaiseCanExecuteChanged();
+    }
+
+    private async Task RefreshAuthenticationStateAsync(
+        CancellationToken cancellationToken)
+    {
+        if (_authenticationService is null || _secureTokenStorage is null)
+        {
+            _session = null;
+            OnAuthenticationStateChanged();
+            return;
+        }
+
+        var storedToken = await _secureTokenStorage.GetSessionTokenAsync(
+            cancellationToken);
+        if (string.IsNullOrWhiteSpace(storedToken))
+        {
+            _session = null;
+            OnAuthenticationStateChanged();
+            return;
+        }
+
+        var result = await _authenticationService.GetSessionAsync(
+            cancellationToken);
+        if (result.Success)
+        {
+            _session = result.Session;
+            SignInMessage = string.IsNullOrWhiteSpace(result.Session?.Email)
+                ? "A saved PC-SPA session is active on this computer."
+                : $"Signed in as {result.Session!.Email}.";
+            OnAuthenticationStateChanged();
+            return;
+        }
+
+        if (IsTransientFailure(result.Failure))
+        {
+            _session = new AuthSession(
+                null,
+                null,
+                "Saved session",
+                true,
+                null);
+            SignInMessage =
+                "PC-SPA could not verify the saved sign-in session right now, but the local session token is still available.";
+            OnAuthenticationStateChanged();
+            return;
+        }
+
+        await ClearSessionTokenAsync(CancellationToken.None);
+        _session = null;
+        SignInMessage =
+            "The saved PC-SPA session is no longer valid. Sign in again if you need account access.";
+        OnAuthenticationStateChanged();
+    }
+
+    private void ApplyLicenseStatus(
+        LicenseStatus? license,
+        string? successMessage = null)
+    {
+        var status = (license?.Status ?? "invalid").Trim().ToLowerInvariant();
+        var message = successMessage ?? status switch
+        {
+            "active" => "PC-SPA access is active on this computer.",
+            "pending" => "The license is pending activation or approval. Complete activation or contact support.",
+            "revoked" => "This PC-SPA license was revoked. Reactivation is required.",
+            "expired" => "This PC-SPA license expired. Enter a valid activation key to continue.",
+            "deactivated" => "This PC-SPA license was deactivated. Enter a valid activation key to continue.",
+            _ => "This PC-SPA license is not valid on this computer."
+        };
+
+        ApplyBetaAccessStatus(new BetaAccessStatus(
+            status == "active",
+            status,
+            license?.LicenseId,
+            license?.ActivatedUtc,
+            license?.ExpiresUtc,
+            0,
+            message));
+    }
+
+    private string? ValidateSignIn()
+    {
+        if (string.IsNullOrWhiteSpace(SignInEmail))
+        {
+            return "Enter the email address used for your PC-SPA access.";
+        }
+
+        if (!SignInEmail.Contains('@', StringComparison.Ordinal))
+        {
+            return "Enter a valid email address before signing in.";
+        }
+
+        if (string.IsNullOrWhiteSpace(SignInPassword))
+        {
+            return "Enter your password before signing in.";
+        }
+
+        return null;
+    }
+
+    private string? ValidateActivationKey() =>
+        string.IsNullOrWhiteSpace(BetaAccessCode)
+            ? "Enter the activation key issued for this PC."
+            : null;
+
+    private bool CanAttemptSignIn() =>
+        !string.IsNullOrWhiteSpace(SignInEmail) &&
+        !string.IsNullOrWhiteSpace(SignInPassword) &&
+        !IsSignedIn;
+
+    private CancellationToken CreateOperationToken()
+    {
+        _betaAccessOperationSource?.Cancel();
+        _betaAccessOperationSource?.Dispose();
+        _betaAccessOperationSource = new CancellationTokenSource();
+        return _betaAccessOperationSource.Token;
+    }
+
+    private void ClearPassword()
+    {
+        SignInPassword = string.Empty;
+    }
+
+    private void ClearActivationKey()
+    {
+        BetaAccessCode = string.Empty;
+    }
+
+    private async Task ClearSessionTokenAsync(
+        CancellationToken cancellationToken)
+    {
+        if (_secureTokenStorage is null)
+        {
+            return;
+        }
+
+        await _secureTokenStorage.ClearSessionTokenAsync(
+            cancellationToken);
+    }
+
+    private async Task ClearLicenseTokenAsync(
+        CancellationToken cancellationToken)
+    {
+        if (_secureTokenStorage is null)
+        {
+            return;
+        }
+
+        await _secureTokenStorage.ClearLicenseTokenAsync(
+            cancellationToken);
+    }
+
+    private static bool IsTransientFailure(ApiFailure? failure) =>
+        failure?.Kind is
+            ApiErrorKind.NetworkUnavailable or
+            ApiErrorKind.Timeout or
+            ApiErrorKind.Transient or
+            ApiErrorKind.ServerError;
+
+    private static string MapAuthenticationFailure(ApiFailure? failure)
+    {
+        if (failure is null)
+        {
+            return "PC-SPA could not complete sign-in.";
+        }
+
+        return failure.Kind switch
+        {
+            ApiErrorKind.AuthenticationFailed =>
+                "The email address or password is incorrect.",
+            ApiErrorKind.AuthorizationFailed =>
+                "This account is not permitted to access PC-SPA licensing.",
+            ApiErrorKind.NetworkUnavailable =>
+                "PC-SPA could not reach the sign-in service. Check the connection and try again.",
+            ApiErrorKind.Timeout =>
+                "The sign-in service did not respond in time. Try again.",
+            _ => failure.Message
+        };
+    }
+
+    private static BetaAccessStatus MapActivationFailure(ApiFailure? failure)
+    {
+        if (failure is null)
+        {
+            return new BetaAccessStatus(
+                false,
+                "activation_rejected",
+                null,
+                null,
+                null,
+                0,
+                WithDiagnosticCode(
+                    "PC-SPA could not activate this computer.",
+                    "NETWORK_ERROR"));
+        }
+
+        var diagnosticCode = GetDiagnosticCode(failure);
+        var message = diagnosticCode switch
+        {
+            "INVALID_KEY" =>
+                "The activation key is not valid for PC-SPA.",
+            "UNAUTHENTICATED" =>
+                "Sign in again before activating this computer.",
+            "WRONG_USER" =>
+                "This activation key belongs to a different signed-in account.",
+            "PENDING" =>
+                "This PC-SPA license is pending activation or approval.",
+            "REVOKED" =>
+                "This PC-SPA license was revoked.",
+            "EXPIRED" =>
+                "This PC-SPA license expired.",
+            "ACTIVATION_LIMIT" =>
+                "This activation key has reached its device limit for PC-SPA.",
+            "DEVICE_ALREADY_ACTIVE" =>
+                "This PC is already active for this license.",
+            "NETWORK_ERROR" =>
+                "PC-SPA could not reach the activation service. Check the connection and try again.",
+            _ => failure.Kind switch
+            {
+                ApiErrorKind.ValidationFailed when HasMarker(
+                    failure,
+                    "device_limit",
+                    "activation_limit",
+                    "limit") =>
+                    "This activation key has reached its device limit for PC-SPA.",
+                ApiErrorKind.ValidationFailed or
+                ApiErrorKind.Conflict or
+                ApiErrorKind.InvalidRequest =>
+                    "The activation key is invalid, expired, or not eligible for this computer.",
+                ApiErrorKind.AuthenticationFailed =>
+                    "Sign in again before activating this computer.",
+                ApiErrorKind.NetworkUnavailable =>
+                    "PC-SPA could not reach the activation service. Check the connection and try again.",
+                ApiErrorKind.Timeout =>
+                    "The activation service did not respond in time. Try again.",
+                _ => failure.Message
+            }
+        };
+
+        var status = diagnosticCode.ToLowerInvariant();
+        return new BetaAccessStatus(
+            false,
+            status == "network_error" ? "activation_rejected" : status,
+            null,
+            null,
+            null,
+            0,
+            WithDiagnosticCode(message, diagnosticCode));
+    }
+
+    private static BetaAccessStatus MapValidationFailure(ApiFailure? failure)
+    {
+        if (failure is null)
+        {
+            return BetaAccessStatus.NotActivated with
+            {
+                Message = WithDiagnosticCode(
+                    "PC-SPA could not validate the saved license.",
+                    "NETWORK_ERROR")
+            };
+        }
+
+        var diagnosticCode = GetDiagnosticCode(failure);
+        var message = diagnosticCode switch
+        {
+            "UNAUTHENTICATED" =>
+                "Sign in again to validate the saved PC-SPA license.",
+            "WRONG_USER" =>
+                "The saved PC-SPA license belongs to a different account.",
+            "PENDING" =>
+                "The saved PC-SPA license is pending activation or approval.",
+            "REVOKED" =>
+                "The saved PC-SPA license was revoked.",
+            "EXPIRED" =>
+                "The saved PC-SPA license expired.",
+            "ACTIVATION_LIMIT" =>
+                "The saved PC-SPA license has reached its device limit.",
+            "DEVICE_ALREADY_ACTIVE" =>
+                "This PC is already active for this license.",
+            "INVALID_KEY" =>
+                "The saved PC-SPA license is no longer valid on this computer.",
+            "NETWORK_ERROR" =>
+                "PC-SPA could not reach the licensing service. Check the connection and try again.",
+            _ => failure.Message
+        };
+
+        return new BetaAccessStatus(
+            false,
+            diagnosticCode.ToLowerInvariant(),
+            null,
+            null,
+            null,
+            0,
+            WithDiagnosticCode(message, diagnosticCode));
+    }
+
+    private static string GetDiagnosticCode(ApiFailure failure)
+    {
+        var normalized = NormalizeDiagnosticCode(failure.Code);
+        if (normalized is not null)
+        {
+            return normalized;
+        }
+
+        return failure.Kind switch
+        {
+            ApiErrorKind.AuthenticationFailed => "UNAUTHENTICATED",
+            ApiErrorKind.AuthorizationFailed => "WRONG_USER",
+            ApiErrorKind.NetworkUnavailable or
+            ApiErrorKind.Timeout or
+            ApiErrorKind.Transient or
+            ApiErrorKind.ServerError => "NETWORK_ERROR",
+            _ => "INVALID_KEY"
+        };
+    }
+
+    private static string? NormalizeDiagnosticCode(string? code)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            return null;
+        }
+
+        var normalized = code.Trim().ToUpperInvariant().Replace('-', '_');
+        return normalized switch
+        {
+            "INVALID_KEY" or
+            "INVALID_ACTIVATION_KEY" or
+            "INVALID_LICENSE" => "INVALID_KEY",
+            "UNAUTHENTICATED" or
+            "AUTHENTICATION_REQUIRED" or
+            "SESSION_REQUIRED" => "UNAUTHENTICATED",
+            "WRONG_USER" or
+            "LICENSE_USER_MISMATCH" => "WRONG_USER",
+            "PENDING" or
+            "LICENSE_PENDING" => "PENDING",
+            "REVOKED" or
+            "LICENSE_REVOKED" => "REVOKED",
+            "EXPIRED" or
+            "LICENSE_EXPIRED" => "EXPIRED",
+            "ACTIVATION_LIMIT" or
+            "DEVICE_LIMIT" or
+            "DEVICE_LIMIT_REACHED" => "ACTIVATION_LIMIT",
+            "DEVICE_ALREADY_ACTIVE" or
+            "INSTALLATION_ALREADY_ACTIVATED" => "DEVICE_ALREADY_ACTIVE",
+            "NETWORK_ERROR" => "NETWORK_ERROR",
+            _ => normalized
+        };
+    }
+
+    private static string WithDiagnosticCode(
+        string message,
+        string diagnosticCode) =>
+        $"{message} [{diagnosticCode}]";
+
+    private static string MapLocalCleanupWarning(
+        string fallbackMessage,
+        ApiFailure? failure)
+    {
+        if (failure is null)
+        {
+            return fallbackMessage;
+        }
+
+        return fallbackMessage + " " + failure.Message;
+    }
+
+    private static bool HasMarker(
+        ApiFailure failure,
+        params string[] markers)
+    {
+        var combined = (failure.Code + " " + failure.Message)
+            .ToLowerInvariant();
+        return markers.Any(combined.Contains);
+    }
 
     private bool SetField<T>(
         ref T field,

@@ -125,12 +125,30 @@ public partial class MainWindow : Window
         var betaDataRoot = Path.Combine(
             Environment.GetFolderPath(
                 Environment.SpecialFolder.LocalApplicationData),
-            "SystemPerformanceAccelerator",
-            "beta-access");
-        var betaAccessService = new BetaAccessService(
-            new InstallationIdentityService(
-                Path.Combine(betaDataRoot, "installation.json")),
-            Path.Combine(betaDataRoot, "entitlement.dat"));
+            "SystemPerformanceAccelerator");
+        var desktopApiOptions =
+            new DesktopApiOptionsProvider().Load();
+        var desktopApiClientFactory =
+            new DesktopApiHttpClientFactory(desktopApiOptions);
+        var desktopApiClient = new DesktopApiClient(
+            desktopApiClientFactory.GetOrCreate(),
+            desktopApiOptions.Timeout);
+        var secureTokenStorage = new FileSecureTokenStorage(
+            Path.Combine(
+                betaDataRoot,
+                "auth",
+                "tokens.dat"));
+        var authenticationService = new AuthenticationService(
+            desktopApiClient,
+            secureTokenStorage);
+        var licenseActivationService = new LicenseActivationService(
+            desktopApiClient,
+            secureTokenStorage,
+            new WindowsDeviceIdentityProvider(
+                Path.Combine(
+                    betaDataRoot,
+                    "licensing",
+                    "device-id.txt")));
 
         var viewModel = new MainWindowViewModel(
             temporaryFileService,
@@ -157,18 +175,13 @@ public partial class MainWindow : Window
             windowsRepairExecutionService,
             windowsRepairExecutionHistoryService,
             feedbackSubmissionService,
-            betaAccessService);
+            new AccessInteractionService(),
+            authenticationService,
+            licenseActivationService,
+            secureTokenStorage);
         DataContext = viewModel;
         viewModel.PropertyChanged +=
             OnMainViewModelPropertyChanged;
-    }
-
-    private async void Window_Loaded(object sender, RoutedEventArgs e)
-    {
-        if (DataContext is MainWindowViewModel viewModel)
-        {
-            await viewModel.Settings.InitializeBetaAccessAsync();
-        }
     }
 
     private void OnMainViewModelPropertyChanged(

@@ -1,13 +1,13 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <BitmapImage x:Key="BrandPhoenixDarkSource"
-                 UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Phoenix-About-2x.png"
+                 UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Phoenix-Dark.png"
                  CacheOption="OnLoad" />
     <BitmapImage x:Key="BrandPhoenixLightSource"
                  UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Phoenix-Light.png"
                  CacheOption="OnLoad" />
     <BitmapImage x:Key="BrandWordmarkDarkSource"
-                 UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Wordmark-About-2x.png"
+                 UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Wordmark-Dark.png"
                  CacheOption="OnLoad" />
     <BitmapImage x:Key="BrandWordmarkLightSource"
                  UriSource="pack://application:,,,/PC-SPA;component/Assets/Branding/PC-SPA-Wordmark-Light.png"

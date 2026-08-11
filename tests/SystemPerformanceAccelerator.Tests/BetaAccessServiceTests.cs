@@ -7,6 +7,7 @@ using Xunit;
 
 namespace SystemPerformanceAccelerator.Tests;
 
+#pragma warning disable CS0618 // Legacy service is covered only by migration/regression tests.
 public sealed class BetaAccessServiceTests
 {
     [Fact]
@@ -293,3 +294,4 @@ public sealed class BetaAccessServiceTests
         }
     }
 }
+#pragma warning restore CS0618

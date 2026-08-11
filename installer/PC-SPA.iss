@@ -2,7 +2,7 @@
   #define SourceRoot "..\artifacts\publish\win-x64"
 #endif
 
-#define AppVersion "1.0.0"
+#define AppVersion "1.0.0-beta.1"
 
 [Setup]
 AppId={{CB5828DE-8E0C-45AE-B3F3-4ADCC907B40B}
@@ -20,7 +20,7 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 MinVersion=10.0.19041
 OutputDir=..\artifacts\installer
-OutputBaseFilename=PC-SPA-1.0.0-win-x64-setup
+OutputBaseFilename=PC-SPA-1.0.0-beta.1-win-x64-setup
 SetupIconFile=..\src\SystemPerformanceAccelerator.Desktop\Assets\Branding\PC-SPA-Taskbar.ico
 UninstallDisplayIcon={app}\PC-SPA.exe
 Compression=lzma2
@@ -30,8 +30,8 @@ CloseApplications=yes
 RestartApplications=no
 RestartIfNeededByRun=no
 ChangesAssociations=no
-VersionInfoVersion=1.0.0.0
-VersionInfoProductVersion=1.0.0
+VersionInfoVersion=1.0.0.1
+VersionInfoProductVersion=1.0.0.1
 VersionInfoCompany=PC-SPA
 VersionInfoDescription=PC-SPA Windows installer
 VersionInfoCopyright=Copyright (C) 2026 PC-SPA
