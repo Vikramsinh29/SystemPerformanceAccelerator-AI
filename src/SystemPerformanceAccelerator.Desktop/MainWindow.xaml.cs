@@ -8,6 +8,7 @@ using SystemPerformanceAccelerator.Core.Interfaces;
 using SystemPerformanceAccelerator.Core.Models;
 using SystemPerformanceAccelerator.Desktop.Services;
 using SystemPerformanceAccelerator.Desktop.ViewModels;
+using SystemPerformanceAccelerator.Infrastructure.Configuration;
 using SystemPerformanceAccelerator.Infrastructure.Diagnostics;
 using SystemPerformanceAccelerator.Infrastructure.Repairs;
 using SystemPerformanceAccelerator.Infrastructure.Services;
