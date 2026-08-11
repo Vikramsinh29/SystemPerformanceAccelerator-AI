@@ -35,14 +35,14 @@ test("authorized staging request uses isolated runtime and router", async () => 
   assert.deepEqual(await response.json(), { error: "not_found" });
 });
 
-test("staging config uses a separate Worker and staging D1 placeholder", async () => {
+test("staging config uses a separate Worker and the approved staging D1", async () => {
   const configUrl = new URL("../wrangler.staging.jsonc", import.meta.url);
   const config = JSON.parse(await readFile(configUrl, "utf8"));
   assert.equal(config.name, "pc-spa-licensing-v2-staging");
   assert.equal(config.main, "src/staging-entrypoint.js");
   assert.equal(config.d1_databases[0].binding, "LICENSING_DB");
   assert.equal(config.d1_databases[0].database_name, "pc-spa-licensing-v2-staging");
-  assert.equal(config.d1_databases[0].database_id, "00000000-0000-0000-0000-000000000000");
+  assert.equal(config.d1_databases[0].database_id, "723d1e78-388e-4aac-88f8-e22fdfab0c41");
 });
 
 test("staging config has no production custom route or production Worker name", async () => {

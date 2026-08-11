@@ -11,7 +11,7 @@
     {
       "binding": "LICENSING_DB",
       "database_name": "pc-spa-licensing-v2-staging",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "723d1e78-388e-4aac-88f8-e22fdfab0c41",
       "migrations_dir": "migrations"
     }
   ]
