@@ -17,14 +17,6 @@ export function requireEnvironment(value) {
   return value;
 }
 
-export function requireInternalAuthHeader(request) {
-  const value = request?.headers?.get?.("authorization");
-  if (typeof value !== "string" || !value.startsWith("Bearer ") || value.length <= 7) {
-    return false;
-  }
-  return true;
-}
-
 export function jsonResponse(status, body) {
   return new Response(JSON.stringify(body), {
     status,
