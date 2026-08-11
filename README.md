@@ -10,7 +10,7 @@ PC-SPA (System Performance Accelerator) is a safe, offline Windows 10/11 desktop
 - Compact, sharp, practical controls with clear system status and actions.
 - Preserve the existing WPF/MVVM architecture.
 - Work through narrow, separately verified sprints.
-- No telemetry or external account requirement. Core tools remain offline; controlled-beta activation/verification and the optional beta error-report action are the only network features.
+- No telemetry or external account requirement applies to the current Open Beta. Core tools remain offline; the optional, user-reviewed beta error-report action is the only current network feature.
 - Never delete user data without explicit confirmation.
 - Report partial failures and skipped files honestly.
 
@@ -22,7 +22,7 @@ PC-SPA (System Performance Accelerator) is a safe, offline Windows 10/11 desktop
 - WPF
 - MVVM
 - xUnit
-- Offline-first; controlled-beta access verification and optional feedback use the PC-SPA Cloudflare Worker
+- Offline-first; optional, user-reviewed feedback uses the PC-SPA Cloudflare Worker
 
 ## Solution structure
 
@@ -206,7 +206,7 @@ PC-SPA Beta builds do not require an account, activation key, entitlement check,
 - Release and expiry timestamps are displayed in Settings
 - Expired builds stop at startup and direct the tester to install a newer official Beta build
 - The controlled-Beta publisher verifies that its release timestamp matches the desktop build metadata
-- The authentication, secure-token, activation, and entitlement foundation remains dormant for a future commercial release
+- The removed legacy authentication and activation runtime is not used as a commercial foundation; Licensing V2 is designed separately
 - Expiry is based on the immutable official build release timestamp, not installation or first-run time
 
 ### Edition and feature access foundation
