@@ -1,16 +1,43 @@
+import { createProductionLicensingRuntime } from "./production-licensing-runtime.js";
+import { createProductionLicensingRouter } from "./production-licensing-router.js";
+
 const JSON_HEADERS = Object.freeze({
   "content-type": "application/json; charset=utf-8",
   "cache-control": "no-store"
 });
 
+const ENABLED_VALUE = "enabled";
+
 export default {
-  async fetch() {
-    return new Response(JSON.stringify({
-      error: "production_not_enabled",
-      message: "Licensing V2 production runtime is configured but not enabled."
-    }), {
-      status: 503,
-      headers: JSON_HEADERS
-    });
+  async fetch(request, env) {
+    if (env?.PRODUCTION_LICENSING_ENABLED !== ENABLED_VALUE) {
+      return json(503, {
+        error: "production_not_enabled",
+        message: "Licensing V2 production runtime is configured but not enabled."
+      });
+    }
+
+    let runtime;
+    try {
+      runtime = createProductionLicensingRuntime({
+        env,
+        identitySecret: env?.LICENSING_IDENTITY_SECRET
+      });
+    } catch {
+      return json(503, {
+        error: "production_not_ready",
+        message: "Licensing V2 production runtime is not ready."
+      });
+    }
+
+    const router = createProductionLicensingRouter({ runtime });
+    return router.fetch(request);
   }
 };
+
+function json(status, body) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: JSON_HEADERS
+  });
+}
