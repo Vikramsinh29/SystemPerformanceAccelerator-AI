@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "pc-spa-licensing-v2-production",
+  "main": "src/production-entrypoint.js",
+  "compatibility_date": "2026-08-11",
+  "workers_dev": true,
+  "d1_databases": [
+    {
+      "binding": "LICENSING_DB",
+      "database_name": "pc-spa",
+      "database_id": "ff7e024c-0b2e-462f-83d8-07cc5d41612b",
+      "migrations_dir": "migrations"
+    }
+  ]
+}
