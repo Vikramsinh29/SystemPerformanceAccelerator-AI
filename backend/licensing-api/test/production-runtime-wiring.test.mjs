@@ -79,12 +79,15 @@ test("production router maps only approved licensing operations", async () => {
   assert.equal(calls.length, 0);
 });
 
-test("production entrypoint remains fail-closed and does not instantiate internal runtime", async () => {
+test("production entrypoint remains fail-closed behind explicit enable gate", async () => {
   const entryUrl = new URL("../src/production-entrypoint.js", import.meta.url);
   const text = await readFile(fileURLToPath(entryUrl), "utf8");
 
+  assert.match(text, /PRODUCTION_LICENSING_ENABLED/);
   assert.match(text, /production_not_enabled/);
-  assert.match(text, /status:\s*503/);
-  assert.doesNotMatch(text, /createProductionLicensingRuntime/);
-  assert.doesNotMatch(text, /createProductionLicensingRouter/);
+  assert.match(text, /json\(503,/);
+  assert.match(text, /createProductionLicensingRuntime/);
+  assert.match(text, /createProductionLicensingRouter/);
+  assert.doesNotMatch(text, /createLicensingStagingRouter/);
+  assert.doesNotMatch(text, /STAGING_ACCESS_TOKEN/);
 });
