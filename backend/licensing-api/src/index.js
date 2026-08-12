@@ -8,6 +8,8 @@ export { LICENSING_RUNTIME_OPERATIONS, createLicensingWorkerRuntime } from "./li
 export { createLicensingStagingRouter } from "./licensing-staging-router.js";
 export { ProductionIdentityError, createProductionIdentityResolver } from "./production-identity-verifier.js";
 export { createProductionTokenIssuer } from "./production-token-issuer.js";
+export { createProductionLicensingRuntime } from "./production-licensing-runtime.js";
+export { createProductionLicensingRouter } from "./production-licensing-router.js";
 
 export default {
   async fetch() {
