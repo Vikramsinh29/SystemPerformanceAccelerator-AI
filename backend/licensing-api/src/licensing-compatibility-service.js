@@ -74,11 +74,15 @@ export class LicensingCompatibilityService {
       entitlement.entitlement_id,
       deviceFingerprintHash
     );
+    const refreshedEntitlement = await this.eventStore.findEntitlement(accountId, productId);
+    if (!refreshedEntitlement) {
+      return failure("license_not_found", null, nowUtc);
+    }
     return {
       ok: true,
       code: "activated",
       activation,
-      license: toCompatibilityLicense(entitlement, nowUtc)
+      license: toCompatibilityLicense(refreshedEntitlement, nowUtc)
     };
   }
 
@@ -110,10 +114,14 @@ export class LicensingCompatibilityService {
     if (!result.closed) {
       return failure("activation_conflict", entitlement, nowUtc);
     }
+    const refreshedEntitlement = await this.eventStore.findEntitlement(accountId, productId);
+    if (!refreshedEntitlement) {
+      return failure("license_not_found", null, nowUtc);
+    }
     return {
       ok: true,
       code: "deactivated",
-      license: toCompatibilityLicense(entitlement, nowUtc)
+      license: toCompatibilityLicense(refreshedEntitlement, nowUtc)
     };
   }
 
