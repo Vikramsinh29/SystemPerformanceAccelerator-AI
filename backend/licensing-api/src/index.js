@@ -7,6 +7,7 @@ export { LicensingIdentityError, createLicensingIdentityBridge } from "./licensi
 export { LICENSING_RUNTIME_OPERATIONS, createLicensingWorkerRuntime } from "./licensing-worker-runtime.js";
 export { createLicensingStagingRouter } from "./licensing-staging-router.js";
 export { ProductionIdentityError, createProductionIdentityResolver } from "./production-identity-verifier.js";
+export { createProductionTokenIssuer } from "./production-token-issuer.js";
 
 export default {
   async fetch() {
