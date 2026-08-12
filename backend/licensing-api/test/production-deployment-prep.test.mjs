@@ -27,16 +27,20 @@ test("production config binds only the verified production D1 and no custom rout
   assert.doesNotMatch(config, /pc-spa-licensing-v2-staging/);
   assert.doesNotMatch(config, /STAGING_ACCESS_TOKEN/);
   assert.doesNotMatch(config, /STAGING_ACCOUNT_ID/);
+  assert.doesNotMatch(config, /PRODUCTION_LICENSING_ENABLED/);
+  assert.doesNotMatch(config, /LICENSING_IDENTITY_SECRET/);
   assert.doesNotMatch(config, /pc-spa-web/);
   assert.doesNotMatch(config, /getpcspa\.com/);
   assert.doesNotMatch(config, /"routes?"\s*:/);
 });
 
-test("production entrypoint does not instantiate Licensing V2 runtime before auth cutover", async () => {
+test("production entrypoint requires explicit gate and contains no staging wiring", async () => {
   const source = await readFile(productionEntrypointUrl, "utf8");
+  assert.match(source, /PRODUCTION_LICENSING_ENABLED/);
   assert.match(source, /production_not_enabled/);
-  assert.match(source, /status:\s*503/);
-  assert.doesNotMatch(source, /createLicensingWorkerRuntime/);
+  assert.match(source, /json\(503,/);
+  assert.match(source, /createProductionLicensingRuntime/);
+  assert.match(source, /createProductionLicensingRouter/);
   assert.doesNotMatch(source, /createLicensingIdentityBridge/);
   assert.doesNotMatch(source, /createLicensingStagingRouter/);
   assert.doesNotMatch(source, /STAGING_ACCESS_TOKEN/);
