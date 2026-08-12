@@ -113,6 +113,9 @@ test("production entrypoint keeps public Worker host from reaching internal toke
     LICENSING_DB: {
       prepare() {
         throw new Error("public token path must not reach licensing runtime data access");
+      },
+      async batch() {
+        throw new Error("public token path must not reach licensing runtime batch access");
       }
     }
   });
@@ -147,6 +150,9 @@ test("production entrypoint allows the exact internal service-binding request wh
               };
             }
           };
+        },
+        async batch() {
+          return [];
         }
       }
     }
