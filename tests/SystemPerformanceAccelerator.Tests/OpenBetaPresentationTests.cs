@@ -2,30 +2,10 @@ using Xunit;
 
 namespace SystemPerformanceAccelerator.Tests;
 
-public sealed class OpenBetaPresentationTests
+public sealed class CommercialReleasePresentationTests
 {
     [Fact]
-    public void MainWindow_UsesOpenBetaPresentationWithoutStartupLicensing()
-    {
-        var xaml = ReadRepositoryFile(
-            "src",
-            "SystemPerformanceAccelerator.Desktop",
-            "MainWindow.xaml");
-        var codeBehind = ReadRepositoryFile(
-            "src",
-            "SystemPerformanceAccelerator.Desktop",
-            "MainWindow.xaml.cs");
-
-        Assert.Contains("OPEN BETA ACCESS", xaml);
-        Assert.Contains("No account or activation key is required", xaml);
-        Assert.DoesNotContain("Loaded=\"Window_Loaded\"", xaml);
-        Assert.DoesNotContain("InitializeBetaAccessAsync", codeBehind);
-        Assert.DoesNotContain("AuthenticationService", codeBehind);
-        Assert.DoesNotContain("LicenseActivationService", codeBehind);
-    }
-
-    [Fact]
-    public void Desktop_RemovesLegacyLicensingGateAndCredentialControls()
+    public void MainWindow_UsesCommercialAccountPresentation()
     {
         var xaml = ReadRepositoryFile(
             "src",
@@ -37,7 +17,32 @@ public sealed class OpenBetaPresentationTests
             "ViewModels",
             "MainWindowViewModel.cs");
 
-        Assert.Contains("Beta Access", xaml);
+        Assert.Contains("Account &amp; License", xaml);
+        Assert.Contains("COMMERCIAL LICENSING", xaml);
+        Assert.Contains("Commercial licensing is not connected in this build", xaml);
+        Assert.Contains("Account & License", viewModel);
+        Assert.Contains("Commercial licensing is not connected in this build", viewModel);
+
+        Assert.DoesNotContain("OPEN BETA ACCESS", xaml);
+        Assert.DoesNotContain("No account or activation key is required", xaml);
+        Assert.DoesNotContain("Beta Access", viewModel);
+        Assert.DoesNotContain("1.0.0-beta.1", viewModel);
+        Assert.DoesNotContain("BetaBuildPolicy", viewModel);
+    }
+
+    [Fact]
+    public void Desktop_DoesNotRestoreLegacyCredentialControls()
+    {
+        var xaml = ReadRepositoryFile(
+            "src",
+            "SystemPerformanceAccelerator.Desktop",
+            "MainWindow.xaml");
+        var viewModel = ReadRepositoryFile(
+            "src",
+            "SystemPerformanceAccelerator.Desktop",
+            "ViewModels",
+            "MainWindowViewModel.cs");
+
         Assert.DoesNotContain("PasswordBox", xaml);
         Assert.DoesNotContain("ActivateBetaAccessCommand", xaml);
         Assert.DoesNotContain("IsBetaAccessGateVisible", viewModel);
