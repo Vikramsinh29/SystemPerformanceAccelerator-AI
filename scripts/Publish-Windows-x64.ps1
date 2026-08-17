@@ -10,7 +10,7 @@ $repo = Split-Path -Parent $PSScriptRoot
 $solution = Join-Path $repo "SystemPerformanceAccelerator.slnx"
 $desktopProject = Join-Path $repo "src\SystemPerformanceAccelerator.Desktop\SystemPerformanceAccelerator.Desktop.csproj"
 
-$version = "1.0.0-beta.1"
+$version = "1.0.0"
 $runtimeIdentifier = "win-x64"
 $releaseName = "PC-SPA-$version-$runtimeIdentifier-portable"
 
@@ -143,8 +143,8 @@ if ($remainingPdbFiles.Count -gt 0) {
 
 $versionInfo = (Get-Item -LiteralPath $executable).VersionInfo
 
-if (-not $versionInfo.FileVersion.StartsWith("1.0.0.1")) {
-    throw "Published executable FileVersion is '$($versionInfo.FileVersion)', expected $version."
+if (-not $versionInfo.FileVersion.StartsWith("1.0.0.0")) {
+    throw "Published executable FileVersion is '$($versionInfo.FileVersion)', expected 1.0.0.0."
 }
 
 if (-not $versionInfo.ProductVersion.StartsWith($version)) {
@@ -163,18 +163,15 @@ PC-SPA $version
 Package:
 - Windows 10/11 x64
 - Self-contained .NET desktop application
-- Portable ZIP; no installer
-- Requests administrator permission at launch for protected startup controls
-- No code signing
-- No cloud service or telemetry
+- Stable commercial release
+- Portable ZIP verification artifact; the public customer package is the Windows installer
+- Requests administrator permission at launch for protected system operations
+- Commercial licensing can use the PC-SPA production licensing service
+- Core cleanup, analysis, monitoring, and repair work runs on the local Windows device
 
-Launch:
-1. Extract the complete ZIP.
-2. Keep all extracted files together.
-3. Run PC-SPA.exe.
-
-Windows may display an Unknown Publisher or SmartScreen warning because this
-release is intentionally unsigned.
+Distribution:
+- Public commercial distribution requires the release signing and integrity gates to pass.
+- The installer and its SHA-256 are produced by the verified installer publisher.
 
 Source commit:
 $commit
@@ -247,7 +244,7 @@ $extractedExecutable = Join-Path `
     "$releaseName\PC-SPA.exe"
 
 if (-not (Test-Path -LiteralPath $extractedExecutable -PathType Leaf)) {
-    throw "Extracted portable executable is missing: $extractedExecutable"
+    throw "Extracted PC-SPA executable is missing: $extractedExecutable"
 }
 
 $launchProcess = $null
@@ -305,7 +302,6 @@ finally {
 }
 
 Remove-Item -LiteralPath $launchTestRoot -Recurse -Force
-
 Remove-Item -LiteralPath $stagingRoot -Recurse -Force
 
 if (-not $SkipDesktopCopy) {
