@@ -21,20 +21,6 @@ public partial class App : Application
 
         try
         {
-            var betaBuild = BetaBuildPolicy.EvaluateCurrentBuild();
-            if (betaBuild.IsExpired)
-            {
-                MessageBox.Show(
-                    "This PC-SPA Beta build expired on " +
-                    betaBuild.ExpiresUtc.ToString("d MMMM yyyy 'at' HH:mm 'UTC'") +
-                    ".\n\nDownload and install the latest official Beta build to continue.",
-                    "PC-SPA Beta build expired",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-                Shutdown();
-                return;
-            }
-
             var settingsService = new ApplicationSettingsService();
             var settingsLoadResult = settingsService.Load();
             var diagnosticService = new LocalDiagnosticService();
