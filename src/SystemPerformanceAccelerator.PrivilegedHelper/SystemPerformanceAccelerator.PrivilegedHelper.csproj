@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyName>PC-SPA.PrivilegedHelper</AssemblyName>
+    <RootNamespace>SystemPerformanceAccelerator.PrivilegedHelper</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SystemPerformanceAccelerator.Core\SystemPerformanceAccelerator.Core.csproj" />
+    <ProjectReference Include="..\SystemPerformanceAccelerator.Infrastructure\SystemPerformanceAccelerator.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>
