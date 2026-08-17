@@ -97,9 +97,12 @@ public partial class MainWindow : Window
             new WindowsRepairPlanService();
         var windowsRepairPlanHistoryService =
             new WindowsRepairPlanHistoryService();
+        var privilegedOperationExecutor =
+            new WindowsPrivilegedOperationExecutor();
         var windowsRepairExecutionService =
             new WindowsRepairExecutionService(
-                new WindowsRepairExecutionCommandRunner(),
+                new PrivilegedWindowsRepairExecutionCommandRunner(
+                    privilegedOperationExecutor),
                 windowsRepairAssessmentService,
                 windowsRepairPlanService);
         var windowsRepairExecutionHistoryService =
