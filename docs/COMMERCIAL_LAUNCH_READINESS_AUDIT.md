@@ -18,6 +18,33 @@ This document records the engineering consequences of the approved commercial la
 - Commercial Licensing V2 is authoritative for entitlement and device activation.
 - The existing Inno Setup EXE pipeline is retained as a secondary/future direct-download channel and must not be represented as signed until it is actually signed.
 - Store and direct packages must represent the same functional application version and source baseline.
+- PC-SPA must open as a normal standard-user application. Administrator rights must be requested only when a user explicitly invokes an approved operation that genuinely requires elevation.
+- Privileged actions must run through a narrowly scoped elevated helper/process boundary and Windows UAC; the main PC-SPA UI must remain non-elevated.
+- The Store/MSIX path may require Microsoft approval for the restricted `allowElevation` capability. Store certification must not be assumed until that capability is accepted for the approved helper design.
+
+## Locked elevation architecture
+
+The commercial desktop must use operation-scoped elevation rather than whole-application elevation.
+
+Target flow:
+
+1. PC-SPA launches normally without a UAC prompt.
+2. Read-only, analysis, monitoring, account, licensing, current-user, and other non-privileged features remain in the normal process.
+3. When a user intentionally starts an operation that requires administrator rights, PC-SPA first explains why elevation is required.
+4. Windows UAC is then triggered for a dedicated privileged helper/process.
+5. The helper accepts only compiled, typed, allowlisted PC-SPA operations; it is not a generic command runner.
+6. The helper performs the approved privileged operation, returns a bounded result, and exits.
+7. The normal PC-SPA process remains standard-user throughout.
+
+Security requirements:
+
+- No arbitrary executable path or arbitrary command-line argument may cross the privileged boundary.
+- No website, update metadata, licensing response, remote input, or untrusted local file may construct privileged commands.
+- Windows Repair operations must map to explicit internal operation identifiers and fixed Microsoft command shapes.
+- Protected Startup Manager changes must carry validated startup identity/state information and must preserve existing stale-state and post-write verification.
+- UAC cancellation must be treated as a normal user cancellation, not as an application failure.
+- Privileged helper invocation, request validation, result parsing, timeout/failure behavior, and replay/identity controls must be covered by automated tests.
+- Store/MSIX packaging must request `allowElevation` only if the final helper design genuinely requires it and only after the implementation is narrow enough to justify to Microsoft.
 
 ## Release state already prepared
 
@@ -33,18 +60,20 @@ Current desktop manifest requests:
 
 This means the complete PC-SPA process runs elevated, including screens and read-only features that do not inherently require administrator privileges.
 
-This is a Store/MSIX architecture blocker and a least-privilege concern.
+This remains a Store/MSIX architecture blocker and a least-privilege concern until the operation-scoped helper is implemented and verified.
 
 Required direction:
 
-1. Change the normal desktop process to non-elevated execution where technically possible.
+1. Keep `requireAdministrator` temporarily until the privileged-operation boundary is implemented and tested.
 2. Inventory every operation that genuinely requires administrator privileges.
-3. Introduce a narrow privileged-operation boundary for those operations rather than elevating the entire UI process.
-4. Preserve explicit user intent and Windows consent before privileged actions.
-5. Keep read-only and current-user operations non-elevated whenever possible.
-6. Add tests proving privileged commands cannot be invoked through arbitrary command or argument injection.
+3. Route only those operations through the typed privileged-operation boundary.
+4. Implement a dedicated elevated helper/process with Windows UAC.
+5. Preserve explicit user intent and Windows consent before privileged actions.
+6. Keep read-only and current-user operations non-elevated wherever technically possible.
+7. After functional verification, change the normal desktop manifest to standard-user execution (`asInvoker` or the Store-compatible equivalent).
+8. Add tests proving privileged commands cannot be invoked through arbitrary command or argument injection.
 
-Do not simply remove `requireAdministrator` without implementing and testing the privileged-operation boundary.
+Do not simply remove `requireAdministrator` before the privileged helper is proven.
 
 ## BLOCKER 2 — Windows Repair privilege model
 
@@ -60,7 +89,8 @@ The current runner uses redirected standard output/error and runs the command di
 Required direction:
 
 - Preserve exact command allowlisting.
-- Move the privileged execution itself behind the future privileged-operation boundary.
+- Move the privileged execution itself behind the dedicated elevated helper.
+- Use typed operation identifiers rather than exposing executable paths/arguments to the caller.
 - Do not accept arbitrary executable paths or argument lists from UI, website, licensing, update metadata, or remote input.
 - Preserve normal completion behavior once a Microsoft repair process has started unless a separately reviewed cancellation design is introduced.
 
@@ -74,7 +104,7 @@ Required direction:
 
 - Keep inventory/read-only scans available without whole-app elevation where Windows permissions allow.
 - Keep current-user state changes in the normal process when safe.
-- Route all-users/HKLM protected state changes through the narrow privileged-operation boundary.
+- Route all-users/HKLM protected state changes through the dedicated elevated helper.
 - Preserve the existing stale-state, identity, command, file-metadata, and post-write verification checks.
 - Never broaden the feature into arbitrary registry editing.
 
@@ -88,8 +118,9 @@ Required direction:
 2. Do not destroy or silently alter the existing direct installer pipeline.
 3. Keep package identity/version mapping deterministic.
 4. Verify WPF/.NET 10 compatibility under the chosen Store packaging model.
-5. Test installation, uninstall, upgrade, settings persistence, local diagnostics, feedback, cleanup, startup management, Windows Repair, and licensing under package identity.
-6. Add package validation and Store-specific test gates before submission.
+5. Declare/request `allowElevation` only if required by the final privileged-helper implementation and prepare a narrow justification for Microsoft certification.
+6. Test installation, uninstall, upgrade, settings persistence, local diagnostics, feedback, cleanup, startup management, Windows Repair, UAC cancellation, and licensing under package identity.
+7. Add package validation and Store-specific test gates before submission.
 
 ## BLOCKER 5 — Commercial desktop authentication/authorization is incomplete
 
@@ -198,21 +229,25 @@ Do not copy historical Beta policy into new commercial code or UI merely because
 - Keep remote input unable to construct arbitrary local commands.
 - Keep diagnostics user-reviewed and privacy-conscious.
 - Separate distribution trust from commercial licensing trust.
+- Keep the normal UI process standard-user after the privileged-helper migration.
+- Treat Microsoft Store `allowElevation` approval as a certification dependency, not as an entitlement to elevate arbitrary code.
 
 ## Required implementation order
 
 1. Finish commercial-neutral desktop presentation and restore a clean Release build/test state.
-2. Design and implement the least-privilege privileged-operation boundary.
-3. Refactor whole-app elevation into operation-scoped elevation and validate all current modules.
-4. Complete browser-to-desktop commercial authorization.
-5. Complete device activation/validation and signed offline entitlement verification.
-6. Approve and encode the Free/Pro feature boundary.
-7. Add Store/MSIX packaging as a parallel packaging path.
-8. Run Store-package functional compatibility tests for every module.
-9. Complete Partner Center package/listing/capability/commerce declarations.
-10. Certify the Store package.
-11. Configure the official Store URL in Web V2 and verify the Store-first download page.
-12. Keep direct-download commercial release disabled until independent signing is available and verified.
+2. Complete the typed privileged-operation contract and helper protocol.
+3. Implement the dedicated elevated helper and operation-scoped UAC flow while retaining the current manifest temporarily.
+4. Route Windows Repair and protected Startup Manager mutations through the helper and validate cancellation/failure behavior.
+5. Change the normal desktop process to standard-user execution and run full regression testing.
+6. Complete browser-to-desktop commercial authorization.
+7. Complete device activation/validation and signed offline entitlement verification.
+8. Approve and encode the Free/Pro feature boundary.
+9. Add Store/MSIX packaging as a parallel packaging path, including `allowElevation` only if required and approved.
+10. Run Store-package functional compatibility tests for every module.
+11. Complete Partner Center package/listing/capability/commerce declarations.
+12. Certify the Store package.
+13. Configure the official Store URL in Web V2 and verify the Store-first download page.
+14. Keep direct-download commercial release disabled until independent signing is available and verified.
 
 ## Launch gate
 
@@ -221,8 +256,10 @@ PC-SPA 1.0.0 must not be called commercially launch-ready until all of the follo
 - stable version metadata is consistent
 - no Beta expiry runtime remains
 - no customer-visible Beta access/expiry presentation remains
-- whole-app mandatory elevation has been replaced or explicitly proven compatible with the approved Store model
-- privileged operations are narrowly controlled and tested
+- normal PC-SPA startup no longer requires administrator elevation
+- privileged operations use a narrowly controlled, tested helper and operation-scoped Windows UAC
+- UAC cancellation and helper failures are handled safely and transparently
+- Microsoft Store elevation capability requirements are satisfied for the final package model
 - commercial browser authorization works end-to-end
 - device entitlement/validation works end-to-end
 - offline entitlement verification works end-to-end
