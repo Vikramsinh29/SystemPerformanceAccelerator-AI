@@ -297,7 +297,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public string SettingsPageTitle => _currentSettingsPage switch
     {
         SettingsPage.General => "General settings",
-        SettingsPage.AccountActivation => "Beta Access",
+        SettingsPage.AccountActivation => "Account & License",
         SettingsPage.Diagnostics => "Diagnostics",
         SettingsPage.Feedback => "Feedback",
         SettingsPage.About => "About PC-SPA",
@@ -309,33 +309,20 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         SettingsPage.General =>
             "Choose appearance and safe operating defaults stored on this computer.",
         SettingsPage.AccountActivation =>
-            "Review this build's activation-free Open Beta period.",
+            "Commercial licensing is not connected in this build.",
         SettingsPage.Diagnostics =>
             "Manage privacy-safe local diagnostics and review technical evidence.",
         SettingsPage.Feedback =>
-            "Preview and send a privacy-safe Beta error report to the PC-SPA team.",
+            "Preview and send a privacy-safe error report to the PC-SPA team.",
         SettingsPage.About =>
             "Review the installed PC-SPA version, platform details, and local storage location.",
         _ => string.Empty
     };
+    public string CommercialReleaseText =>
+        "Commercial release: 1.0.0";
 
-    public string BetaBuildReleaseText
-    {
-        get
-        {
-            var status = BetaBuildPolicy.EvaluateCurrentBuild();
-            return $"Official release: {status.ReleaseUtc:d MMMM yyyy} UTC";
-        }
-    }
-
-    public string BetaBuildExpiryText
-    {
-        get
-        {
-            var status = BetaBuildPolicy.EvaluateCurrentBuild();
-            return $"Expires: {status.ExpiresUtc:d MMMM yyyy HH:mm} UTC";
-        }
-    }
+    public string CommercialLicensingStatusText =>
+        "Commercial licensing is not connected in this build.";
 
     public FeatureAccessPresentation CurrentFeatureAccess =>
         GetAccessPresentation(_currentModule);
@@ -351,7 +338,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         {
             var version = typeof(MainWindowViewModel).Assembly.GetName().Version;
             return version is null
-                ? "Version 1.0.0-beta.1"
+                ? "Version 1.0.0"
                 : $"Version {version.Major}.{version.Minor}.{version.Build}";
         }
     }
@@ -363,8 +350,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             var editionName = ApplicationEditionHierarchy.GetDisplayName(
                 _featureAccessGuard.EffectiveEdition);
             return _featureAccessGuard.IsDevelopmentOverrideActive
-                ? $"{editionName} edition • local development override"
-                : $"{editionName} edition • local system utility";
+                ? $"{editionName} edition â€¢ local development override"
+                : $"{editionName} edition â€¢ local system utility";
         }
     }
 
@@ -443,7 +430,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public string FilesFound => Candidates.Count.ToString("N0");
     public string ReclaimableSpace => FormatBytes(Candidates.Sum(x => x.Model.SizeBytes));
-    public string Summary => $"{FilesFound} files • {ReclaimableSpace}";
+    public string Summary => $"{FilesFound} files â€¢ {ReclaimableSpace}";
 
     public bool? AreAllCandidatesSelected
     {
@@ -705,8 +692,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             RefreshSummary();
             var elapsed = FormatElapsed(result.Elapsed);
             ScanStatus = result.Errors.Count == 0
-                ? $"Completed • {elapsed}"
-                : $"Completed • {elapsed} • {result.Errors.Count} skipped";
+                ? $"Completed â€¢ {elapsed}"
+                : $"Completed â€¢ {elapsed} â€¢ {result.Errors.Count} skipped";
             Status = result.Errors.Count == 0
                 ? $"Scan complete in {elapsed}. Review the list before cleaning."
                 : $"Scan complete in {elapsed} with {result.Errors.Count} skipped item(s).";

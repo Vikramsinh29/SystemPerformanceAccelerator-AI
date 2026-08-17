@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using SystemPerformanceAccelerator.Infrastructure.Services;
+using Xunit;
 
 namespace SystemPerformanceAccelerator.Tests;
 

@@ -5,7 +5,7 @@
         xmlns:controls="clr-namespace:SystemPerformanceAccelerator.Desktop.Controls"
         xmlns:models="clr-namespace:SystemPerformanceAccelerator.Core.Models;assembly=SystemPerformanceAccelerator.Core"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
-        Title="PC-SPA — System Performance Accelerator"
+        Title="PC-SPA â€” System Performance Accelerator"
         Width="1240"
         Height="780"
         MinWidth="1000"
@@ -617,7 +617,7 @@
                         Background="{DynamicResource SidebarBrush}"
                         BorderBrush="{DynamicResource SidebarDividerBrush}"
                         BorderThickness="0,0,0,1">
-                    <Grid ToolTip="PC-SPA — System Performance Accelerator">
+                    <Grid ToolTip="PC-SPA â€” System Performance Accelerator">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1*" />
                             <ColumnDefinition Width="8" />
@@ -1231,7 +1231,7 @@
                                                    Foreground="{DynamicResource SuccessBrush}"
                                                    VerticalAlignment="Center" />
                                         <TextBlock Margin="6,0,0,0"
-                                                   Text="Read-only • user-requested recommendations"
+                                                   Text="Read-only â€¢ user-requested recommendations"
                                                    Foreground="{DynamicResource SuccessBrush}"
                                                    FontSize="10.5"
                                                    FontWeight="SemiBold"
@@ -1986,7 +1986,7 @@
                                                Foreground="{DynamicResource SuccessBrush}"
                                                VerticalAlignment="Center" />
                                     <TextBlock Margin="6,0,0,0"
-                                               Text="Manual review • confirmation required"
+                                               Text="Manual review â€¢ confirmation required"
                                                Foreground="{DynamicResource SuccessBrush}"
                                                FontSize="10.5"
                                                FontWeight="SemiBold"
@@ -2424,7 +2424,7 @@
                                                Foreground="{DynamicResource SuccessBrush}"
                                                VerticalAlignment="Center" />
                                     <TextBlock Margin="6,0,0,0"
-                                               Text="Preview first • confirmation required"
+                                               Text="Preview first â€¢ confirmation required"
                                                Foreground="{DynamicResource SuccessBrush}"
                                                FontSize="10.5"
                                                FontWeight="SemiBold"
@@ -2984,7 +2984,7 @@
                                            VerticalAlignment="Center" />
                             </Border>
                             <StackPanel Grid.Column="1" Margin="11,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="Manual execution only — you remain in control"
+                                <TextBlock Text="Manual execution only â€” you remain in control"
                                            Foreground="{DynamicResource TextPrimaryBrush}"
                                            FontSize="12"
                                            FontWeight="SemiBold" />
@@ -3225,7 +3225,7 @@
                                        FontSize="20"
                                        FontWeight="SemiBold" />
                             <TextBlock Margin="0,3,0,0"
-                                       Text="Fresh manual cleanup review — no file begins selected"
+                                       Text="Fresh manual cleanup review â€” no file begins selected"
                                        Foreground="{DynamicResource TextSecondaryBrush}"
                                        FontSize="11" />
                         </StackPanel>
@@ -3354,7 +3354,7 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Button Command="{Binding BackToSchedulesCommand}"
-                                Style="{StaticResource FluentSecondaryButtonStyle}" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE72B;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="←  Back to schedules" VerticalAlignment="Center" /></StackPanel></Button>
+                                Style="{StaticResource FluentSecondaryButtonStyle}" ><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE72B;" Style="{StaticResource ActionButtonGlyphStyle}" /><TextBlock Margin="8,0,0,0" Text="â†  Back to schedules" VerticalAlignment="Center" /></StackPanel></Button>
                         <StackPanel Grid.Column="2" VerticalAlignment="Center">
                             <TextBlock Text="{Binding EditorTitle}"
                                        Foreground="{DynamicResource TextPrimaryBrush}"
@@ -3433,7 +3433,7 @@
                                                   Style="{StaticResource FluentComboBoxStyle}" />
                                     </StackPanel>
                                     <StackPanel Visibility="{Binding IsMonthlyFrequency, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <TextBlock Text="Day of month (1–31)" Style="{StaticResource ScheduleFieldLabelStyle}" />
+                                        <TextBlock Text="Day of month (1â€“31)" Style="{StaticResource ScheduleFieldLabelStyle}" />
                                         <TextBox Height="42"
                                                  Text="{Binding MonthlyDayText, UpdateSourceTrigger=PropertyChanged}"
                                                  Style="{StaticResource FluentTextBoxStyle}" />
@@ -3638,7 +3638,7 @@
                                        Style="{StaticResource ModuleHeroDescriptionStyle}" />
                         </StackPanel>
                         <Border Grid.Column="2" Padding="10,6" Background="{DynamicResource WarningSoftBrush}" CornerRadius="12" VerticalAlignment="Center">
-                            <TextBlock Text="Preview first • confirmation required" Foreground="{DynamicResource WarningBrush}" FontSize="10.5" FontWeight="SemiBold" />
+                            <TextBlock Text="Preview first â€¢ confirmation required" Foreground="{DynamicResource WarningBrush}" FontSize="10.5" FontWeight="SemiBold" />
                         </Border>
                     </Grid>
                 </Border>
@@ -3870,7 +3870,7 @@
                             <TextBlock Text="Confirm identical-content groups, select only extra copies, then explicitly approve Recycle Bin cleanup." Style="{StaticResource ModuleHeroDescriptionStyle}" />
                         </StackPanel>
                         <Border Grid.Column="2" Padding="10,6" Background="{DynamicResource WarningSoftBrush}" CornerRadius="12" VerticalAlignment="Center">
-                            <TextBlock Text="Hash-confirmed • recycle only" Foreground="{DynamicResource WarningBrush}" FontSize="10.5" FontWeight="SemiBold" />
+                            <TextBlock Text="Hash-confirmed â€¢ recycle only" Foreground="{DynamicResource WarningBrush}" FontSize="10.5" FontWeight="SemiBold" />
                         </Border>
                     </Grid>
                 </Border>
@@ -6252,7 +6252,7 @@
                                 <Button Command="{Binding DataContext.ShowSettingsAccountActivationCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                         Tag="{Binding DataContext.IsAccountActivationSettingsPage, RelativeSource={RelativeSource AncestorType=Window}}"
                                         Style="{StaticResource SettingsPageButtonStyle}"
-                                        Content="Beta Access" />
+                                        Content="Account &amp; License" />
                                 <Button Command="{Binding DataContext.ShowSettingsDiagnosticsCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                         Tag="{Binding DataContext.IsDiagnosticsSettingsPage, RelativeSource={RelativeSource AncestorType=Window}}"
                                         Style="{StaticResource SettingsPageButtonStyle}"
@@ -6279,12 +6279,12 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <StackPanel>
-                                        <TextBlock Text="OPEN BETA ACCESS"
+                                        <TextBlock Text="COMMERCIAL LICENSING"
                                                    Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontSize="10"
                                                    FontWeight="Bold" />
                                         <TextBlock Margin="0,5,0,0"
-                                                   Text="No account or activation key is required"
+                                                   Text="Commercial licensing is not connected in this build"
                                                    Foreground="{DynamicResource TextPrimaryBrush}"
                                                    FontSize="15"
                                                    FontWeight="SemiBold" />
@@ -6294,7 +6294,7 @@
                                             Background="{DynamicResource AccentSoftBrush}"
                                             CornerRadius="12"
                                             VerticalAlignment="Center">
-                                        <TextBlock Text="BETA ACCESS OPEN"
+                                        <TextBlock Text="RELEASE PREPARATION"
                                                    Foreground="{DynamicResource AccentBrush}"
                                                    FontSize="10.5"
                                                    FontWeight="SemiBold" />
@@ -6308,13 +6308,13 @@
                                 <WrapPanel Margin="0,14,0,0">
                                     <Border Margin="0,0,8,6"
                                             Style="{StaticResource OperationMetaChipStyle}">
-                                        <TextBlock Text="{Binding DataContext.BetaBuildReleaseText, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        <TextBlock Text="{Binding DataContext.CommercialReleaseText, RelativeSource={RelativeSource AncestorType=Window}}"
                                                    Foreground="{DynamicResource MetaTextBrush}"
                                                    FontSize="10.5" />
                                     </Border>
                                     <Border Margin="0,0,0,6"
                                             Style="{StaticResource OperationMetaChipStyle}">
-                                        <TextBlock Text="{Binding DataContext.BetaBuildExpiryText, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        <TextBlock Text="{Binding DataContext.CommercialLicensingStatusText, RelativeSource={RelativeSource AncestorType=Window}}"
                                                    Foreground="{DynamicResource MetaTextBrush}"
                                                    FontSize="10.5" />
                                     </Border>
@@ -6750,7 +6750,7 @@
                                 CornerRadius="10"
                                 Visibility="{Binding DataContext.IsFeedbackSettingsPage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel>
-                                <TextBlock Text="BETA ERROR FEEDBACK"
+                                <TextBlock Text="ERROR FEEDBACK"
                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                            FontSize="10"
                                            FontWeight="Bold" />
