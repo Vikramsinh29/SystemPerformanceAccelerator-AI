@@ -33,6 +33,21 @@ public sealed class InstallerPackagingTests
     }
 
     [Fact]
+    public void InstallerDefinition_UsesStableCommercialIdentity()
+    {
+        var definition = File.ReadAllText(FindRepositoryFile(
+            "installer",
+            "PC-SPA.iss"));
+
+        Assert.Contains("#define AppVersion \"1.0.0\"", definition);
+        Assert.Contains("OutputBaseFilename=PC-SPA-1.0.0-win-x64-setup", definition);
+        Assert.Contains("VersionInfoProductVersion=1.0.0.0", definition);
+        Assert.Contains("AppPublisherURL=https://getpcspa.com", definition);
+        Assert.Contains("AppSupportURL=https://getpcspa.com/support", definition);
+        Assert.DoesNotContain("beta.1", definition, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void InstallerPublishScript_ReusesVerifiedPublishAndReportsIntegrity()
     {
         var script = File.ReadAllText(FindRepositoryFile(
@@ -40,7 +55,8 @@ public sealed class InstallerPackagingTests
             "Publish-Windows-x64-Installer.ps1"));
 
         Assert.Contains("Publish-Windows-x64.ps1", script);
-        Assert.Contains("PC-SPA-1.0.0-beta.1-win-x64-setup.exe", script);
+        Assert.Contains("PC-SPA-1.0.0-win-x64-setup.exe", script);
+        Assert.DoesNotContain("PC-SPA-1.0.0-beta.1-win-x64-setup.exe", script);
         Assert.Contains("INNO_SETUP_COMPILER", script);
         Assert.Contains("Programs\\Inno Setup 6\\ISCC.exe", script);
         Assert.Contains("Get-FileHash", script);
