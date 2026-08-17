@@ -8,11 +8,10 @@
     <RootNamespace>SystemPerformanceAccelerator.Desktop</RootNamespace>
     <Title>PC-SPA</Title>
 
-    <Version>1.0.0-beta.1</Version>
-    <AssemblyVersion>1.0.0.1</AssemblyVersion>
-    <FileVersion>1.0.0.1</FileVersion>
-    <InformationalVersion>1.0.0-beta.1</InformationalVersion>
-    <BetaReleaseUtc>2026-08-07T00:00:00Z</BetaReleaseUtc>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <InformationalVersion>1.0.0</InformationalVersion>
 
     <Product>PC-SPA</Product>
     <Description>PC-SPA — local Windows system cleanup, analysis, and optimization utility.</Description>
@@ -22,11 +21,6 @@
     <RepositoryUrl>https://github.com/Vikramsinh29/SystemPerformanceAccelerator-AI</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
-
-  <ItemGroup>
-    <AssemblyMetadata Include="PCSPABetaReleaseUtc"
-                      Value="$(BetaReleaseUtc)" />
-  </ItemGroup>
 
   <ItemGroup>
     <None Remove="Assets\Branding\*.png" />
