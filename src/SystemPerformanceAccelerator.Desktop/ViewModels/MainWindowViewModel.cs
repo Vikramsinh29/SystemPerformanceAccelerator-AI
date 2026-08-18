@@ -350,8 +350,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             var editionName = ApplicationEditionHierarchy.GetDisplayName(
                 _featureAccessGuard.EffectiveEdition);
             return _featureAccessGuard.IsDevelopmentOverrideActive
-                ? $"{editionName} edition â€¢ local development override"
-                : $"{editionName} edition â€¢ local system utility";
+                ? $"{editionName} edition • local development override"
+                : $"{editionName} edition • local system utility";
         }
     }
 
@@ -430,7 +430,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public string FilesFound => Candidates.Count.ToString("N0");
     public string ReclaimableSpace => FormatBytes(Candidates.Sum(x => x.Model.SizeBytes));
-    public string Summary => $"{FilesFound} files â€¢ {ReclaimableSpace}";
+    public string Summary => $"{FilesFound} files • {ReclaimableSpace}";
 
     public bool? AreAllCandidatesSelected
     {
@@ -692,8 +692,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             RefreshSummary();
             var elapsed = FormatElapsed(result.Elapsed);
             ScanStatus = result.Errors.Count == 0
-                ? $"Completed â€¢ {elapsed}"
-                : $"Completed â€¢ {elapsed} â€¢ {result.Errors.Count} skipped";
+                ? $"Completed • {elapsed}"
+                : $"Completed • {elapsed} • {result.Errors.Count} skipped";
             Status = result.Errors.Count == 0
                 ? $"Scan complete in {elapsed}. Review the list before cleaning."
                 : $"Scan complete in {elapsed} with {result.Errors.Count} skipped item(s).";
