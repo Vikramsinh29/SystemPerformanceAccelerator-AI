@@ -27,7 +27,7 @@ public sealed class WindowsRepairPrivilegedCompositionTests
     }
 
     [Fact]
-    public void DesktopManifest_RemainsElevatedUntilReadinessModelIsRefactored()
+    public void DesktopManifest_RunsAsInvokerAfterReadinessModelRefactor()
     {
         var manifest = ReadRepositoryFile(
             "src",
@@ -35,6 +35,10 @@ public sealed class WindowsRepairPrivilegedCompositionTests
             "app.manifest");
 
         Assert.Contains(
+            "requestedExecutionLevel level=\"asInvoker\"",
+            manifest,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
             "requestedExecutionLevel level=\"requireAdministrator\"",
             manifest,
             StringComparison.Ordinal);
