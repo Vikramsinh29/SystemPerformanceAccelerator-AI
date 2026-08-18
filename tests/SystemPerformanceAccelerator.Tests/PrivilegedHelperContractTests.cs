@@ -5,7 +5,7 @@ namespace SystemPerformanceAccelerator.Tests;
 public sealed class PrivilegedHelperContractTests
 {
     [Fact]
-    public void Helper_RequiresAdministratorButDesktopManifestIsNotChangedByThisSprint()
+    public void Helper_RequiresAdministratorWhileDesktopRunsAsInvoker()
     {
         var helperManifest = ReadRepositoryFile(
             "src",
@@ -17,7 +17,8 @@ public sealed class PrivilegedHelperContractTests
             "app.manifest");
 
         Assert.Contains("requestedExecutionLevel level=\"requireAdministrator\"", helperManifest);
-        Assert.Contains("requestedExecutionLevel level=\"requireAdministrator\"", desktopManifest);
+        Assert.Contains("requestedExecutionLevel level=\"asInvoker\"", desktopManifest);
+        Assert.DoesNotContain("requestedExecutionLevel level=\"requireAdministrator\"", desktopManifest);
     }
 
     [Fact]
