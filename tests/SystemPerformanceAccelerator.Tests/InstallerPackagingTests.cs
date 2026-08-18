@@ -29,7 +29,7 @@ public sealed class InstallerPackagingTests
         Assert.Contains("Name: \"{group}\\PC-SPA\"", definition);
         Assert.Contains("Name: \"desktopicon\"", definition);
         Assert.DoesNotContain("Flags: unchecked", definition);
-        Assert.Contains("Verb: \"runas\"; Flags: nowait postinstall skipifsilent shellexec", definition);
+        Assert.Contains(             "Flags: nowait postinstall skipifsilent runasoriginaluser",             definition);         Assert.DoesNotContain("Verb: \"runas\"", definition);
     }
 
     [Fact]

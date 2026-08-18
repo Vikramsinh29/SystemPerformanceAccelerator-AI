@@ -9,12 +9,14 @@ Set-StrictMode -Version Latest
 $repo = Split-Path -Parent $PSScriptRoot
 $solution = Join-Path $repo "SystemPerformanceAccelerator.slnx"
 $desktopProject = Join-Path $repo "src\SystemPerformanceAccelerator.Desktop\SystemPerformanceAccelerator.Desktop.csproj"
+$helperProject = Join-Path $repo "src\SystemPerformanceAccelerator.PrivilegedHelper\SystemPerformanceAccelerator.PrivilegedHelper.csproj"
 
 $version = "1.0.0"
 $runtimeIdentifier = "win-x64"
 $releaseName = "PC-SPA-$version-$runtimeIdentifier-portable"
 
 $publishDirectory = Join-Path $repo "artifacts\publish\$runtimeIdentifier"
+$helperPublishDirectory = Join-Path $repo "artifacts\publish\_privileged-helper-$runtimeIdentifier"
 $releaseRoot = Join-Path $repo "artifacts\releases"
 $stagingRoot = Join-Path $releaseRoot "_staging"
 $launchTestRoot = Join-Path $releaseRoot "_launch-test"
@@ -59,6 +61,7 @@ Get-Process -Name "PC-SPA", "SystemPerformanceAccelerator.Desktop" -ErrorAction 
     Stop-Process -Force
 
 Remove-Item -LiteralPath $publishDirectory -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath $helperPublishDirectory -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath $stagingRoot -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath $launchTestRoot -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath $zipPath -Force -ErrorAction SilentlyContinue
@@ -102,16 +105,66 @@ if ($LASTEXITCODE -ne 0) {
     throw "Windows x64 publish failed."
 }
 
+Write-Host ""
+Write-Host "Self-contained privileged helper publish..." -ForegroundColor Cyan
+
+dotnet publish $helperProject `
+    -c Release `
+    -r $runtimeIdentifier `
+    --self-contained true `
+    -p:UseAppHost=true `
+    -p:DebugType=none `
+    -p:DebugSymbols=false `
+    -o $helperPublishDirectory
+
+if ($LASTEXITCODE -ne 0) {
+    throw "Privileged helper self-contained publish failed."
+}
+
+$helperArtifacts = @(
+    "PC-SPA.PrivilegedHelper.exe",
+    "PC-SPA.PrivilegedHelper.dll",
+    "PC-SPA.PrivilegedHelper.deps.json",
+    "PC-SPA.PrivilegedHelper.runtimeconfig.json"
+)
+
+foreach ($helperArtifact in $helperArtifacts) {
+
+    $helperSource =
+        Join-Path $helperPublishDirectory $helperArtifact
+
+    if (-not (Test-Path -LiteralPath $helperSource -PathType Leaf)) {
+        throw "Required privileged-helper publish artifact is missing: $helperSource"
+    }
+
+    Copy-Item `
+        -LiteralPath $helperSource `
+        -Destination (Join-Path $publishDirectory $helperArtifact) `
+        -Force
+}
+
+Remove-Item `
+    -LiteralPath $helperPublishDirectory `
+    -Recurse `
+    -Force
 $executable = Join-Path $publishDirectory "PC-SPA.exe"
 $runtimeConfig = Join-Path $publishDirectory "PC-SPA.runtimeconfig.json"
 $dependencyManifest = Join-Path $publishDirectory "PC-SPA.deps.json"
 $coreRuntime = Join-Path $publishDirectory "coreclr.dll"
+$helperExecutable = Join-Path $publishDirectory "PC-SPA.PrivilegedHelper.exe"
+$helperAssembly = Join-Path $publishDirectory "PC-SPA.PrivilegedHelper.dll"
+$helperRuntimeConfig = Join-Path $publishDirectory "PC-SPA.PrivilegedHelper.runtimeconfig.json"
+$helperDependencyManifest = Join-Path $publishDirectory "PC-SPA.PrivilegedHelper.deps.json"
 
 foreach ($requiredFile in @(
     $executable,
     $runtimeConfig,
     $dependencyManifest,
-    $coreRuntime
+    $coreRuntime,
+    $helperExecutable,
+    $helperAssembly,
+    $helperRuntimeConfig,
+    $helperDependencyManifest
 )) {
     if (-not (Test-Path -LiteralPath $requiredFile -PathType Leaf)) {
         throw "Required self-contained publish file is missing: $requiredFile"
@@ -219,6 +272,7 @@ try {
         "$releaseName/PC-SPA.runtimeconfig.json",
         "$releaseName/PC-SPA.deps.json",
         "$releaseName/coreclr.dll",
+        "$releaseName/PC-SPA.PrivilegedHelper.exe",         "$releaseName/PC-SPA.PrivilegedHelper.dll",         "$releaseName/PC-SPA.PrivilegedHelper.deps.json",         "$releaseName/PC-SPA.PrivilegedHelper.runtimeconfig.json",
         "$releaseName/RELEASE-NOTES.txt"
     )
 

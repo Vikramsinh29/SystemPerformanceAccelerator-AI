@@ -47,4 +47,4 @@ Name: "{group}\PC-SPA"; Filename: "{app}\PC-SPA.exe"; WorkingDir: "{app}"
 Name: "{autodesktop}\PC-SPA"; Filename: "{app}\PC-SPA.exe"; WorkingDir: "{app}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\PC-SPA.exe"; Description: "Launch PC-SPA"; Verb: "runas"; Flags: nowait postinstall skipifsilent shellexec
+Filename: "{app}\PC-SPA.exe"; Description: "Launch PC-SPA"; Flags: nowait postinstall skipifsilent runasoriginaluser

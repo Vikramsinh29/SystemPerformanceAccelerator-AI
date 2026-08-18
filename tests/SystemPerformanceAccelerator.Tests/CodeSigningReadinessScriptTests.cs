@@ -37,6 +37,7 @@ public sealed class CodeSigningReadinessScriptTests
 
         Assert.Contains("PC-SPA.exe", script);
         Assert.Contains("PC-SPA.dll", script);
+        Assert.Contains("PC-SPA.PrivilegedHelper.exe", script);         Assert.Contains("PC-SPA.PrivilegedHelper.dll", script);
         Assert.Contains("SystemPerformanceAccelerator.Core.dll", script);
         Assert.Contains("SystemPerformanceAccelerator.Infrastructure.dll", script);
         Assert.Contains("PC-SPA-1.0.0-win-x64-setup.exe", script);
