@@ -10,7 +10,7 @@ PC-SPA (System Performance Accelerator) is a safe, offline Windows 10/11 desktop
 - Compact, sharp, practical controls with clear system status and actions.
 - Preserve the existing WPF/MVVM architecture.
 - Work through narrow, separately verified sprints.
-- No telemetry or external account requirement applies to the current Open Beta. Core tools remain offline; the optional, user-reviewed beta error-report action is the only current network feature.
+- Core tools remain offline and no telemetry is sent automatically. Optional user-reviewed diagnostic feedback is the only current network-assisted support path, and it runs only after explicit review and consent.
 - Never delete user data without explicit confirmation.
 - Report partial failures and skipped files honestly.
 
@@ -31,7 +31,7 @@ PC-SPA (System Performance Accelerator) is a safe, offline Windows 10/11 desktop
 - `src/SystemPerformanceAccelerator.Desktop`
 - `tests/SystemPerformanceAccelerator.Tests`
 - Solution: `SystemPerformanceAccelerator.slnx`
-- Optional beta feedback backend: `backend/feedback-api` (separately deployed; the desktop application remains fully functional offline)
+- Optional diagnostic-feedback backend: `backend/feedback-api` (separately deployed; core desktop functionality remains fully usable offline)
 
 Dependencies point inward: Desktop → Infrastructure → Core.
 
@@ -126,7 +126,7 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - Shortcut resolution without executing startup items
 - Safe handling of inaccessible keys/folders, malformed values, cancellation, and partial scan failures
 - Total, Enabled, Disabled, and Unknown counters always account for every displayed row
-- The desktop application requests administrator permission at launch for protected Windows startup locations
+- PC-SPA starts without administrator elevation. Windows User Account Control (UAC) is requested only when an approved protected startup change genuinely requires administrator permission.
 - No startup entry deletion, command editing, startup-item execution, or unrelated registry modification
 
 ### System Monitor
@@ -197,18 +197,18 @@ Dependencies point inward: Desktop → Infrastructure → Core.
 - `Open this tool` actions navigate directly to the selected desktop module without running an operation
 - All guidance is bundled locally and requires no account, telemetry, or internet connection
 
-### Open Beta build policy
+### Commercial 1.0.0 release contract
 
-PC-SPA Beta builds do not require an account, activation key, entitlement check, or licensing-service connection. Each build embeds its official UTC release timestamp and works for exactly 30 days from that timestamp. Version `1.0.0-beta.1` was officially released at `2026-08-07T00:00:00Z` and expires at `2026-09-06T00:00:00Z`.
+PC-SPA `1.0.0` is the stable commercial-release code line. Customer-facing runtime presentation must not show Open Beta access, Beta expiry, or `1.0.0-beta.1` release messaging.
 
-- Startup licensing initialization and the activation gate are disabled for Beta builds
-- Beta Access clearly states that the current build is activation-free
-- Release and expiry timestamps are displayed in Settings
-- Expired builds stop at startup and direct the tester to install a newer official Beta build
-- The controlled-Beta publisher verifies that its release timestamp matches the desktop build metadata
-- The removed legacy authentication and activation runtime is not used as a commercial foundation; Licensing V2 is designed separately
-- Expiry is based on the immutable official build release timestamp, not installation or first-run time
-
+- The desktop starts as a normal standard-user application.
+- Windows User Account Control (UAC) is requested only for an explicitly started protected operation that requires administrator permission.
+- Privileged work is routed through the dedicated, narrowly scoped PC-SPA privileged helper rather than elevating the whole desktop application.
+- UAC cancellation is treated as a normal cancellation and does not start the protected operation.
+- Core tools remain offline-first and do not send telemetry automatically.
+- Diagnostic feedback is optional, user-reviewed, and sent only after explicit consent.
+- Historical Beta scripts and sprint evidence remain in the repository for traceability but do not define the commercial runtime contract.
+- Commercial licensing and Microsoft Store/MSIX distribution remain separate release-readiness work and must not be represented as active until their respective production paths are verified.
 ### Edition and feature access foundation
 
 - One shared codebase supports Trial, Free, Standard, Pro, and Business editions

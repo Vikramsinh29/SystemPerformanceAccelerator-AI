@@ -57,8 +57,8 @@ public sealed class HelpCenterViewModel : INotifyPropertyChanged
                 "Review applications configured to start with Windows.",
                 "Use it when many non-essential applications open automatically after sign-in.",
                 "Do not disable security software, hardware utilities, or entries you do not understand.",
-                "Review publisher and path information, disable one non-essential entry at a time, then restart later to evaluate.",
-                "Disabling a startup entry does not uninstall or delete the application.",
+                "Review publisher and path information, change one non-essential entry at a time, approve Windows User Account Control (UAC) only if the selected protected change requires it, then restart later to evaluate.",
+                "PC-SPA starts without administrator elevation. Protected startup changes use operation-scoped UAC and never uninstall or delete the application.",
                 openStartupManager),
             new(
                 "I want an overall PC check",
@@ -75,8 +75,8 @@ public sealed class HelpCenterViewModel : INotifyPropertyChanged
                 "Assess Windows component-store and protected-file integrity before considering guided repair.",
                 "Use it after repeated Windows errors, failed updates, or when Health Check recommends integrity assessment.",
                 "Do not start repair during a power interruption, active Windows Update, or when you cannot keep the PC available.",
-                "Run the read-only assessment, select Review and repair, verify readiness, review every step, then start guided repair only if allowed.",
-                "Assessment is read-only. Repair requires separate confirmation, uses Microsoft tools, and never restarts Windows automatically.",
+                "Run the read-only assessment first, review the findings, select Review and repair only when needed, verify readiness, and approve Windows User Account Control (UAC) only when the protected repair operation starts.",
+                "Assessment is read-only. Protected repair requires separate confirmation and operation-scoped UAC, uses Microsoft DISM/SFC tools, and never restarts Windows automatically.",
                 openWindowsRepair),
             new(
                 "I need controlled cleanup choices",

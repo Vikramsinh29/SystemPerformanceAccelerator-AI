@@ -25,9 +25,26 @@ public sealed class CommercialReleasePresentationTests
 
         Assert.DoesNotContain("OPEN BETA ACCESS", xaml);
         Assert.DoesNotContain("No account or activation key is required", xaml);
+        Assert.DoesNotContain("All locally available Beta features", xaml);
+        Assert.DoesNotContain("30 days from its official release date", xaml);
         Assert.DoesNotContain("Beta Access", viewModel);
         Assert.DoesNotContain("1.0.0-beta.1", viewModel);
         Assert.DoesNotContain("BetaBuildPolicy", viewModel);
+
+        var splash = ReadRepositoryFile(
+            "src",
+            "SystemPerformanceAccelerator.Desktop",
+            "SplashWindow.xaml");
+
+        var settings = ReadRepositoryFile(
+            "src",
+            "SystemPerformanceAccelerator.Desktop",
+            "ViewModels",
+            "SettingsViewModel.cs");
+
+        Assert.Contains("VERSION 1.0.0", splash);
+        Assert.DoesNotContain("1.0.0-BETA.1", splash);
+        Assert.DoesNotContain("1.0.0-beta.1", settings);
     }
 
     [Fact]

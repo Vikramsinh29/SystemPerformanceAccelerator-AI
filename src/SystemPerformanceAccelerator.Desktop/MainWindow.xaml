@@ -6123,7 +6123,7 @@
                                     </Border>
                                 </Grid>
                                 <TextBlock Margin="0,12,0,0"
-                                           Text="All locally available Beta features can be used without signing in or activating this PC. This build remains available for 30 days from its official release date."
+                                           Text="PC-SPA 1.0.0 uses the commercial release foundation. Core tools remain available locally, while commercial account and licensing connectivity is still being prepared for the production release path."
                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                            FontSize="11"
                                            TextWrapping="Wrap" />

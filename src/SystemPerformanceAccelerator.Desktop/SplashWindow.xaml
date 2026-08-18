@@ -42,7 +42,7 @@
                            VerticalAlignment="Center" />
 
                 <TextBlock Grid.Column="1"
-                           Text="VERSION 1.0.0-BETA.1"
+                           Text="VERSION 1.0.0"
                            Foreground="#AEB4BE"
                            FontFamily="Segoe UI"
                            FontSize="10"

@@ -1,6 +1,6 @@
 # Read-only Windows Repair Assessment Procedure
 
-1. Launch PC-SPA elevated.
+1. Launch PC-SPA normally. If a protected assessment command requires administrator permission, approve the Windows User Account Control (UAC) prompt for that operation only.
 2. Open **Windows Repair**.
 3. Select Component Store CheckHealth, Protected Windows Files VerifyOnly, or
    both.
@@ -12,4 +12,4 @@
 8. Export the latest report only when support evidence is needed.
 9. Inspect the ZIP before sharing it.
 
-No repair action is available in Sprint 35A.
+This procedure covers the read-only assessment path. Guided repair is a separate, explicitly confirmed workflow and uses operation-scoped UAC only when a protected repair operation starts.

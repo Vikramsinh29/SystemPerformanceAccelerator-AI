@@ -55,7 +55,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         _feedbackSubmissionService = feedbackSubmissionService ??
             new DisabledDiagnosticFeedbackSubmissionService();
         _applicationVersion = string.IsNullOrWhiteSpace(applicationVersion)
-            ? "1.0.0-beta.1"
+            ? "1.0.0"
             : applicationVersion;
 
         _selectedTheme = loadResult.Settings.Theme;

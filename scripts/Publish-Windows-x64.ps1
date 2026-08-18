@@ -165,7 +165,7 @@ Package:
 - Self-contained .NET desktop application
 - Stable commercial release
 - Portable ZIP verification artifact; the public customer package is the Windows installer
-- Requests administrator permission at launch for protected system operations
+- Starts normally without administrator elevation; Windows User Account Control (UAC) is requested only when an approved protected operation requires it
 - Commercial licensing can use the PC-SPA production licensing service
 - Core cleanup, analysis, monitoring, and repair work runs on the local Windows device
 

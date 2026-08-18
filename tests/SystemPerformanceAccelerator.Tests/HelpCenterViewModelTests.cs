@@ -22,6 +22,30 @@ public sealed class HelpCenterViewModelTests
         Assert.Contains(
             viewModel.Guides,
             guide => guide.ToolName == "System Monitor");
+
+        var startup = Assert.Single(
+            viewModel.Guides,
+            guide => guide.ToolName == "Startup Manager");
+
+        Assert.Contains(
+            "User Account Control (UAC)",
+            startup.Steps);
+
+        Assert.Contains(
+            "operation-scoped UAC",
+            startup.SafetyNote);
+
+        var repair = Assert.Single(
+            viewModel.Guides,
+            guide => guide.ToolName == "Windows Repair");
+
+        Assert.Contains(
+            "User Account Control (UAC)",
+            repair.Steps);
+
+        Assert.Contains(
+            "operation-scoped UAC",
+            repair.SafetyNote);
     }
 
     [Fact]
