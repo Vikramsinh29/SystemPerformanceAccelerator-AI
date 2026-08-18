@@ -208,7 +208,52 @@ PC-SPA `1.0.0` is the stable commercial-release code line. Customer-facing runti
 - Core tools remain offline-first and do not send telemetry automatically.
 - Diagnostic feedback is optional, user-reviewed, and sent only after explicit consent.
 - Historical Beta scripts and sprint evidence remain in the repository for traceability but do not define the commercial runtime contract.
-- Commercial licensing and Microsoft Store/MSIX distribution remain separate release-readiness work and must not be represented as active until their respective production paths are verified.
+- Commercial licensing and Microsoft Store/MSIX distribution remain release-readiness work and must not be represented as active until their production paths are verified.
+
+### Authoritative low-cost launch route until public release
+
+This section records the current PC-SPA `1.0.0` launch strategy and is authoritative until it is explicitly replaced by a later verified release decision. Historical sprint notes describing portable ZIP, controlled-Beta, installer, or unsigned distribution do not override this section.
+
+The immediate objective is to launch PC-SPA legally and safely with zero or near-zero additional signing expenditure while preserving the existing commercial application, website, safety model, and future direct-download option.
+
+- `getpcspa.com` remains the primary PC-SPA product, documentation, support, marketing, and customer-facing website.
+- The preferred initial public Windows distribution route is Microsoft Store distribution using an MSIX package, subject to a complete PC-SPA Store/MSIX compatibility and certification-readiness audit.
+- The Store/MSIX route is preferred because Microsoft Store can provide trusted Store signing for an accepted MSIX package, avoiding the immediate requirement to purchase a separate public code-signing certificate solely for the first Store launch.
+- The existing verified Inno Setup installer and portable package are preserved as direct-distribution assets and must not be discarded or redesigned merely to adopt the Store route.
+- The current Inno Setup direct installer remains private/release-candidate infrastructure until its commercial-use entitlement and public code-signing requirements are resolved.
+- An unsigned direct public EXE, installer, or portable ZIP must not become the primary commercial customer download merely to avoid certificate cost.
+- A self-signed certificate may be used only for controlled/internal testing where trust is explicitly managed; customers must not be instructed to install a private root certificate as a normal public-installation requirement.
+- PC-SPA must not be converted to open source merely to qualify for free open-source signing unless a separate product/business decision explicitly approves open sourcing.
+- Microsoft Artifact Signing, commercial CA certificates, EV signing, cloud signing, hardware tokens, and paid Inno Setup commercial licensing may be deferred until revenue or another verified release requirement justifies the expense.
+- When affordable commercial signing becomes available, PC-SPA may add a separately verified direct-download route alongside Microsoft Store distribution without replacing the Store option.
+- No release-cost shortcut may weaken PC-SPA's least-privilege architecture, explicit confirmation model, local-data protections, Windows Repair safeguards, Startup Manager safeguards, diagnostic-consent rules, or privileged-helper boundaries.
+
+Before adopting MSIX as the public launch package, compatibility must be proven for the complete commercial application, including:
+
+1. Cleaner
+2. Health Check
+3. Custom Clean
+4. Auto Clean Schedule
+5. Large File Finder
+6. Duplicate File Finder
+7. Startup Manager
+8. Windows Repair
+9. System Monitor
+10. PC-SPA privileged helper and operation-scoped Windows User Account Control (UAC)
+11. Program Files, LocalAppData, filesystem, registry, Recycle Bin, process-launch, DISM, SFC, and other required Windows capabilities
+12. Settings, repair history, diagnostics, upgrades, uninstall behaviour, and legacy-data migration
+13. Microsoft Store policy and certification compatibility
+
+The MSIX route is approved only if PC-SPA's required functionality and safety model can be preserved without material degradation. If the compatibility audit identifies a fundamental Store/MSIX restriction, stop the Store conversion and evaluate another legitimate zero/near-zero-cost release route rather than weakening application behaviour.
+
+Until that compatibility gate passes:
+
+- Microsoft Store/MSIX status: `FEASIBILITY / READINESS AUDIT`
+- Direct unsigned public distribution: `NOT APPROVED`
+- Paid code-signing purchase: `DEFERRED`
+- Inno Setup commercial purchase: `DEFERRED`
+- Existing private RC pipeline: `PRESERVED`
+- Production publication: `NOT APPROVED`
 ### Edition and feature access foundation
 
 - One shared codebase supports Trial, Free, Standard, Pro, and Business editions
