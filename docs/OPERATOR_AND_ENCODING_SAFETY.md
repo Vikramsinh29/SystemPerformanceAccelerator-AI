@@ -2,11 +2,24 @@
 
 These rules apply to all future development, verification, and handover work.
 
-## Prompt and screenshot discipline
+## CRITICAL prompt and screenshot discipline
 
-- Read the user's full instruction before taking any tool action.
+### Absolute image-generation prohibition unless explicitly requested
+
+- **DO NOT invoke any image-generation, image-editing, image-redesign, image-rendering, or image-transformation tool unless the user's CURRENT prompt explicitly asks to create, generate, render, redesign, or edit an image.**
+- The presence of one or more screenshots does **not** authorize image generation or image editing.
+- Screenshots are **inspection/reference evidence by default**.
+- Requests such as **check, inspect, audit, review, compare, correct, fix, proceed, do the needful, make the UI uniform, adjust the layout, adjust colours, or repair the application** are requests to inspect the supplied evidence and work on the actual project/source. They are **not** image-generation requests.
+- When the user asks for a correction to the application shown in a screenshot, modify or diagnose the actual application/source code. **Do not create a mock-up, preview image, replacement screenshot, infographic, or redesigned image unless the user explicitly requests one.**
+- Before any image-tool invocation, perform this mandatory check: **Does the user's current prompt explicitly request creation or editing of an image?** If the answer is not an unambiguous **YES**, image-tool invocation is prohibited.
+- Previous image-generation requests do not carry forward to later prompts. Authorization must exist in the current prompt.
+- If the current prompt contains screenshots plus code/repository instructions, the code/repository instructions control unless image creation is explicitly requested.
+
+### General prompt handling
+
+- Read the user's **entire current prompt carefully before taking any tool action**.
+- Identify the requested artifact/action first; do not infer a different task merely because an attachment is present.
 - When screenshots are supplied for inspection, inspect the marked area and surrounding UI first.
-- Do not generate, edit, or transform images unless the user explicitly asks for image creation or image editing.
 - Do not substitute a visually similar mock-up for inspection of the user's actual screenshot.
 - If the requested action is code, repository, documentation, or diagnostic work, stay within that scope unless an additional action is clearly required.
 - Before any destructive, publishing, deployment, packaging, merge, or production action, verify that the user's instruction actually authorizes it.
