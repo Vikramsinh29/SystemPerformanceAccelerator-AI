@@ -31,7 +31,10 @@ public sealed class ReleasePackagingScriptTests
         Assert.Contains("$launchProcess.WaitForExit(10000)", script);
         Assert.Contains("Extracted portable launch: Passed", script);
         Assert.Contains("SkipDesktopCopy", script);
-        Assert.Contains("SystemPerformanceAccelerator.PrivilegedHelper", script);         Assert.Contains("PC-SPA.PrivilegedHelper.exe", script);         Assert.Contains("PC-SPA.PrivilegedHelper.runtimeconfig.json", script);         Assert.Contains("--self-contained true", script);
+        Assert.Contains("SystemPerformanceAccelerator.PrivilegedHelper", script);
+        Assert.Contains("PC-SPA.PrivilegedHelper.exe", script);
+        Assert.Contains("PC-SPA.PrivilegedHelper.runtimeconfig.json", script);
+        Assert.Contains("--self-contained true", script);
     }
 
     private static string FindRepositoryFile(params string[] relativePath)

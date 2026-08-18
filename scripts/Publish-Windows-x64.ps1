@@ -272,7 +272,10 @@ try {
         "$releaseName/PC-SPA.runtimeconfig.json",
         "$releaseName/PC-SPA.deps.json",
         "$releaseName/coreclr.dll",
-        "$releaseName/PC-SPA.PrivilegedHelper.exe",         "$releaseName/PC-SPA.PrivilegedHelper.dll",         "$releaseName/PC-SPA.PrivilegedHelper.deps.json",         "$releaseName/PC-SPA.PrivilegedHelper.runtimeconfig.json",
+        "$releaseName/PC-SPA.PrivilegedHelper.exe",
+        "$releaseName/PC-SPA.PrivilegedHelper.dll",
+        "$releaseName/PC-SPA.PrivilegedHelper.deps.json",
+        "$releaseName/PC-SPA.PrivilegedHelper.runtimeconfig.json",
         "$releaseName/RELEASE-NOTES.txt"
     )
 

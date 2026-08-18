@@ -124,7 +124,8 @@ if (Test-Path -LiteralPath $publishDirectory -PathType Container) {
     foreach ($artifactName in @(
         "PC-SPA.exe",
         "PC-SPA.dll",
-        "PC-SPA.PrivilegedHelper.exe",         "PC-SPA.PrivilegedHelper.dll",
+        "PC-SPA.PrivilegedHelper.exe",
+        "PC-SPA.PrivilegedHelper.dll",
         "SystemPerformanceAccelerator.Core.dll",
         "SystemPerformanceAccelerator.Infrastructure.dll"
     )) {
