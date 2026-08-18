@@ -53,6 +53,36 @@ function Replace-InSection {
     return $Source.Remove($start, $end - $start).Insert($start, $section)
 }
 
+function Replace-BlockInSection {
+    param(
+        [string]$Source,
+        [string]$StartAnchor,
+        [string]$EndAnchor,
+        [string]$BlockStart,
+        [string]$BlockEnd,
+        [string]$NewBlock,
+        [string]$Name
+    )
+
+    $sectionStart = $Source.IndexOf($StartAnchor, [System.StringComparison]::Ordinal)
+    if ($sectionStart -lt 0) { throw "$Name section start was not found." }
+
+    $sectionEnd = $Source.IndexOf($EndAnchor, $sectionStart + $StartAnchor.Length, [System.StringComparison]::Ordinal)
+    if ($sectionEnd -lt 0) { throw "$Name section end was not found." }
+
+    $blockStartIndex = $Source.IndexOf($BlockStart, $sectionStart, [System.StringComparison]::Ordinal)
+    if ($blockStartIndex -lt 0 -or $blockStartIndex -ge $sectionEnd) {
+        throw "$Name block start was not found in section."
+    }
+
+    $blockEndIndex = $Source.IndexOf($BlockEnd, $blockStartIndex + $BlockStart.Length, [System.StringComparison]::Ordinal)
+    if ($blockEndIndex -lt 0 -or $blockEndIndex -gt $sectionEnd) {
+        throw "$Name block end was not found in section."
+    }
+
+    return $Source.Remove($blockStartIndex, $blockEndIndex - $blockStartIndex).Insert($blockStartIndex, $NewBlock)
+}
+
 Write-Host ''
 Write-Host 'VERIFYING CURRENT UNIFORM-LAYOUT BASELINE'
 Write-Host '============================================'
@@ -61,7 +91,8 @@ foreach ($required in @(
     '<Setter Property="MinHeight" Value="90" />',
     'MinHeight="180"',
     'MinHeight="310" Style="{StaticResource ScheduleSurfaceCardStyle}"',
-    'Background="{DynamicResource HelpSafetyBackgroundBrush}"'
+    'Background="{DynamicResource HelpSafetyBackgroundBrush}"',
+    'BorderThickness="1"'
 )) {
     if (-not $main.Contains($required)) {
         throw "Expected current uniform-layout marker missing: $required"
@@ -118,7 +149,6 @@ foreach ($item in $sections) {
     $main = Replace-InSection -Source $main -StartAnchor $item.Start -EndAnchor $item.End -OldText $item.Old -NewText $item.New -Name ($item.Name + ' minimum')
 }
 
-# Duplicate Finder had no protected result minimum yet.
 $duplicateResultOld = '<Border Grid.Row="3" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">'
 $duplicateResultNew = '<Border Grid.Row="3" MinHeight="160" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">'
 $main = Replace-InSection `
@@ -168,6 +198,202 @@ Write-Host 'Duplicate outer gap    : 12 -> 10'
 Write-Host 'Duplicate row gaps     : reduced'
 
 Write-Host ''
+Write-Host 'NORMALIZING STARTUP MANAGER'
+Write-Host '============================================'
+
+$startupItemsCard = @'
+<Border Grid.Column="0"
+                        Padding="12,9"
+                        MinHeight="90"
+                        Style="{StaticResource FluentCardStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="44" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource SummaryMetricIconStyle}"
+                                    Background="{DynamicResource AccentSoftBrush}">
+                                <TextBlock Text="&#xE8FD;"
+                                           Foreground="{DynamicResource AccentBrush}"
+                                           Style="{StaticResource SummaryMetricGlyphStyle}" />
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="ITEMS FOUND" Style="{StaticResource FluentCaptionStyle}" />
+                                <TextBlock Text="{Binding ItemsFound}"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                           Style="{StaticResource SummaryMetricValueStyle}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    '
+'@.TrimEnd("`r","`n")
+
+$main = Replace-BlockInSection `
+    -Source $main `
+    -StartAnchor 'DataContext="{Binding StartupManager}"' `
+    -EndAnchor 'DataContext="{Binding WindowsRepairAssessment}"' `
+    -BlockStart '<Border Grid.Column="0"' `
+    -BlockEnd '<Border Grid.Column="2"' `
+    -NewBlock $startupItemsCard `
+    -Name 'Startup Manager first summary card'
+
+$startupStart = $main.IndexOf('DataContext="{Binding StartupManager}"', [System.StringComparison]::Ordinal)
+$startupEnd = $main.IndexOf('DataContext="{Binding WindowsRepairAssessment}"', $startupStart + 1, [System.StringComparison]::Ordinal)
+if ($startupStart -lt 0 -or $startupEnd -lt 0) { throw 'Startup Manager section bounds were not found.' }
+$startup = $main.Substring($startupStart, $startupEnd - $startupStart)
+
+$oldStartupMetric = 'Padding="16,14" Style="{StaticResource FluentCardStyle}"'
+$startupMetricCount = ([regex]::Matches($startup, [regex]::Escape($oldStartupMetric))).Count
+if ($startupMetricCount -ne 3) {
+    throw "Expected 3 Startup Manager metric cards but found $startupMetricCount."
+}
+$startup = $startup.Replace($oldStartupMetric, 'Padding="12,9" MinHeight="90" Style="{StaticResource FluentCardStyle}"')
+
+$startupResultOld = '<Border Grid.Row="2" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">'
+$startupResultCount = ([regex]::Matches($startup, [regex]::Escape($startupResultOld))).Count
+if ($startupResultCount -ne 1) { throw "Expected one Startup Manager result card but found $startupResultCount." }
+$startup = $startup.Replace($startupResultOld, '<Border Grid.Row="2" MinHeight="160" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">')
+
+$startupHeaderOld = 'Padding="14,10"'
+$startupHeaderCount = ([regex]::Matches($startup, [regex]::Escape($startupHeaderOld))).Count
+if ($startupHeaderCount -lt 1) { throw 'Startup Manager info-strip padding target was not found.' }
+$startup = $startup.Replace($startupHeaderOld, 'Padding="14,8"')
+
+if (-not $startup.Contains('Text="Administrator permission active"')) {
+    throw 'Startup Manager legacy administrator badge text was not found.'
+}
+$startup = $startup.Replace('Text="Administrator permission active"', 'Text="UAC only when required"')
+
+if (-not $startup.Contains('Margin="0,14,0,0"')) {
+    throw 'Startup Manager status gap target was not found.'
+}
+$startup = $startup.Replace('Margin="0,14,0,0"', 'Margin="0,10,0,0"')
+
+$main = $main.Remove($startupStart, $startupEnd - $startupStart).Insert($startupStart, $startup)
+
+Write-Host 'Startup first summary : ITEMS FOUND (correct domain data)'
+Write-Host 'Startup metric cards  : 90px uniform'
+Write-Host 'Startup result area   : 160px minimum'
+Write-Host 'Startup info strip    : compacted'
+Write-Host 'Startup UAC badge     : least-privilege wording'
+Write-Host 'Startup status gap    : 10px'
+
+Write-Host ''
+Write-Host 'NORMALIZING WINDOWS REPAIR'
+Write-Host '============================================'
+
+$repairChecksCard = @'
+<Border Grid.Column="0"
+                Padding="12,9"
+                MinHeight="90"
+                Style="{StaticResource FluentCardStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="ASSESSMENT CHECKS"
+                           Style="{StaticResource FluentCaptionStyle}" />
+
+                <Grid Grid.Row="1" Margin="0,5,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <CheckBox Grid.Column="0"
+                              IsChecked="{Binding CheckComponentStore, Mode=TwoWay}"
+                              Foreground="{DynamicResource TextPrimaryBrush}"
+                              VerticalContentAlignment="Center">
+                        <StackPanel Margin="4,0,0,0">
+                            <TextBlock Text="DISM CheckHealth"
+                                       FontSize="11.5"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Margin="0,1,0,0"
+                                       Text="Windows component store"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       FontSize="9.5"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </CheckBox>
+
+                    <CheckBox Grid.Column="2"
+                              IsChecked="{Binding VerifyProtectedSystemFiles, Mode=TwoWay}"
+                              Foreground="{DynamicResource TextPrimaryBrush}"
+                              VerticalContentAlignment="Center">
+                        <StackPanel Margin="4,0,0,0">
+                            <TextBlock Text="SFC VerifyOnly"
+                                       FontSize="11.5"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Margin="0,1,0,0"
+                                       Text="Protected Windows files"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       FontSize="9.5"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </CheckBox>
+                </Grid>
+            </Grid>
+        </Border>
+
+        '
+'@.TrimEnd("`r","`n")
+
+$main = Replace-BlockInSection `
+    -Source $main `
+    -StartAnchor 'DataContext="{Binding WindowsRepairAssessment}"' `
+    -EndAnchor 'DataContext="{Binding SystemMonitor}"' `
+    -BlockStart '<Border Grid.Column="0"' `
+    -BlockEnd '<Border Grid.Column="2"' `
+    -NewBlock $repairChecksCard `
+    -Name 'Windows Repair assessment-check summary card'
+
+$repairStart = $main.IndexOf('DataContext="{Binding WindowsRepairAssessment}"', [System.StringComparison]::Ordinal)
+$repairEnd = $main.IndexOf('DataContext="{Binding SystemMonitor}"', $repairStart + 1, [System.StringComparison]::Ordinal)
+if ($repairStart -lt 0 -or $repairEnd -lt 0) { throw 'Windows Repair section bounds were not found.' }
+$repair = $main.Substring($repairStart, $repairEnd - $repairStart)
+
+$repairMetricOld = 'Padding="12,6"' + "`n" + '                MinHeight="66"' + "`n" + '                Style="{StaticResource FluentCardStyle}">'
+$repairMetricCount = ([regex]::Matches($repair, [regex]::Escape($repairMetricOld))).Count
+if ($repairMetricCount -ne 3) {
+    throw "Expected 3 Windows Repair summary metric cards but found $repairMetricCount."
+}
+$repair = $repair.Replace($repairMetricOld, 'Padding="12,9"' + "`n" + '                MinHeight="90"' + "`n" + '                Style="{StaticResource FluentCardStyle}">')
+
+if (-not $repair.Contains('<ColumnDefinition Width="0.82*" MinWidth="220" />')) {
+    throw 'Windows Repair safeguards column target was not found.'
+}
+$repair = $repair.Replace('<ColumnDefinition Width="0.82*" MinWidth="220" />', '<ColumnDefinition Width="1.0*" MinWidth="250" />')
+$repair = $repair.Replace('<ColumnDefinition Width="10" />' + "`n" + '            <ColumnDefinition Width="2.55*" />', '<ColumnDefinition Width="10" />' + "`n" + '            <ColumnDefinition Width="2.4*" />')
+
+$compactRepairs = @(
+    @{ Old='Padding="13"' + "`n" + '                Style="{StaticResource FluentElevatedCardStyle}"'; New='Padding="12"' + "`n" + '                Style="{StaticResource FluentElevatedCardStyle}"'; Name='safeguards padding' },
+    @{ Old='<StackPanel Grid.Row="1" Margin="0,7,0,0">'; New='<StackPanel Grid.Row="1" Margin="0,5,0,0">'; Name='safeguards intro gap' },
+    @{ Old='<StackPanel Grid.Row="2" Margin="0,7,0,0">'; New='<StackPanel Grid.Row="2" Margin="0,5,0,0">'; Name='safeguards bullet gap' },
+    @{ Old='Margin="0,14,0,0"' + "`n" + '                        Padding="9,6"' + "`n" + '                        Background="{DynamicResource WarningSoftBrush}"'; New='Margin="0,8,0,0"' + "`n" + '                        Padding="8,5"' + "`n" + '                        Background="{DynamicResource WarningSoftBrush}"'; Name='safe-stop compacting' },
+    @{ Old='<StackPanel Grid.Row="4" Margin="0,7,0,0">'; New='<StackPanel Grid.Row="4" Margin="0,5,0,0">'; Name='latest-reference gap' },
+    @{ Old='Text="Active Microsoft repair or check is never force-closed"'; New='Text="Active Microsoft repair/check is never force-closed"'; Name='safeguard wrapping' }
+)
+
+foreach ($item in $compactRepairs) {
+    $count = ([regex]::Matches($repair, [regex]::Escape($item.Old))).Count
+    if ($count -ne 1) {
+        throw "Windows Repair $($item.Name) expected one target but found $count."
+    }
+    $repair = $repair.Replace($item.Old, $item.New)
+}
+
+$main = $main.Remove($repairStart, $repairEnd - $repairStart).Insert($repairStart, $repair)
+
+Write-Host 'Repair summary cards   : 90px uniform'
+Write-Host 'Repair assessment checks: horizontal / compact'
+Write-Host 'Repair safeguards width: increased'
+Write-Host 'Repair safeguards      : compacted without removing safety content'
+Write-Host 'Repair results panel   : preserved'
+
+Write-Host ''
 Write-Host 'REDUCING RESULT-TO-STATUS GAPS'
 Write-Host '============================================'
 
@@ -198,7 +424,11 @@ foreach ($required in @(
     '<Setter Property="MinHeight" Value="84" />',
     'MinHeight="160"',
     'MinHeight="285" Style="{StaticResource ScheduleSurfaceCardStyle}"',
-    'Grid.Row="3" MinHeight="160" Background="{DynamicResource SurfaceBrush}"'
+    'Grid.Row="3" MinHeight="160" Background="{DynamicResource SurfaceBrush}"',
+    'Text="ITEMS FOUND"',
+    'Text="UAC only when required"',
+    'DataContext="{Binding WindowsRepairAssessment}"',
+    '<ColumnDefinition Width="1.0*" MinWidth="250" />'
 )) {
     if (-not $main.Contains($required)) {
         throw "Required final compactness marker missing: $required"
@@ -225,14 +455,19 @@ if ($afterChanged.Count -ne 3) {
 Write-Host ''
 Write-Host 'FINAL TOOL VERTICAL COMPACTNESS COMPLETE'
 Write-Host '============================================'
-Write-Host 'Hero cards            : UNCHANGED'
-Write-Host 'Summary cards         : UNCHANGED (90)'
-Write-Host 'Status panel minimum  : 84'
-Write-Host 'Result minimum        : 160'
-Write-Host 'Auto result minimum   : 285'
-Write-Host 'Duplicate action card : COMPACTED'
-Write-Host 'Result/status gap     : 10'
-Write-Host 'Help green palette    : PRESERVED'
-Write-Host 'Help border           : 1.0 PRESERVED'
-Write-Host 'Changed files         : 3'
+Write-Host 'Hero cards             : UNCHANGED'
+Write-Host 'Summary cards          : UNIFORM 90'
+Write-Host 'Status panel minimum   : 84'
+Write-Host 'Result minimum         : 160'
+Write-Host 'Auto result minimum    : 285'
+Write-Host 'Duplicate action card  : COMPACTED'
+Write-Host 'Startup first summary  : ITEMS FOUND'
+Write-Host 'Startup metric cards   : UNIFORM'
+Write-Host 'Startup UAC wording    : LEAST-PRIVILEGE'
+Write-Host 'Windows Repair summaries: UNIFORM'
+Write-Host 'Windows Repair safeguards: COMPACT / READABLE'
+Write-Host 'Result/status gap      : 10'
+Write-Host 'Help green palette     : PRESERVED'
+Write-Host 'Help border            : 1.0 PRESERVED'
+Write-Host 'Changed files          : 3'
 Write-Host 'No commit or push was performed.'
