@@ -18,6 +18,21 @@ public sealed class ReleasePackagingScriptTests
     }
 
     [Fact]
+    public void WindowsPublishScript_AllowsDetachedHeadWithCommitIdentity()
+    {
+        var script = File.ReadAllText(FindRepositoryFile(
+            "scripts",
+            "Publish-Windows-x64.ps1"));
+
+        Assert.Contains("$branchOutput = @(git branch --show-current)", script);
+        Assert.Contains("$commitOutput = @(git rev-parse HEAD)", script);
+        Assert.Contains("detached@$($commit.Substring(0, 12))", script);
+        Assert.DoesNotContain(
+            "$branch = (git branch --show-current).Trim()",
+            script);
+    }
+
+    [Fact]
     public void WindowsPublishScript_VerifiesExtractedExecutableLaunchAndNormalClose()
     {
         var script = File.ReadAllText(FindRepositoryFile(

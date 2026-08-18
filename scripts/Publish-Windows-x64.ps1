@@ -46,15 +46,18 @@ if (-not $AllowDirtyWorkingTree) {
     }
 }
 
-$branch = (git branch --show-current).Trim()
-$commit = (git rev-parse HEAD).Trim()
+$branchOutput = @(git branch --show-current)
+$branch = ($branchOutput -join "").Trim()
 
-if ([string]::IsNullOrWhiteSpace($branch)) {
-    throw "Unable to determine the current Git branch."
-}
+$commitOutput = @(git rev-parse HEAD)
+$commit = ($commitOutput -join "").Trim()
 
 if ([string]::IsNullOrWhiteSpace($commit)) {
     throw "Unable to determine the current Git commit."
+}
+
+if ([string]::IsNullOrWhiteSpace($branch)) {
+    $branch = "detached@$($commit.Substring(0, 12))"
 }
 
 Get-Process -Name "PC-SPA", "SystemPerformanceAccelerator.Desktop" -ErrorAction SilentlyContinue |
