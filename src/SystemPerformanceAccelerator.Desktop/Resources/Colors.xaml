@@ -45,6 +45,10 @@
 
     <SolidColorBrush x:Key="SuccessBrush" presentationOptions:Freeze="False" Color="#42B883" />
     <SolidColorBrush x:Key="SuccessSoftBrush" presentationOptions:Freeze="False" Color="#15352A" />
+    <SolidColorBrush x:Key="HelpSafetyBackgroundBrush" presentationOptions:Freeze="False" Color="#0D261B" />
+    <SolidColorBrush x:Key="HelpSafetyBorderBrush" presentationOptions:Freeze="False" Color="#32F58A" />
+    <SolidColorBrush x:Key="HelpSafetyAccentBrush" presentationOptions:Freeze="False" Color="#78FFB6" />
+    <SolidColorBrush x:Key="HelpSafetyTextBrush" presentationOptions:Freeze="False" Color="#CFF8DF" />
     <SolidColorBrush x:Key="WarningBrush" presentationOptions:Freeze="False" Color="#F0A543" />
     <SolidColorBrush x:Key="WarningSoftBrush" presentationOptions:Freeze="False" Color="#392B19" />
     <SolidColorBrush x:Key="DangerBrush" presentationOptions:Freeze="False" Color="#ED6A63" />

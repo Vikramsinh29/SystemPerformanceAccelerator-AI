@@ -57,6 +57,10 @@ public static class ThemeManager
 
             ["SuccessBrush"] = Color.FromRgb(0x10, 0x7C, 0x41),
             ["SuccessSoftBrush"] = Color.FromRgb(0xE8, 0xF5, 0xEE),
+            ["HelpSafetyBackgroundBrush"] = Color.FromRgb(0xEC, 0xFF, 0xF5),
+            ["HelpSafetyBorderBrush"] = Color.FromRgb(0x16, 0xC9, 0x6A),
+            ["HelpSafetyAccentBrush"] = Color.FromRgb(0x0F, 0xAF, 0x58),
+            ["HelpSafetyTextBrush"] = Color.FromRgb(0x26, 0x6A, 0x45),
             ["WarningBrush"] = Color.FromRgb(0xB8, 0x60, 0x08),
             ["WarningSoftBrush"] = Color.FromRgb(0xFF, 0xF1, 0xD6),
             ["DangerBrush"] = Color.FromRgb(0xC4, 0x2B, 0x1C),
@@ -120,6 +124,10 @@ public static class ThemeManager
 
             ["SuccessBrush"] = Color.FromRgb(0x42, 0xB8, 0x83),
             ["SuccessSoftBrush"] = Color.FromRgb(0x15, 0x35, 0x2A),
+            ["HelpSafetyBackgroundBrush"] = Color.FromRgb(0x0D, 0x26, 0x1B),
+            ["HelpSafetyBorderBrush"] = Color.FromRgb(0x32, 0xF5, 0x8A),
+            ["HelpSafetyAccentBrush"] = Color.FromRgb(0x78, 0xFF, 0xB6),
+            ["HelpSafetyTextBrush"] = Color.FromRgb(0xCF, 0xF8, 0xDF),
             ["WarningBrush"] = Color.FromRgb(0xF0, 0xA5, 0x43),
             ["WarningSoftBrush"] = Color.FromRgb(0x39, 0x2B, 0x19),
             ["DangerBrush"] = Color.FromRgb(0xED, 0x6A, 0x63),
