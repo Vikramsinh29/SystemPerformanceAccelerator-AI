@@ -25,8 +25,9 @@ public sealed class OperationScopedWindowsRepairPlanServiceTests
         var plan = service.CreatePlan(assessment);
 
         Assert.Equal(WindowsRepairPlanDecision.ReviewRequired, plan.Decision);
-        var admin = Assert.Single(plan.Preflight.Where(item =>
-            item.Title == "Administrator session"));
+        var admin = Assert.Single(
+            plan.Preflight,
+            item => item.Title == "Administrator session");
         Assert.Equal(WindowsRepairPlanItemStatus.Information, admin.Status);
         Assert.Contains("Windows UAC", admin.Detail, StringComparison.Ordinal);
         Assert.Contains("UAC", plan.Disclosure, StringComparison.Ordinal);
