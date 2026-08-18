@@ -187,8 +187,10 @@ Write-Host ''
 Write-Host 'VERIFYING SOURCE CONTRACT'
 Write-Host '============================================'
 
-if ($main.Contains($legacyHeight)) {
-    throw 'A legacy fixed viewport-height binding remains.'
+$legacyHeightPattern = '(?<!Min)Height="\{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter=\{StaticResource SubtractDoubleConverter\}, ConverterParameter=34\}"'
+$remainingLegacyHeightMatches = [regex]::Matches($main, $legacyHeightPattern).Count
+if ($remainingLegacyHeightMatches -ne 0) {
+    throw "A standalone legacy fixed viewport-height binding remains. Count: $remainingLegacyHeightMatches"
 }
 foreach ($required in @(
     'MinHeight="190"',
