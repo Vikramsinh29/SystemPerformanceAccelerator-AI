@@ -21,6 +21,7 @@ public partial class App : Application
 
         try
         {
+            CommercialUserDataMigrationService.CleanupLegacyBetaAccess();
             var settingsService = new ApplicationSettingsService();
             var settingsLoadResult = settingsService.Load();
             var diagnosticService = new LocalDiagnosticService();
