@@ -1,0 +1,522 @@
+--- a/src/SystemPerformanceAccelerator.Desktop/MainWindow.xaml
++++ b/src/SystemPerformanceAccelerator.Desktop/MainWindow.xaml
+@@ -246,8 +246,8 @@
+         <Style x:Key="OperationStatusPanelStyle"
+                TargetType="Border"
+                BasedOn="{StaticResource FluentCardStyle}">
+-            <Setter Property="MinHeight" Value="90" />
+-            <Setter Property="Padding" Value="15,11" />
++            <Setter Property="MinHeight" Value="80" />
++            <Setter Property="Padding" Value="14,9" />
+             <Setter Property="VerticalAlignment" Value="Bottom" />
+         </Style>
+ 
+@@ -273,7 +273,7 @@
+         <Style x:Key="ModuleHeroCardStyle"
+                TargetType="Border"
+                BasedOn="{StaticResource FluentElevatedCardStyle}">
+-            <Setter Property="Padding" Value="22,18" />
++            <Setter Property="Padding" Value="20,15" />
+         </Style>
+ 
+         <Style x:Key="ModuleHeroIconStyle" TargetType="Border">
+@@ -330,8 +330,8 @@
+                TargetType="Border"
+                BasedOn="{StaticResource FluentCardStyle}">
+             <Setter Property="Margin" Value="4" />
+-            <Setter Property="Padding" Value="12,9" />
+-            <Setter Property="MinHeight" Value="90" />
++            <Setter Property="Padding" Value="12,8" />
++            <Setter Property="MinHeight" Value="82" />
+         </Style>
+ 
+         <Style x:Key="ResponsiveSummaryCardCaptionStyle"
+@@ -1156,8 +1156,8 @@
+             </Border>
+ 
+             <Grid Grid.Row="1"
+-                  Margin="20,16,20,18"
+-                  MinHeight="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=34}"
++                  Margin="20,14,20,14"
++                  MinHeight="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=38}"
+                   DataContext="{Binding HealthCheck}"
+                   Visibility="{Binding DataContext.IsHealthCheckContentVisible, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BooleanToVisibilityConverter}}">
+@@ -1181,9 +1181,8 @@
+                     </Grid.RowDefinitions>
+ 
+                     <Border Grid.Row="0"
+-                            Margin="0,0,0,14"
+-                            Padding="22,18"
+-                            Style="{StaticResource FluentElevatedCardStyle}">
++                            Margin="0,0,0,10"
++                            Style="{StaticResource ModuleHeroCardStyle}">
+@@ -1324,7 +1323,7 @@
+                     </UniformGrid>
+ 
+                     <Border Grid.Row="2"
+-                            MinHeight="180"
++                            MinHeight="140"
+                             Style="{StaticResource FluentElevatedCardStyle}"
+                             ClipToBounds="True">
+@@ -1447,7 +1446,7 @@
+                     </Border>
+ 
+                     <Border Grid.Row="3"
+-                            Margin="0,14,0,0"
++                            Margin="0,10,0,0"
+                             Style="{StaticResource OperationStatusPanelStyle}">
+@@ -1926,8 +1925,8 @@
+             </Grid>
+ 
+             <Grid Grid.Row="1"
+-                  Margin="20,16,20,18"
+-                  MinHeight="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=34}"
++                  Margin="20,14,20,14"
++                  MinHeight="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=38}"
+                   Visibility="{Binding IsCleanerContentVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+@@ -1939,9 +1938,8 @@
+ 
+                 <Border Grid.Row="0"
+-                        Margin="0,0,0,14"
+-                        Padding="22,18"
+-                        Style="{StaticResource FluentElevatedCardStyle}">
++                        Margin="0,0,0,10"
++                        Style="{StaticResource ModuleHeroCardStyle}">
+@@ -2296,7 +2294,7 @@
+                 </Border>
+ 
+                 <Border Grid.Row="3"
+-                        Margin="0,14,0,0"
++                        Margin="0,10,0,0"
+                         Style="{StaticResource OperationStatusPanelStyle}">
+@@ -2363,8 +2361,8 @@
+             </Grid>
+ 
+             <Grid Grid.Row="1"
+-                  Margin="20,16,20,18"
+-                  MinHeight="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=34}"
++                  Margin="20,14,20,14"
++                  MinHeight="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=38}"
+                   DataContext="{Binding CustomClean}"
+@@ -2376,9 +2374,8 @@
+ 
+                 <Border Grid.Row="0"
+-                        Margin="0,0,0,14"
+-                        Padding="22,18"
+-                        Style="{StaticResource FluentElevatedCardStyle}">
++                        Margin="0,0,0,10"
++                        Style="{StaticResource ModuleHeroCardStyle}">
+@@ -2556,7 +2553,7 @@
+ 
+                 <Border Grid.Row="2"
+-                        MinHeight="180"
++                        MinHeight="140"
+                         Background="{DynamicResource SurfaceBrush}"
+@@ -2773,7 +2770,7 @@
+                 </Border>
+ 
+                 <Border Grid.Row="3"
+-                        Margin="0,14,0,0"
++                        Margin="0,10,0,0"
+                         Style="{StaticResource OperationStatusPanelStyle}">
+@@ -2840,8 +2837,8 @@
+             </Grid>
+ 
+             <Grid Grid.Row="1"
+-                  Margin="20,16,20,18"
+-                  MinHeight="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=34}"
++                  Margin="20,14,20,14"
++                  MinHeight="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=38}"
+@@ -2999,7 +2996,7 @@
+-                    <Border Grid.Row="2" MinHeight="310" Style="{StaticResource ScheduleSurfaceCardStyle}">
++                    <Border Grid.Row="2" MinHeight="230" Style="{StaticResource ScheduleSurfaceCardStyle}">
+@@ -3183,7 +3180,7 @@
+                     <Border Grid.Row="3"
+-                            Margin="0,14,0,0"
++                            Margin="0,10,0,0"
+                             Style="{StaticResource OperationStatusPanelStyle}">
+@@ -3608,8 +3605,8 @@
+             </Grid>
+ 
+             <Grid Grid.Row="1"
+-                  Margin="20,16,20,18"
+-                  MinHeight="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=34}"
++                  Margin="20,14,20,14"
++                  MinHeight="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=38}"
+@@ -3738,7 +3735,7 @@
+-                <Border Grid.Row="3" MinHeight="180" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
++                <Border Grid.Row="3" MinHeight="140" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
+@@ -3790,7 +3787,7 @@
+                 <Border Grid.Row="4"
+-                        Margin="0,14,0,0"
++                        Margin="0,10,0,0"
+                         Style="{StaticResource OperationStatusPanelStyle}">
+@@ -3849,8 +3846,8 @@
+             </Grid>
+ 
+             <Grid Grid.Row="1"
+-                  Margin="20,16,20,18"
+-                  MinHeight="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=34}"
++                  Margin="20,14,20,14"
++                  MinHeight="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=38}"
+@@ -3877,29 +3874,9 @@
+-                <Grid Grid.Row="1" Margin="0,12,0,0">
+-                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="12" /><ColumnDefinition Width="*" /><ColumnDefinition Width="12" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+-                    <Border Grid.Column="0" Padding="18,14" Style="{StaticResource FluentCardStyle}">
+-                        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+-                            <Border Style="{StaticResource SummaryMetricIconStyle}" Background="{DynamicResource AccentSoftBrush}"><TextBlock Text="&#xE8FD;" Foreground="{DynamicResource AccentBrush}" Style="{StaticResource SummaryMetricGlyphStyle}" /></Border>
+-                            <StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="DUPLICATE GROUPS" Style="{StaticResource FluentCaptionStyle}" /><TextBlock Text="{Binding GroupsFound}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /></StackPanel>
+-                        </Grid>
+-                    </Border>
+-                    <Border Grid.Column="2" Padding="18,14" Style="{StaticResource FluentCardStyle}">
+-                        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+-                            <Border Style="{StaticResource SummaryMetricIconStyle}" Background="{DynamicResource SuccessSoftBrush}"><TextBlock Text="&#xE8A5;" Foreground="{DynamicResource SuccessBrush}" Style="{StaticResource SummaryMetricGlyphStyle}" /></Border>
+-                            <StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="CONFIRMED FILES" Style="{StaticResource FluentCaptionStyle}" /><TextBlock Text="{Binding DuplicateFiles}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /></StackPanel>
+-                        </Grid>
+-                    </Border>
+-                    <Border Grid.Column="4" Padding="18,14" Style="{StaticResource FluentCardStyle}">
+-                        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+-                            <Border Style="{StaticResource SummaryMetricIconStyle}" Background="{DynamicResource WarningSoftBrush}"><TextBlock Text="&#xE8C8;" Foreground="{DynamicResource WarningBrush}" Style="{StaticResource SummaryMetricGlyphStyle}" /></Border>
+-                            <StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="POTENTIAL RECLAIMABLE" Style="{StaticResource FluentCaptionStyle}" /><TextBlock Text="{Binding PotentialReclaimableSpace}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /></StackPanel>
+-                        </Grid>
+-                    </Border>
+-                </Grid>
++                <UniformGrid Grid.Row="1" Margin="-4,6,-4,6" Columns="3">
++                    <Border Style="{StaticResource ResponsiveSummaryCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource SummaryMetricIconStyle}" Background="{DynamicResource AccentSoftBrush}"><TextBlock Text="&#xE8FD;" Foreground="{DynamicResource AccentBrush}" Style="{StaticResource SummaryMetricGlyphStyle}" /></Border><StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="DUPLICATE GROUPS" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" /><TextBlock Text="{Binding GroupsFound}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /></StackPanel></Grid></Border>
++                    <Border Style="{StaticResource ResponsiveSummaryCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource SummaryMetricIconStyle}" Background="{DynamicResource SuccessSoftBrush}"><TextBlock Text="&#xE8A5;" Foreground="{DynamicResource SuccessBrush}" Style="{StaticResource SummaryMetricGlyphStyle}" /></Border><StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="CONFIRMED FILES" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" /><TextBlock Text="{Binding DuplicateFiles}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /></StackPanel></Grid></Border>
++                    <Border Style="{StaticResource ResponsiveSummaryCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource SummaryMetricIconStyle}" Background="{DynamicResource WarningSoftBrush}"><TextBlock Text="&#xE8C8;" Foreground="{DynamicResource WarningBrush}" Style="{StaticResource SummaryMetricGlyphStyle}" /></Border><StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="POTENTIAL RECLAIMABLE" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" /><TextBlock Text="{Binding PotentialReclaimableSpace}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /></StackPanel></Grid></Border>
++                </UniformGrid>
+@@ -3900,7 +3877,7 @@
+-                <Border Grid.Row="2" Margin="0,12,0,12" Padding="18,15" Style="{StaticResource FluentCardStyle}">
++                <Border Grid.Row="2" Margin="0,4,0,6" Padding="16,10" Style="{StaticResource FluentCardStyle}">
+@@ -3910,7 +3887,7 @@
+-                        <Grid Grid.Row="1" Margin="0,11,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="12" /><ColumnDefinition Width="2*" /></Grid.ColumnDefinitions>
++                        <Grid Grid.Row="1" Margin="0,8,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="12" /><ColumnDefinition Width="2*" /></Grid.ColumnDefinitions>
+@@ -3924,7 +3901,7 @@
+-                <Border Grid.Row="3" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
++                <Border Grid.Row="3" MinHeight="130" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
+@@ -4150,7 +4127,7 @@
+                 <Border Grid.Row="4"
+-                        Margin="0,14,0,0"
++                        Margin="0,10,0,0"
+                         Style="{StaticResource OperationStatusPanelStyle}">
+@@ -4209,8 +4186,8 @@
+             </Grid>
+ 
+             <Grid Grid.Row="1"
+-                  Margin="20,16,20,18"
+-                  MinHeight="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=34}"
++                  Margin="20,14,20,14"
++                  MinHeight="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=38}"
+                   DataContext="{Binding StartupManager}"
+@@ -4235,69 +4212,25 @@
+-                <Grid Grid.Row="1" Margin="0,7,0,7">
+-                    <Grid.ColumnDefinitions>
+-                        <ColumnDefinition Width="*" />
+-                        <ColumnDefinition Width="12" />
+-                        <ColumnDefinition Width="*" />
+-                        <ColumnDefinition Width="12" />
+-                        <ColumnDefinition Width="*" />
+-                        <ColumnDefinition Width="12" />
+-                        <ColumnDefinition Width="*" />
+-                    </Grid.ColumnDefinitions>
+-                    <Border Grid.Column="0"
+-                Padding="12,7"
+-                MinHeight="72"
+-                Style="{StaticResource FluentCardStyle}">
+-            <Grid>
+-                <Grid.RowDefinitions>
+-                    <RowDefinition Height="Auto" />
+-                    <RowDefinition Height="Auto" />
+-                </Grid.RowDefinitions>
+-
+-                <TextBlock Text="ASSESSMENT CHECKS"
+-                           Style="{StaticResource FluentCaptionStyle}" />
+-
+-                <Grid Grid.Row="1" Margin="0,5,0,0">
+-                    <Grid.ColumnDefinitions>
+-                        <ColumnDefinition Width="*" />
+-                        <ColumnDefinition Width="10" />
+-                        <ColumnDefinition Width="*" />
+-                    </Grid.ColumnDefinitions>
+-
+-                    <CheckBox Grid.Column="0"
+-                              IsChecked="{Binding CheckComponentStore, Mode=TwoWay}"
+-                              Foreground="{DynamicResource TextPrimaryBrush}"
+-                              VerticalContentAlignment="Center">
+-                        <StackPanel Margin="4,0,0,0">
+-                            <TextBlock Text="DISM CheckHealth"
+-                                       FontSize="11.5"
+-                                       FontWeight="SemiBold" />
+-                            <TextBlock Margin="0,1,0,0"
+-                                       Text="Windows component store"
+-                                       Foreground="{DynamicResource TextSecondaryBrush}"
+-                                       FontSize="9.5" />
+-                        </StackPanel>
+-                    </CheckBox>
+-
+-                    <CheckBox Grid.Column="2"
+-                              IsChecked="{Binding VerifyProtectedSystemFiles, Mode=TwoWay}"
+-                              Foreground="{DynamicResource TextPrimaryBrush}"
+-                              VerticalContentAlignment="Center">
+-                        <StackPanel Margin="4,0,0,0">
+-                            <TextBlock Text="SFC VerifyOnly"
+-                                       FontSize="11.5"
+-                                       FontWeight="SemiBold" />
+-                            <TextBlock Margin="0,1,0,0"
+-                                       Text="Protected Windows files"
+-                                       Foreground="{DynamicResource TextSecondaryBrush}"
+-                                       FontSize="9.5" />
+-                        </StackPanel>
+-                    </CheckBox>
+-                </Grid>
+-            </Grid>
+-        </Border>
+-        <Border Grid.Column="2" Padding="16,14" Style="{StaticResource FluentCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource SummaryMetricIconStyle}" Background="{DynamicResource SuccessSoftBrush}"><TextBlock Text="&#xE73E;" Foreground="{DynamicResource SuccessBrush}" Style="{StaticResource SummaryMetricGlyphStyle}" /></Border><StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="ENABLED" Style="{StaticResource FluentCaptionStyle}" /><TextBlock Text="{Binding EnabledItems}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /></StackPanel></Grid></Border>
+-                    <Border Grid.Column="4" Padding="16,14" Style="{StaticResource FluentCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource SummaryMetricIconStyle}" Background="{DynamicResource DangerSoftBrush}"><TextBlock Text="&#xE711;" Foreground="{DynamicResource DangerBrush}" Style="{StaticResource SummaryMetricGlyphStyle}" /></Border><StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="DISABLED" Style="{StaticResource FluentCaptionStyle}" /><TextBlock Text="{Binding DisabledItems}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /></StackPanel></Grid></Border>
+-                    <Border Grid.Column="6" Padding="16,14" Style="{StaticResource FluentCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource SummaryMetricIconStyle}" Background="{DynamicResource WarningSoftBrush}"><TextBlock Text="&#xE897;" Foreground="{DynamicResource WarningBrush}" Style="{StaticResource SummaryMetricGlyphStyle}" /></Border><StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="UNKNOWN" Style="{StaticResource FluentCaptionStyle}" /><TextBlock Text="{Binding UnknownItems}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /></StackPanel></Grid></Border>
+-                </Grid>
++                <UniformGrid Grid.Row="1" Margin="-4,6,-4,6" Columns="4">
++                    <Border Style="{StaticResource ResponsiveSummaryCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
++                            <Border Style="{StaticResource SummaryMetricIconStyle}" Background="{DynamicResource AccentSoftBrush}"><TextBlock Text="&#xE8FD;" Foreground="{DynamicResource AccentBrush}" Style="{StaticResource SummaryMetricGlyphStyle}" /></Border>
++                            <StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="ITEMS FOUND" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" /><TextBlock Text="{Binding ItemsFound}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /></StackPanel></Grid></Border>
++                    <Border Style="{StaticResource ResponsiveSummaryCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
++                            <Border Style="{StaticResource SummaryMetricIconStyle}" Background="{DynamicResource SuccessSoftBrush}"><TextBlock Text="&#xE73E;" Foreground="{DynamicResource SuccessBrush}" Style="{StaticResource SummaryMetricGlyphStyle}" /></Border>
++                            <StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="ENABLED" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" /><TextBlock Text="{Binding EnabledItems}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /></StackPanel></Grid></Border>
++                    <Border Style="{StaticResource ResponsiveSummaryCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
++                            <Border Style="{StaticResource SummaryMetricIconStyle}" Background="{DynamicResource DangerSoftBrush}"><TextBlock Text="&#xE711;" Foreground="{DynamicResource DangerBrush}" Style="{StaticResource SummaryMetricGlyphStyle}" /></Border>
++                            <StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="DISABLED" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" /><TextBlock Text="{Binding DisabledItems}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /></StackPanel></Grid></Border>
++                    <Border Style="{StaticResource ResponsiveSummaryCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
++                            <Border Style="{StaticResource SummaryMetricIconStyle}" Background="{DynamicResource WarningSoftBrush}"><TextBlock Text="&#xE897;" Foreground="{DynamicResource WarningBrush}" Style="{StaticResource SummaryMetricGlyphStyle}" /></Border>
++                            <StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="UNKNOWN" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" /><TextBlock Text="{Binding UnknownItems}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /></StackPanel></Grid></Border>
++                </UniformGrid>
+ 
+-                <Border Grid.Row="2" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
++                <Border Grid.Row="2" MinHeight="130" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
+@@ -4449,7 +4382,7 @@
+                 <Border Grid.Row="3"
+-                        Margin="0,14,0,0"
++                        Margin="0,10,0,0"
+                         Style="{StaticResource OperationStatusPanelStyle}">
+@@ -4501,12 +4434,12 @@
+-      Margin="20,14,20,16"
+-      MinHeight="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=30}"
++      Margin="20,14,20,14"
++      MinHeight="{Binding ViewportHeight, ElementName=ToolContentScrollViewer, Converter={StaticResource SubtractDoubleConverter}, ConverterParameter=38}"
+@@ -4508,7 +4441,7 @@
+-        <RowDefinition Height="200" />
++        <RowDefinition Height="*" />
+@@ -4582,132 +4515,13 @@
+-    <Grid Grid.Row="1" Margin="0,7,0,7">
+-        <Grid.ColumnDefinitions>
+-            <ColumnDefinition Width="1.9*" />
+-            <ColumnDefinition Width="12" />
+-            <ColumnDefinition Width="0.85*" />
+-            <ColumnDefinition Width="12" />
+-            <ColumnDefinition Width="0.95*" />
+-            <ColumnDefinition Width="12" />
+-            <ColumnDefinition Width="1.15*" />
+-        </Grid.ColumnDefinitions>
+-
+-        <Border Grid.Column="0"
+-                Padding="16,12"
+-                MinHeight="98"
+-                Style="{StaticResource FluentCardStyle}">
+-            <StackPanel>
+-                <TextBlock Text="ASSESSMENT CHECKS"
+-                           Style="{StaticResource FluentCaptionStyle}" />
+-
+-                <CheckBox Margin="0,9,0,0"
+-                          IsChecked="{Binding CheckComponentStore, Mode=TwoWay}"
+-                          Foreground="{DynamicResource TextPrimaryBrush}"
+-                          VerticalContentAlignment="Center">
+-                    <StackPanel Margin="4,0,0,0">
+-                        <TextBlock Text="DISM CheckHealth"
+-                                   FontSize="12.5"
+-                                   FontWeight="SemiBold" />
+-                        <TextBlock Margin="0,2,0,0"
+-                                   Text="Windows component store"
+-                                   Foreground="{DynamicResource TextSecondaryBrush}"
+-                                   FontSize="10.5" />
+-                    </StackPanel>
+-                </CheckBox>
+-
+-                <CheckBox Margin="0,8,0,0"
+-                          IsChecked="{Binding VerifyProtectedSystemFiles, Mode=TwoWay}"
+-                          Foreground="{DynamicResource TextPrimaryBrush}"
+-                          VerticalContentAlignment="Center">
+-                    <StackPanel Margin="4,0,0,0">
+-                        <TextBlock Text="SFC VerifyOnly"
+-                                   FontSize="12.5"
+-                                   FontWeight="SemiBold" />
+-                        <TextBlock Margin="0,2,0,0"
+-                                   Text="Protected Windows files"
+-                                   Foreground="{DynamicResource TextSecondaryBrush}"
+-                                   FontSize="10.5" />
+-                    </StackPanel>
+-                </CheckBox>
+-            </StackPanel>
+-        </Border>
+-
+-        <Border Grid.Column="2"
+-                Padding="12,6"
+-                MinHeight="66"
+-                Style="{StaticResource FluentCardStyle}">
+-            <StackPanel>
+-                <TextBlock Text="COMPLETED"
+-                           Style="{StaticResource FluentCaptionStyle}" />
+-                <TextBlock Margin="0,7,0,0"
+-                           Text="{Binding CompletedChecks}"
+-                           Foreground="{DynamicResource TextPrimaryBrush}"
+-                           FontSize="26"
+-                           FontWeight="SemiBold" />
+-                <TextBlock Margin="0,1,0,0"
+-                           Text="checks"
+-                           Foreground="{DynamicResource TextSecondaryBrush}"
+-                           FontSize="10.5" />
+-            </StackPanel>
+-        </Border>
+-
+-        <Border Grid.Column="4"
+-                Padding="12,6"
+-                MinHeight="66"
+-                Style="{StaticResource FluentCardStyle}">
+-            <StackPanel>
+-                <TextBlock Text="NO ISSUE"
+-                           Style="{StaticResource FluentCaptionStyle}" />
+-                <TextBlock Margin="0,7,0,0"
+-                           Text="{Binding HealthyChecks}"
+-                           Foreground="{DynamicResource SuccessBrush}"
+-                           FontSize="26"
+-                           FontWeight="SemiBold" />
+-                <TextBlock Margin="0,1,0,0"
+-                           Text="classified"
+-                           Foreground="{DynamicResource TextSecondaryBrush}"
+-                           FontSize="10.5" />
+-            </StackPanel>
+-        </Border>
+-
+-        <Border Grid.Column="6"
+-                Padding="12,6"
+-                MinHeight="66"
+-                Style="{StaticResource FluentCardStyle}">
+-            <StackPanel>
+-                <TextBlock Text="REVIEW"
+-                           Style="{StaticResource FluentCaptionStyle}" />
+-                <Grid Margin="0,8,0,0">
+-                    <Grid.ColumnDefinitions>
+-                        <ColumnDefinition Width="*" />
+-                        <ColumnDefinition Width="1" />
+-                        <ColumnDefinition Width="*" />
+-                    </Grid.ColumnDefinitions>
+-
+-                    <StackPanel>
+-                        <TextBlock Text="{Binding AttentionChecks}"
+-                                   Foreground="{DynamicResource WarningBrush}"
+-                                   FontSize="20"
+-                                   FontWeight="SemiBold" />
+-                        <TextBlock Margin="0,2,0,0"
+-                                   Text="Attention"
+-                                   Foreground="{DynamicResource TextSecondaryBrush}"
+-                                   FontSize="10" />
+-                    </StackPanel>
+-
+-                    <Border Grid.Column="1"
+-                            Background="{DynamicResource BorderBrush}"
+-                            Margin="8,0" />
+-
+-                    <StackPanel Grid.Column="2">
+-                        <TextBlock Text="{Binding InconclusiveChecks}"
+-                                   Foreground="{DynamicResource AccentBrush}"
+-                                   FontSize="20"
+-                                   FontWeight="SemiBold" />
+-                        <TextBlock Margin="0,2,0,0"
+-                                   Text="Inconclusive"
+-                                   Foreground="{DynamicResource TextSecondaryBrush}"
+-                                   FontSize="10" />
+-                    </StackPanel>
+-                </Grid>
+-            </StackPanel>
+-        </Border>
+-    </Grid>
++    <UniformGrid Grid.Row="1" Margin="-4,6,-4,6" Columns="4">
++        <Border Style="{StaticResource ResponsiveSummaryCardStyle}">
++            <StackPanel>
++                <TextBlock Text="ASSESSMENT CHECKS" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" />
++                <CheckBox Margin="0,5,0,0" IsChecked="{Binding CheckComponentStore, Mode=TwoWay}" Foreground="{DynamicResource TextPrimaryBrush}" Content="DISM CheckHealth" ToolTip="Read-only Windows component-store check" />
++                <CheckBox Margin="0,3,0,0" IsChecked="{Binding VerifyProtectedSystemFiles, Mode=TwoWay}" Foreground="{DynamicResource TextPrimaryBrush}" Content="SFC VerifyOnly" ToolTip="Read-only protected-system-file verification" />
++            </StackPanel>
++        </Border>
++        <Border Style="{StaticResource ResponsiveSummaryCardStyle}"><StackPanel><TextBlock Text="COMPLETED" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" /><TextBlock Text="{Binding CompletedChecks}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /><TextBlock Margin="0,2,0,0" Text="checks" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10.5" /></StackPanel></Border>
++        <Border Style="{StaticResource ResponsiveSummaryCardStyle}"><StackPanel><TextBlock Text="NO ISSUE" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" /><TextBlock Text="{Binding HealthyChecks}" Foreground="{DynamicResource SuccessBrush}" Style="{StaticResource SummaryMetricValueStyle}" /><TextBlock Margin="0,2,0,0" Text="classified" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10.5" /></StackPanel></Border>
++        <Border Style="{StaticResource ResponsiveSummaryCardStyle}"><StackPanel><TextBlock Text="REVIEW" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" /><Grid Margin="0,5,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="1" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><StackPanel><TextBlock Text="{Binding AttentionChecks}" Foreground="{DynamicResource WarningBrush}" FontSize="18" FontWeight="SemiBold" /><TextBlock Text="Attention" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="9.5" /></StackPanel><Border Grid.Column="1" Background="{DynamicResource BorderBrush}" Margin="6,0" /><StackPanel Grid.Column="2"><TextBlock Text="{Binding InconclusiveChecks}" Foreground="{DynamicResource AccentBrush}" FontSize="18" FontWeight="SemiBold" /><TextBlock Text="Inconclusive" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="9.5" /></StackPanel></Grid></StackPanel></Border>
++    </UniformGrid>
+@@ -4714,9 +4528,9 @@
+     <Grid Grid.Row="2">
+         <Grid.ColumnDefinitions>
+-            <ColumnDefinition Width="0.82*" MinWidth="220" />
++            <ColumnDefinition Width="1.05*" MinWidth="250" />
+             <ColumnDefinition Width="10" />
+-            <ColumnDefinition Width="2.55*" />
++            <ColumnDefinition Width="2.35*" />
+         </Grid.ColumnDefinitions>
+@@ -4721,7 +4535,7 @@
+         <Border Grid.Column="0"
+-                Padding="13"
++                Padding="12"
+                 Style="{StaticResource FluentElevatedCardStyle}">
+@@ -4825,7 +4639,7 @@
+                 <Border Grid.Row="3"
+-                        Margin="0,14,0,0"
++                        Margin="0,8,0,0"
+                         Padding="9,6"
+@@ -5134,7 +4948,7 @@
+     <Border Grid.Row="4"
+-            Margin="0,12,0,0"
++            Margin="0,10,0,0"
+             Style="{StaticResource OperationStatusPanelStyle}">
+@@ -5730,7 +5544,7 @@
+ <Grid Grid.Row="1"
+-      Margin="20,16,20,18"
++      Margin="20,14,20,14"
+       DataContext="{Binding SystemMonitor}"
+@@ -5749,11 +5563,9 @@
+-                <Grid Grid.Row="1" Margin="0,7,0,7">
+-                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="12" /><ColumnDefinition Width="*" /><ColumnDefinition Width="12" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+-                    <Border Grid.Column="0" Padding="18,14" Style="{StaticResource FluentCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource SummaryMetricIconStyle}" Background="{DynamicResource AccentSoftBrush}"><TextBlock Text="&#xE9D9;" Foreground="{DynamicResource AccentBrush}" Style="{StaticResource SummaryMetricGlyphStyle}" /></Border><StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="CPU USAGE" Style="{StaticResource FluentCaptionStyle}" /><TextBlock Text="{Binding CpuUsageText}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /></StackPanel></Grid></Border>
+-                    <Border Grid.Column="2" Padding="18,14" Style="{StaticResource FluentCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource SummaryMetricIconStyle}" Background="{DynamicResource SuccessSoftBrush}"><TextBlock Text="&#xE950;" Foreground="{DynamicResource SuccessBrush}" Style="{StaticResource SummaryMetricGlyphStyle}" /></Border><StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="MEMORY USAGE" Style="{StaticResource FluentCaptionStyle}" /><TextBlock Text="{Binding MemoryUsageText}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /></StackPanel></Grid></Border>
+-                    <Border Grid.Column="4" Padding="18,14" Style="{StaticResource FluentCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource SummaryMetricIconStyle}" Background="{DynamicResource WarningSoftBrush}"><TextBlock Text="&#xE8C8;" Foreground="{DynamicResource WarningBrush}" Style="{StaticResource SummaryMetricGlyphStyle}" /></Border><StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="MEMORY USED" Style="{StaticResource FluentCaptionStyle}" /><TextBlock Text="{Binding UsedMemoryText}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /></StackPanel></Grid></Border>
+-                </Grid>
++                <UniformGrid Grid.Row="1" Margin="-4,6,-4,6" Columns="3">
++                    <Border Style="{StaticResource ResponsiveSummaryCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource SummaryMetricIconStyle}" Background="{DynamicResource AccentSoftBrush}"><TextBlock Text="&#xE9D9;" Foreground="{DynamicResource AccentBrush}" Style="{StaticResource SummaryMetricGlyphStyle}" /></Border><StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="CPU USAGE" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" /><TextBlock Text="{Binding CpuUsageText}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /></StackPanel></Grid></Border>
++                    <Border Style="{StaticResource ResponsiveSummaryCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource SummaryMetricIconStyle}" Background="{DynamicResource SuccessSoftBrush}"><TextBlock Text="&#xE950;" Foreground="{DynamicResource SuccessBrush}" Style="{StaticResource SummaryMetricGlyphStyle}" /></Border><StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="MEMORY USAGE" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" /><TextBlock Text="{Binding MemoryUsageText}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /></StackPanel></Grid></Border>
++                    <Border Style="{StaticResource ResponsiveSummaryCardStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource SummaryMetricIconStyle}" Background="{DynamicResource WarningSoftBrush}"><TextBlock Text="&#xE8C8;" Foreground="{DynamicResource WarningBrush}" Style="{StaticResource SummaryMetricGlyphStyle}" /></Border><StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="MEMORY USED" Style="{StaticResource ResponsiveSummaryCardCaptionStyle}" /><TextBlock Text="{Binding UsedMemoryText}" Foreground="{DynamicResource TextPrimaryBrush}" Style="{StaticResource SummaryMetricValueStyle}" /></StackPanel></Grid></Border>
++                </UniformGrid>
+@@ -5764,7 +5576,7 @@
+-                            Padding="20"
++                            Padding="16"
+@@ -5791,7 +5603,7 @@
+-                            <Grid Grid.Row="3" Margin="0,18,0,10" MinHeight="150">
++                            <Grid Grid.Row="3" Margin="0,12,0,8" MinHeight="120">
+@@ -5828,7 +5640,7 @@
+-                            Padding="20"
++                            Padding="16"
+@@ -5854,7 +5666,7 @@
+-                            <Grid Grid.Row="3" Margin="0,18,0,10" MinHeight="150">
++                            <Grid Grid.Row="3" Margin="0,12,0,8" MinHeight="120">
+@@ -5910,7 +5722,7 @@
+                 <Border Grid.Row="3"
+-                        Margin="0,14,0,0"
++                        Margin="0,10,0,0"
+                         Style="{StaticResource OperationStatusPanelStyle}">
+@@ -5954,7 +5766,7 @@
+-                  Margin="20,16,20,18"
++                  Margin="20,14,20,14"
+@@ -6201,7 +6013,7 @@
+-                  Margin="20,16,20,18"
++                  Margin="20,14,20,14"
+@@ -6981,7 +6793,7 @@
+                 <Border Grid.Row="3"
+-                        Margin="0,14,0,0"
++                        Margin="0,10,0,0"
+                         Style="{StaticResource OperationStatusPanelStyle}">
