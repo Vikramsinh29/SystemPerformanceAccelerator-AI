@@ -18,6 +18,37 @@ $main = [System.IO.File]::ReadAllText($mainWindowPath, $utf8)
 $colors = [System.IO.File]::ReadAllText($colorsPath, $utf8)
 $theme = [System.IO.File]::ReadAllText($themeManagerPath, $utf8)
 
+function Replace-InSection {
+    param(
+        [string]$Source,
+        [string]$StartAnchor,
+        [string]$EndAnchor,
+        [string]$OldText,
+        [string]$NewText,
+        [string]$Name
+    )
+
+    $start = $Source.IndexOf($StartAnchor, [System.StringComparison]::Ordinal)
+    if ($start -lt 0) {
+        throw "$Name start anchor was not found."
+    }
+
+    $end = $Source.IndexOf($EndAnchor, $start + $StartAnchor.Length, [System.StringComparison]::Ordinal)
+    if ($end -lt 0) {
+        throw "$Name end anchor was not found."
+    }
+
+    $length = $end - $start
+    $section = $Source.Substring($start, $length)
+    $count = ([regex]::Matches($section, [regex]::Escape($OldText))).Count
+    if ($count -ne 1) {
+        throw "$Name expected exactly one target but found $count."
+    }
+
+    $section = $section.Replace($OldText, $NewText)
+    return $Source.Remove($start, $length).Insert($start, $section)
+}
+
 Write-Host ''
 Write-Host 'APPLYING RESPONSIVE VIEWPORT FIX'
 Write-Host '============================================'
@@ -35,46 +66,52 @@ Write-Host ''
 Write-Host 'PROTECTING EMPTY/RESULT REGION HEIGHTS'
 Write-Host '============================================'
 
-$customPattern = '(?s)<Border Grid.Row="2"\s+Padding="0"\s+Style="\{StaticResource FluentElevatedCardStyle\}"\s+ClipToBounds="True">'
-$customMatches = [regex]::Matches($main, $customPattern).Count
-if ($customMatches -ne 1) {
-    throw "Expected exactly one Custom Clean result container but found $customMatches."
-}
-$main = [regex]::Replace(
-    $main,
-    $customPattern,
-    '<Border Grid.Row="2"' + "`n" + '                        MinHeight="190"' + "`n" + '                        Padding="0"' + "`n" + '                        Style="{StaticResource FluentElevatedCardStyle}"' + "`n" + '                        ClipToBounds="True">',
-    1)
+$customOld = '<Border Grid.Row="2"' + "`n" + '                        Padding="0"' + "`n" + '                        Style="{StaticResource FluentElevatedCardStyle}"' + "`n" + '                        ClipToBounds="True">'
+$customNew = '<Border Grid.Row="2"' + "`n" + '                        MinHeight="190"' + "`n" + '                        Padding="0"' + "`n" + '                        Style="{StaticResource FluentElevatedCardStyle}"' + "`n" + '                        ClipToBounds="True">'
+$mainNormalized = $main.Replace("`r`n", "`n")
+$mainNormalized = Replace-InSection `
+    -Source $mainNormalized `
+    -StartAnchor 'DataContext="{Binding CustomClean}"' `
+    -EndAnchor 'DataContext="{Binding AutoCleanSchedule}"' `
+    -OldText $customOld `
+    -NewText $customNew `
+    -Name 'Custom Clean result container'
+$main = $mainNormalized
 
 $autoOld = '<Border Grid.Row="2" Style="{StaticResource ScheduleSurfaceCardStyle}">'
-if (([regex]::Matches($main, [regex]::Escape($autoOld))).Count -ne 1) {
-    throw 'Auto Clean schedule result container was not found exactly once.'
-}
-$main = $main.Replace(
-    $autoOld,
-    '<Border Grid.Row="2" MinHeight="360" Style="{StaticResource ScheduleSurfaceCardStyle}">')
+$autoNew = '<Border Grid.Row="2" MinHeight="360" Style="{StaticResource ScheduleSurfaceCardStyle}">'
+$main = Replace-InSection `
+    -Source $main `
+    -StartAnchor 'DataContext="{Binding AutoCleanSchedule}"' `
+    -EndAnchor 'DataContext="{Binding LargeFileFinder}"' `
+    -OldText $autoOld `
+    -NewText $autoNew `
+    -Name 'Auto Clean schedule result container'
 
 $largeOld = '<Border Grid.Row="3" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">'
-if (([regex]::Matches($main, [regex]::Escape($largeOld))).Count -ne 1) {
-    throw 'Large File Finder result container was not found exactly once.'
-}
-$main = $main.Replace(
-    $largeOld,
-    '<Border Grid.Row="3" MinHeight="190" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">')
+$largeNew = '<Border Grid.Row="3" MinHeight="190" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">'
+$main = Replace-InSection `
+    -Source $main `
+    -StartAnchor 'DataContext="{Binding LargeFileFinder}"' `
+    -EndAnchor 'DataContext="{Binding DuplicateFileFinder}"' `
+    -OldText $largeOld `
+    -NewText $largeNew `
+    -Name 'Large File Finder result container'
 
-# Compact only the Auto Clean empty-state block, anchored by its unique title.
-$autoEmptyPattern = '(?s)<Border Padding="34"\s+Background="Transparent"\s+Visibility="\{Binding IsEmptyStateVisible, Converter=\{StaticResource BooleanToVisibilityConverter\}\}">(?<body>.*?)Text="No schedules yet"(?<tail>.*?)</Border>\s+</Grid>\s+<Border Grid.Row="2"'
-$autoEmptyMatch = [regex]::Match($main, $autoEmptyPattern)
-if (-not $autoEmptyMatch.Success) {
-    throw 'Auto Clean empty-state block was not found safely.'
+$autoStart = $main.IndexOf('DataContext="{Binding AutoCleanSchedule}"', [System.StringComparison]::Ordinal)
+$autoEnd = $main.IndexOf('DataContext="{Binding LargeFileFinder}"', $autoStart + 1, [System.StringComparison]::Ordinal)
+if ($autoStart -lt 0 -or $autoEnd -lt 0) {
+    throw 'Auto Clean section bounds were not found.'
 }
-$autoEmptyOriginal = $autoEmptyMatch.Value
-$autoEmptyUpdated = $autoEmptyOriginal.Replace('Padding="34"', 'Padding="20"')
-$autoEmptyUpdated = $autoEmptyUpdated.Replace('Width="62" Height="62"', 'Width="54" Height="54"')
-$autoEmptyUpdated = $autoEmptyUpdated.Replace('CornerRadius="18" HorizontalAlignment="Center"', 'CornerRadius="16" HorizontalAlignment="Center"')
-$autoEmptyUpdated = $autoEmptyUpdated.Replace('Margin="0,18,0,0"' + "`r`n" + '                                                   Text="No schedules yet"', 'Margin="0,12,0,0"' + "`r`n" + '                                                   Text="No schedules yet"')
-$autoEmptyUpdated = $autoEmptyUpdated.Replace('Margin="0,18,0,0"' + "`n" + '                                                   Text="No schedules yet"', 'Margin="0,12,0,0"' + "`n" + '                                                   Text="No schedules yet"')
-$main = $main.Replace($autoEmptyOriginal, $autoEmptyUpdated)
+$autoSection = $main.Substring($autoStart, $autoEnd - $autoStart)
+if (-not $autoSection.Contains('Text="No schedules yet"')) {
+    throw 'Auto Clean empty-state title was not found.'
+}
+$autoSection = $autoSection.Replace('Padding="34"', 'Padding="20"')
+$autoSection = $autoSection.Replace('Width="62" Height="62"', 'Width="54" Height="54"')
+$autoSection = $autoSection.Replace('CornerRadius="18" HorizontalAlignment="Center"', 'CornerRadius="16" HorizontalAlignment="Center"')
+$autoSection = $autoSection.Replace('Margin="0,18,0,0"' + "`n" + '                                                   Text="No schedules yet"', 'Margin="0,12,0,0"' + "`n" + '                                                   Text="No schedules yet"')
+$main = $main.Remove($autoStart, $autoEnd - $autoStart).Insert($autoStart, $autoSection)
 
 Write-Host 'Custom Clean minimum result height : 190'
 Write-Host 'Auto Clean schedule card minimum  : 360'
@@ -122,18 +159,21 @@ $theme = $theme.Replace(
     '            ["HelpSafetyAccentBrush"] = Color.FromRgb(0x78, 0xFF, 0xB6),' + "`n" +
     '            ["HelpSafetyTextBrush"] = Color.FromRgb(0xCF, 0xF8, 0xDF),')
 
-$helpPattern = '(?s)<Border Margin="0,0,0,14"\s+Padding="18"\s+Background="\{DynamicResource SuccessSoftBrush\}"\s+BorderBrush="\{DynamicResource SuccessBrush\}"\s+BorderThickness="1"\s+CornerRadius="10">(?<body>.*?Text="Safety first".*?</Border>)'
-$helpMatch = [regex]::Match($main, $helpPattern)
-if (-not $helpMatch.Success) {
-    throw 'Help Safety first panel was not found safely.'
+$helpStart = $main.IndexOf('DataContext="{Binding Help}"', [System.StringComparison]::Ordinal)
+$helpEnd = $main.IndexOf('DataContext="{Binding Settings}"', $helpStart + 1, [System.StringComparison]::Ordinal)
+if ($helpStart -lt 0 -or $helpEnd -lt 0) {
+    throw 'Help section bounds were not found.'
 }
-$helpOriginal = $helpMatch.Value
-$helpUpdated = $helpOriginal.Replace('Background="{DynamicResource SuccessSoftBrush}"', 'Background="{DynamicResource HelpSafetyBackgroundBrush}"')
-$helpUpdated = $helpUpdated.Replace('BorderBrush="{DynamicResource SuccessBrush}"', 'BorderBrush="{DynamicResource HelpSafetyBorderBrush}"')
-$helpUpdated = $helpUpdated.Replace('BorderThickness="1"', 'BorderThickness="1.5"')
-$helpUpdated = $helpUpdated.Replace('Foreground="{DynamicResource SuccessBrush}"', 'Foreground="{DynamicResource HelpSafetyAccentBrush}"')
-$helpUpdated = $helpUpdated.Replace('Foreground="{DynamicResource TextSecondaryBrush}"', 'Foreground="{DynamicResource HelpSafetyTextBrush}"')
-$main = $main.Replace($helpOriginal, $helpUpdated)
+$helpSection = $main.Substring($helpStart, $helpEnd - $helpStart)
+if (-not $helpSection.Contains('Text="Safety first"')) {
+    throw 'Help Safety first panel was not found.'
+}
+$helpSection = $helpSection.Replace('Background="{DynamicResource SuccessSoftBrush}"', 'Background="{DynamicResource HelpSafetyBackgroundBrush}"')
+$helpSection = $helpSection.Replace('BorderBrush="{DynamicResource SuccessBrush}"', 'BorderBrush="{DynamicResource HelpSafetyBorderBrush}"')
+$helpSection = $helpSection.Replace('BorderThickness="1"', 'BorderThickness="1.5"')
+$helpSection = $helpSection.Replace('Foreground="{DynamicResource SuccessBrush}"', 'Foreground="{DynamicResource HelpSafetyAccentBrush}"')
+$helpSection = $helpSection.Replace('Foreground="{DynamicResource TextSecondaryBrush}"', 'Foreground="{DynamicResource HelpSafetyTextBrush}"')
+$main = $main.Remove($helpStart, $helpEnd - $helpStart).Insert($helpStart, $helpSection)
 
 [System.IO.File]::WriteAllText($mainWindowPath, $main, $utf8)
 [System.IO.File]::WriteAllText($colorsPath, $colors, $utf8)
