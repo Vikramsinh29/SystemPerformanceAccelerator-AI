@@ -30,7 +30,12 @@ if ($currentChanged.Count -ne 3) {
 }
 
 $utf8 = New-Object System.Text.UTF8Encoding($false, $true)
-$main = [System.IO.File]::ReadAllText($mainWindowPath, $utf8)
+$main = [System.IO.File]::ReadAllText($mainWindowPath, $utf8).Replace("`r`n", "`n")
+
+function Normalize-Lf {
+    param([string]$Text)
+    return $Text.Replace("`r`n", "`n")
+}
 
 function Replace-ExactlyOnce {
     param(
@@ -40,6 +45,8 @@ function Replace-ExactlyOnce {
         [string]$Name
     )
 
+    $OldText = Normalize-Lf $OldText
+    $NewText = Normalize-Lf $NewText
     $count = ([regex]::Matches($Source, [regex]::Escape($OldText))).Count
     if ($count -ne 1) {
         throw "$Name expected exactly one target but found $count."
@@ -58,6 +65,8 @@ function Replace-InSection {
         [string]$Name
     )
 
+    $OldText = Normalize-Lf $OldText
+    $NewText = Normalize-Lf $NewText
     $start = $Source.IndexOf($StartAnchor, [System.StringComparison]::Ordinal)
     if ($start -lt 0) {
         throw "$Name start anchor was not found."
@@ -148,9 +157,6 @@ Write-Host ''
 Write-Host 'NORMALIZING RESULT / EMPTY-STATE REGIONS'
 Write-Host '============================================'
 
-# Existing responsive corrections made Custom Clean and Large File 190px.
-# Bring them to a common 180px result minimum so the status panel remains visible
-# at the 1240x720 review viewport while preserving a fully readable empty state.
 $main = Replace-InSection `
     -Source $main `
     -StartAnchor 'DataContext="{Binding CustomClean}"' `
@@ -167,8 +173,6 @@ $main = Replace-InSection `
     -NewText 'MinHeight="180"' `
     -Name 'Large File Finder result minimum'
 
-# Auto Clean's result card includes its own header and footer, so it needs more
-# height than a plain DataGrid empty state, but 360px is visually excessive.
 $main = Replace-InSection `
     -Source $main `
     -StartAnchor 'DataContext="{Binding AutoCleanSchedule}"' `
@@ -177,18 +181,15 @@ $main = Replace-InSection `
     -NewText 'MinHeight="310" Style="{StaticResource ScheduleSurfaceCardStyle}"' `
     -Name 'Auto Clean schedule result minimum'
 
-# Health Check had no protected minimum at all. Add the same 180px result minimum.
 $healthOld = '<Border Grid.Row="2"' + "`n" + '                            Style="{StaticResource FluentElevatedCardStyle}"' + "`n" + '                            ClipToBounds="True">'
 $healthNew = '<Border Grid.Row="2"' + "`n" + '                            MinHeight="180"' + "`n" + '                            Style="{StaticResource FluentElevatedCardStyle}"' + "`n" + '                            ClipToBounds="True">'
-$normalized = $main.Replace("`r`n", "`n")
-$normalized = Replace-InSection `
-    -Source $normalized `
+$main = Replace-InSection `
+    -Source $main `
     -StartAnchor 'DataContext="{Binding HealthCheck}"' `
     -EndAnchor 'Visibility="{Binding IsCleanerContentVisible' `
     -OldText $healthOld `
     -NewText $healthNew `
     -Name 'Health Check result minimum'
-$main = $normalized
 
 Write-Host 'Health Check result : 180px minimum'
 Write-Host 'Custom Clean result : 180px minimum'
