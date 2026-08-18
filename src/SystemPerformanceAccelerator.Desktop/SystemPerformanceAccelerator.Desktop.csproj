@@ -30,5 +30,27 @@
   <ItemGroup>
     <ProjectReference Include="..\SystemPerformanceAccelerator.Core\SystemPerformanceAccelerator.Core.csproj" />
     <ProjectReference Include="..\SystemPerformanceAccelerator.Infrastructure\SystemPerformanceAccelerator.Infrastructure.csproj" />
+    <ProjectReference Include="..\SystemPerformanceAccelerator.PrivilegedHelper\SystemPerformanceAccelerator.PrivilegedHelper.csproj"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
+
+  <Target Name="CopyPrivilegedHelperToBuildOutput" AfterTargets="Build">
+    <ItemGroup>
+      <PrivilegedHelperBuildOutput Include="$(MSBuildProjectDirectory)\..\SystemPerformanceAccelerator.PrivilegedHelper\bin\$(Configuration)\$(TargetFramework)\PC-SPA.PrivilegedHelper.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(PrivilegedHelperBuildOutput)"
+          DestinationFolder="$(TargetDir)"
+          SkipUnchangedFiles="true"
+          Condition="'@(PrivilegedHelperBuildOutput)' != ''" />
+  </Target>
+
+  <Target Name="CopyPrivilegedHelperToPublishOutput" AfterTargets="Publish">
+    <ItemGroup>
+      <PrivilegedHelperPublishOutput Include="$(MSBuildProjectDirectory)\..\SystemPerformanceAccelerator.PrivilegedHelper\bin\$(Configuration)\$(TargetFramework)\PC-SPA.PrivilegedHelper.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(PrivilegedHelperPublishOutput)"
+          DestinationFolder="$(PublishDir)"
+          SkipUnchangedFiles="true"
+          Condition="'@(PrivilegedHelperPublishOutput)' != ''" />
+  </Target>
 </Project>
