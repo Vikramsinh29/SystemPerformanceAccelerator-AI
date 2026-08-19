@@ -92,7 +92,7 @@ public partial class MainWindow : Window
             new WindowsRepairAssessmentHistoryService();
         var windowsRepairAssessmentService =
             new WindowsRepairAssessmentService(
-                new WindowsRepairCommandRunner());
+                new PrivilegedWindowsRepairAssessmentCommandRunner());
         var windowsRepairPlanService =
             new OperationScopedWindowsRepairPlanService(
                 new WindowsRepairPlanService());

@@ -342,14 +342,7 @@ public sealed class WindowsRepairAssessmentService :
             issues.Add(
                 "Windows Repair Assessment is supported only on Windows.");
         }
-
-        if (!environment.IsElevated)
-        {
-            issues.Add(
-                "Administrator elevation is required for Microsoft DISM and SFC assessment commands.");
-        }
-
-        if (string.IsNullOrWhiteSpace(
+if (string.IsNullOrWhiteSpace(
                 environment.WindowsDirectory) ||
             !Path.IsPathRooted(environment.WindowsDirectory))
         {

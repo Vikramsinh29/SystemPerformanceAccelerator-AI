@@ -22,25 +22,67 @@ public sealed class PrivilegedHelperContractTests
     }
 
     [Fact]
-    public void Helper_ExposesOnlyTwoFixedWindowsRepairOperations()
+    public void Helper_ExposesOnlyFixedWindowsRepairOperations()
     {
         var program = ReadRepositoryFile(
             "src",
             "SystemPerformanceAccelerator.PrivilegedHelper",
             "Program.cs");
 
-        Assert.Contains("windows-repair-restore-health", program);
-        Assert.Contains("windows-repair-scan-protected-files", program);
-        Assert.Contains("args.Length != 1", program);
-        Assert.Contains("CreateDismRestoreHealth", program);
-        Assert.Contains("CreateSfcScanNow", program);
-        Assert.Contains("IsApprovedGuidedRepairCommand", program);
+        Assert.Contains(
+            "windows-repair-restore-health",
+            program);
+        Assert.Contains(
+            "windows-repair-scan-protected-files",
+            program);
+        Assert.Contains(
+            "windows-repair-assess-check-health",
+            program);
+        Assert.Contains(
+            "windows-repair-assess-verify-protected-files",
+            program);
 
-        Assert.DoesNotContain("ProcessStartInfo", program);
-        Assert.DoesNotContain("cmd.exe", program, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("powershell", program, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("ExecutablePath = args", program);
-        Assert.DoesNotContain("Arguments = args", program);
+        Assert.Contains(
+            "args.Length is < 1 or > 2",
+            program);
+
+        Assert.Contains(
+            "CreateDismRestoreHealth",
+            program);
+        Assert.Contains(
+            "CreateSfcScanNow",
+            program);
+        Assert.Contains(
+            "CreateDismCheckHealth",
+            program);
+        Assert.Contains(
+            "CreateSfcVerifyOnly",
+            program);
+
+        Assert.Contains(
+            "IsApprovedGuidedRepairCommand",
+            program);
+        Assert.Contains(
+            "IsStrictlyReadOnly",
+            program);
+
+        Assert.DoesNotContain(
+            "ProcessStartInfo",
+            program);
+        Assert.DoesNotContain(
+            "cmd.exe",
+            program,
+            StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(
+            "powershell",
+            program,
+            StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(
+            "ExecutablePath = args",
+            program);
+        Assert.DoesNotContain(
+            "Arguments = args",
+            program);
     }
 
     [Fact]

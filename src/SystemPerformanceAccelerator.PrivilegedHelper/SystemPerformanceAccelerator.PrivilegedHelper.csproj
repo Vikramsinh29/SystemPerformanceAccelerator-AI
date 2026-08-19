@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AssemblyName>PC-SPA.PrivilegedHelper</AssemblyName>
     <RootNamespace>SystemPerformanceAccelerator.PrivilegedHelper</RootNamespace>

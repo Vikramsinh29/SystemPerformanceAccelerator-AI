@@ -23,24 +23,35 @@ public sealed class WindowsRepairAssessmentServiceTests
     }
 
     [Fact]
-    public async Task AssessAsync_WhenNotElevated_BlocksBeforeCommand()
+    public async Task AssessAsync_WhenDesktopIsNotElevated_UsesConfiguredRunner()
     {
-        var runner = new FakeRunner();
+        var runner = new FakeRunner(
+            Completed(
+                "No component store corruption detected."));
+
         var service = CreateService(
             runner,
             CreateEnvironment(isElevated: false));
 
         var result = await service.AssessAsync(
-            new WindowsRepairAssessmentRequest(true, false));
+            new WindowsRepairAssessmentRequest(
+                true,
+                false));
 
         Assert.Equal(
-            WindowsRepairAssessmentOutcome.Unsupported,
-            result.OverallOutcome);
-        Assert.Single(result.Checks);
+            1,
+            runner.CallCount);
+
+        Assert.Single(
+            result.Checks);
+
         Assert.Equal(
-            WindowsRepairAssessmentOutcome.Skipped,
+            WindowsRepairAssessmentOutcome.Healthy,
             result.Checks[0].Outcome);
-        Assert.Equal(0, runner.CallCount);
+
+        Assert.Equal(
+            WindowsRepairAssessmentOutcome.Healthy,
+            result.OverallOutcome);
     }
 
     [Fact]
