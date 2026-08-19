@@ -254,6 +254,44 @@ Until that compatibility gate passes:
 - Inno Setup commercial purchase: `DEFERRED`
 - Existing private RC pipeline: `PRESERVED`
 - Production publication: `NOT APPROVED`
+### Verified local MSIX feasibility evidence — 2026-08-19
+
+The Microsoft Store/MSIX route has passed a controlled local feasibility test for the most sensitive current privileged Windows Repair path. This evidence does not by itself approve public Store submission; full application compatibility and Store certification readiness remain required.
+
+Verified local feasibility package:
+
+- Test package identity: `PCSPA.Local.Feasibility`
+- Test package version: `1.0.0.1`
+- Source commit: `24d37a02303da601242c73e130c66affd3ac2a97`
+- Package signing: temporary local self-signed test certificate only; not customer/public signing
+- Fresh packaged `SystemPerformanceAccelerator.Infrastructure.dll` matched the freshly rebuilt Release DLL by SHA-256
+- The obsolete whole-desktop administrator preflight blocker was confirmed absent from the packaged Infrastructure assembly
+- PC-SPA launched from the installed MSIX as a normal standard-user application without startup UAC
+- Windows Repair requested UAC only when the selected protected assessment operation began
+- `DISM CheckHealth` completed successfully through the operation-scoped privileged helper
+- `SFC VerifyOnly` completed successfully through the operation-scoped privileged helper
+- The privileged helper remained windowless during execution; no black console window was shown
+- The fixed privileged-operation allow-list and `requireAdministrator` helper boundary were preserved
+- Assessment results returned successfully to the normal desktop process
+- The previous `Skipped / Preflight blocked` MSIX failure was traced to stale packaging output, not to a fundamental MSIX restriction
+- Fresh Release staging resolved the stale-assembly problem
+- Real PC-SPA Phoenix package assets were included and the installed taskbar branding displayed correctly
+- No repair command was automatically authorized by the assessment flow
+- Repository source remained clean during feasibility packaging
+- Production was not touched
+
+Current interpretation:
+
+- Windows Repair + operation-scoped UAC under local MSIX: `FEASIBILITY PASSED`
+- Windowless privileged helper under local MSIX: `FEASIBILITY PASSED`
+- Phoenix package branding under local MSIX: `FEASIBILITY PASSED`
+- Full PC-SPA MSIX compatibility audit: `IN PROGRESS`
+- Microsoft Store certification readiness: `NOT YET VERIFIED`
+- Public Store submission: `NOT YET APPROVED`
+- Direct unsigned public distribution: `NOT APPROVED`
+- Paid public code signing: `DEFERRED`
+
+The permanent Store/MSIX packaging implementation must build from freshly verified Release/publish output and must never reuse stale package staging artifacts. Package-build verification should compare critical staged/package assemblies against the intended fresh build before signing or installation.
 ### Edition and feature access foundation
 
 - One shared codebase supports Trial, Free, Standard, Pro, and Business editions
