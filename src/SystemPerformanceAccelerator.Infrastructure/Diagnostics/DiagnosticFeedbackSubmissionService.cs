@@ -17,7 +17,7 @@ public sealed class DiagnosticFeedbackSubmissionService :
     private static readonly TimeSpan DefaultTimeout =
         TimeSpan.FromSeconds(20);
     private static readonly Regex ReferencePattern = new(
-        "^BETA-[0-9]{8}-[A-F0-9]{10}$",
+        "^PCSPA-[0-9]{8}-[A-F0-9]{10}$",
         RegexOptions.CultureInvariant);
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {

@@ -247,7 +247,7 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
             var elapsed = FormatElapsed(result.Elapsed);
             PreviewStatus = result.CompletedWithoutIssues
                 ? $"Cleanup complete - {elapsed}"
-                : $"Cleanup complete - {elapsed} - issues reported";
+                : $"Cleanup complete - {elapsed} - some files could not be removed";
 
             OperationResult = new OperationResultPresentation(
                 true,
@@ -260,7 +260,7 @@ public sealed class CustomCleanViewModel : INotifyPropertyChanged
                 result.Errors.Count > 0 ? result.Errors[0] : string.Empty);
             Status = result.CompletedWithoutIssues
                 ? "Custom Clean completed successfully."
-                : "Custom Clean completed with skipped or failed items.";
+                : "Cleanup completed. Some files could not be removed, for example because they are currently in use or protected by Windows.";
         }
         catch (OperationCanceledException)
         {

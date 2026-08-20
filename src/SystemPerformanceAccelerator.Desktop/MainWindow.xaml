@@ -3242,12 +3242,12 @@
                                        Foreground="{DynamicResource TextSecondaryBrush}"
                                        FontSize="11" />
                         </StackPanel>
-                        <Border Grid.Column="3" Style="{StaticResource FluentBadgeStyle}" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding RunScheduleStateText}"
+                        <Border Grid.Column="3" VerticalAlignment="Center" Style="{StaticResource OperationMetaChipStyle}">
+    <TextBlock Text="{Binding RunScheduleStateText}"
                                        Foreground="{DynamicResource AccentBrush}"
                                        FontSize="10.5"
                                        FontWeight="SemiBold" />
-                        </Border>
+</Border>
                     </Grid>
 
                     <UniformGrid Grid.Row="1" Margin="-4,-4,-4,9" Columns="4">
@@ -3292,7 +3292,9 @@
                                     <TextBlock Text="Fresh preview files" Style="{StaticResource ScheduleSectionTitleStyle}" />
                                     <TextBlock Margin="0,3,0,0" Text="Select only files you reviewed. Cleanup revalidates every selected file immediately before deletion." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="10.5" TextWrapping="Wrap" />
                                 </StackPanel>
-                                <Border Grid.Column="1" Style="{StaticResource FluentBadgeStyle}" Margin="16,0,0,0" VerticalAlignment="Center"><TextBlock Text="{Binding RunPreviewStatus}" Foreground="{DynamicResource AccentBrush}" FontSize="10.5" FontWeight="SemiBold" MaxWidth="230" TextTrimming="CharacterEllipsis" /></Border>
+                                <Border Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center" Style="{StaticResource OperationMetaChipStyle}">
+    <TextBlock Text="{Binding RunPreviewStatus}" Foreground="{DynamicResource AccentBrush}" FontSize="10.5" FontWeight="SemiBold" MaxWidth="230" TextTrimming="CharacterEllipsis" />
+</Border>
                             </Grid>
                             <ProgressBar Grid.Row="1" Height="5" Minimum="0" Maximum="100" Value="{Binding RunProgress, Mode=OneWay}" Foreground="{DynamicResource AccentBrush}" Background="{DynamicResource ProgressTrackBrush}" />
                             <Grid Grid.Row="2">
@@ -5826,8 +5828,6 @@
                                                FontSize="10"
                                                FontWeight="Bold" />
                                     <TextBox Margin="0,8,0,0"
-                                             MinHeight="40"
-                                             Padding="12,8"
                                              Style="{StaticResource InputTextBoxStyle}"
                                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                                              ToolTip="Try storage, startup, duplicate, Windows repair, CPU, or cleanup" />
@@ -6758,16 +6758,10 @@
                                     </WrapPanel>
 
                                     <TextBlock Margin="0,5,0,0"
-                                               Text="A local system utility with no cloud account, telemetry, or automatic deletion. Every cleanup remains review-first and confirmation-required."
+                                               Text="A local-first system utility with no automatic telemetry or automatic deletion. Network communication occurs only for explicit user-requested services such as sending a reviewed error report. Every cleanup remains review-first and confirmation-required."
                                                Foreground="{DynamicResource TextSecondaryBrush}"
                                                FontSize="11"
                                                TextWrapping="Wrap" />
-                                    <TextBlock Margin="0,7,0,0"
-                                               Text="github.com/Vikramsinh29/SystemPerformanceAccelerator-AI"
-                                               Foreground="{DynamicResource TextTertiaryBrush}"
-                                               FontSize="10.5"
-                                               TextTrimming="CharacterEllipsis"
-                                               ToolTip="https://github.com/Vikramsinh29/SystemPerformanceAccelerator-AI" />
                                 </StackPanel>
                             </Grid>
                         </Border>
@@ -6785,7 +6779,7 @@
                                            FontSize="10"
                                            FontWeight="Bold" />
                                 <TextBlock Margin="0,5,0,0"
-                                           Text="Settings are saved as a local JSON file. No cloud account, telemetry, or registry writing is used."
+                                           Text="Settings are saved as a local JSON file. Settings are not uploaded automatically and are not stored in the Windows registry."
                                            Foreground="{DynamicResource TextPrimaryBrush}"
                                            FontSize="12"
                                            TextWrapping="Wrap" />

@@ -15,7 +15,7 @@ public sealed class DiagnosticFeedbackSubmissionServiceTests
             new HttpResponseMessage(HttpStatusCode.Created)
             {
                 Content = new StringContent(
-                    "{\"accepted\":true,\"reference\":\"BETA-20260802-ABCDEF1234\"}",
+                    "{\"accepted\":true,\"reference\":\"PCSPA-20260802-ABCDEF1234\"}",
                     Encoding.UTF8,
                     "application/json")
             });
@@ -27,7 +27,7 @@ public sealed class DiagnosticFeedbackSubmissionServiceTests
         var result = await service.SubmitAsync(CreateReport());
 
         Assert.True(result.Success);
-        Assert.Equal("BETA-20260802-ABCDEF1234", result.Reference);
+        Assert.Equal("PCSPA-20260802-ABCDEF1234", result.Reference);
         Assert.Equal(HttpMethod.Post, handler.RequestMethod);
         Assert.Equal("application/json", handler.ContentType);
     }

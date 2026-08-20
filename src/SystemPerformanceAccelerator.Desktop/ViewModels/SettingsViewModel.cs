@@ -484,7 +484,11 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
                 SetSubmittedFeedbackReference(result.Reference);
                 Status = result.Message;
                 TryMarkLatestErrorReviewed(result.Message);
+                FeedbackAffectedArea = string.Empty;
+                FeedbackDescription = string.Empty;
+                FeedbackExpectedResult = string.Empty;
                 FeedbackConsent = false;
+
                 return;
             }
 
