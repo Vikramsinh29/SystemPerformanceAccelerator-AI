@@ -211,7 +211,7 @@ function createReference(now) {
     .map(value => value.toString(16).padStart(2, "0"))
     .join("")
     .toUpperCase();
-  return `BETA-${date}-${suffix}`;
+  return `PCSPA-${date}-${suffix}`;
 }
 
 async function hashInstallationId(installationId, salt) {

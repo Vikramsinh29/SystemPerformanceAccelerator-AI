@@ -60,7 +60,7 @@ test("valid report is accepted and stored without raw installation id", async ()
 
   assert.equal(response.status, 201);
   const body = await response.json();
-  assert.match(body.reference, /^BETA-\d{8}-[A-F0-9]{10}$/);
+  assert.match(body.reference, /^PCSPA-\d{8}-[A-F0-9]{10}$/);
   assert.equal(executed.length, 1);
   assert.notEqual(executed[0][13], report.installationId);
   assert.match(executed[0][13], /^[a-f0-9]{64}$/);
