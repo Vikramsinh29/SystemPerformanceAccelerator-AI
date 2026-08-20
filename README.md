@@ -1017,3 +1017,27 @@ Attention assessments.
 - A successful response must contain a valid `BETA-...` receipt, which is displayed and can be copied.
 - If the service is unavailable, rejected, rate-limited, times out, or returns an invalid receipt, PC-SPA offers the existing reviewed local ZIP workflow.
 - Cleaner, repair, startup, monitoring, scheduling, safety, command, runner, and execution-service behaviour is unchanged.
+
+### Post-1.0 Startup Manager improvement
+
+Startup Manager currently reports some detected startup entries as `Unknown`
+when PC-SPA cannot safely determine their enabled/disabled state.
+
+For Commercial 1.0.0:
+
+- Known Enabled/Disabled startup entries remain manageable.
+- Entries reported as `Unknown` are not modified when their state cannot be
+  determined safely.
+- This does not block the Commercial 1.0.0 release.
+
+Planned post-1.0 improvement:
+
+- Investigate Windows startup-state mechanisms responsible for entries
+  currently reported as `Unknown`.
+- Convert supported entries to reliable Enabled/Disabled states where possible.
+- Retain `Unknown` only for genuinely unsupported or indeterminate entries.
+- Provide explicit user-facing information for entries that cannot be safely
+  controlled.
+
+Safety requirement: PC-SPA must never infer an Enabled/Disabled state or modify
+a startup entry when its state cannot be determined reliably.
