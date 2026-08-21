@@ -8,6 +8,8 @@ param(
 
     [Parameter(Mandatory = $true)]
     [string]$Publisher,
+    [Parameter(Mandatory = $true)]
+    [string]$PublisherDisplayName,
 
     [string]$CertificateThumbprint,
 
@@ -332,6 +334,10 @@ $resolvedManifest =
         Replace(
             "__PACKAGE_PUBLISHER__",
             $Publisher
+        ).
+        Replace(
+            "__PACKAGE_PUBLISHER_DISPLAY_NAME__",
+            $PublisherDisplayName
         ).
         Replace(
             "__PACKAGE_VERSION__",
