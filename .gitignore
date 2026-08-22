@@ -28,3 +28,6 @@ backend/feedback-api/.dev.vars
 *.pfx
 *.p12
 *.pvk
+
+# Cloudflare Licensing API local state
+backend/licensing-api/.wrangler/
