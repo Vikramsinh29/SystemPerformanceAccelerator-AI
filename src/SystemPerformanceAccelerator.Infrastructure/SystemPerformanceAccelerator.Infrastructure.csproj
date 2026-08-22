@@ -2,4 +2,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SystemPerformanceAccelerator.Core\SystemPerformanceAccelerator.Core.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.11" />
+  </ItemGroup>
 </Project>
