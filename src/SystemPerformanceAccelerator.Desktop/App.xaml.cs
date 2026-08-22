@@ -12,6 +12,7 @@ namespace SystemPerformanceAccelerator.Desktop;
 public partial class App : Application
 {
     private IDiagnosticService? _diagnosticService;
+    private SingleInstanceActivationCoordinator? _singleInstanceCoordinator;
     private bool _isHandlingFatalError;
 
     protected override void OnStartup(StartupEventArgs e)
@@ -22,6 +23,32 @@ public partial class App : Application
 
         try
         {
+            _singleInstanceCoordinator =
+                new SingleInstanceActivationCoordinator();
+
+            if (!_singleInstanceCoordinator.IsPrimaryInstance)
+            {
+                try
+                {
+                    _singleInstanceCoordinator
+                        .ForwardArgumentsToPrimaryAsync(
+                            e.Args)
+                        .GetAwaiter()
+                        .GetResult();
+                }
+                catch
+                {
+                    // A secondary instance must never continue into
+                    // a second full desktop process if forwarding fails.
+                }
+
+                Shutdown(0);
+                return;
+            }
+
+            _singleInstanceCoordinator.StartListening(
+                HandleForwardedActivationAsync);
+
             CommercialUserDataMigrationService.CleanupLegacyBetaAccess();
             var settingsService = new ApplicationSettingsService();
             var settingsLoadResult = settingsService.Load();
@@ -88,6 +115,33 @@ public partial class App : Application
         }
     }
 
+    private async Task HandleForwardedActivationAsync(
+        IReadOnlyList<string> arguments)
+    {
+        await Dispatcher.InvokeAsync(
+            () =>
+            {
+                if (MainWindow is null)
+                {
+                    return;
+                }
+
+                if (MainWindow.WindowState ==
+                    WindowState.Minimized)
+                {
+                    MainWindow.WindowState =
+                        WindowState.Normal;
+                }
+
+                MainWindow.Show();
+                MainWindow.Activate();
+            });
+
+        await HandleDesktopAuthorizationStartupAsync(
+                arguments)
+            .ConfigureAwait(false);
+    }
+
     private static async Task HandleDesktopAuthorizationStartupAsync(
         IReadOnlyList<string> arguments)
     {
@@ -114,6 +168,10 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         UnregisterGlobalExceptionHandlers();
+
+        _singleInstanceCoordinator?.Dispose();
+        _singleInstanceCoordinator = null;
+
         base.OnExit(e);
     }
 
