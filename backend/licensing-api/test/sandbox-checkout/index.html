@@ -1,0 +1,39 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>PC-SPA Paddle Sandbox Checkout</title>
+
+  <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+</head>
+<body>
+  <h2>PC-SPA Paddle Sandbox Checkout</h2>
+  <p id="status">Initializing Paddle Sandbox...</p>
+
+  <script>
+    Paddle.Environment.set("sandbox");
+
+    Paddle.Initialize({
+      token: "test_dd2e0179b36d8b06708d8b916fd"
+    });
+
+    const params =
+      new URLSearchParams(window.location.search);
+
+    const transactionId =
+      params.get("_ptxn");
+
+    if (transactionId) {
+      document.getElementById("status").textContent =
+        "Opening sandbox checkout...";
+
+      Paddle.Checkout.open({
+        transactionId
+      });
+    } else {
+      document.getElementById("status").textContent =
+        "No sandbox transaction supplied.";
+    }
+  </script>
+</body>
+</html>

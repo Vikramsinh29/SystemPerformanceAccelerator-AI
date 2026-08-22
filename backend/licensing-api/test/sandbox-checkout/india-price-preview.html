@@ -1,0 +1,59 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>PC-SPA India Price Preview</title>
+  <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+</head>
+<body>
+  <h2>PC-SPA Paddle Sandbox — India Price Preview</h2>
+  <pre id="result">Loading India pricing...</pre>
+
+  <script>
+    Paddle.Environment.set("sandbox");
+
+    Paddle.Initialize({
+      token: "test_dd2e0179b36d8b06708d8b916fd"
+    });
+
+    async function preview(label, priceId) {
+      const result = await Paddle.PricePreview({
+        items: [
+          {
+            priceId,
+            quantity: 1
+          }
+        ],
+        address: {
+          countryCode: "IN"
+        }
+      });
+
+      return {
+        label,
+        result
+      };
+    }
+
+    Promise.all([
+      preview(
+        "Monthly",
+        "pri_01m0k4ycnmg10qe9455hwdx0vr"
+      ),
+      preview(
+        "Annual",
+        "pri_01m0k52c9eqvxe15bktrhaee3x"
+      )
+    ])
+      .then(results => {
+        document.getElementById("result").textContent =
+          JSON.stringify(results, null, 2);
+      })
+      .catch(error => {
+        document.getElementById("result").textContent =
+          "PRICE PREVIEW FAILED\n" +
+          String(error?.message ?? error);
+      });
+  </script>
+</body>
+</html>

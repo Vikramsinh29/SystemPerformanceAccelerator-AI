@@ -1,4 +1,4 @@
-const PRICE_ID_PATTERN =
+﻿const PRICE_ID_PATTERN =
   /^pri_[a-z\d]{26}$/;
 
 const INTERNAL_ID_PATTERN =
@@ -10,6 +10,8 @@ export function buildPaddleTransactionRequest({
   internalAccountId,
   internalSubscriptionId,
   productCode = "pc-spa",
+  providerCustomerId = null,
+  providerAddressId = null,
   checkoutUrl = null
 }) {
   requirePriceId(priceId);
@@ -51,6 +53,36 @@ export function buildPaddleTransactionRequest({
         productCode
     }
   };
+
+  if (
+    (providerCustomerId === null) !==
+    (providerAddressId === null)
+  ) {
+    throw new PaddleTransactionRequestError(
+      "invalid_provider_billing_context",
+      "Customer and address must be supplied together."
+    );
+  }
+
+  if (providerCustomerId !== null) {
+    requireProviderId(
+      providerCustomerId,
+      "ctm_",
+      "providerCustomerId"
+    );
+
+    requireProviderId(
+      providerAddressId,
+      "add_",
+      "providerAddressId"
+    );
+
+    body.customer_id =
+      providerCustomerId;
+
+    body.address_id =
+      providerAddressId;
+  }
 
   if (checkoutUrl !== null) {
     body.checkout = {
@@ -198,6 +230,26 @@ function requireInternalId(
   ) {
     throw new PaddleTransactionRequestError(
       "invalid_internal_id",
+      `${field} is invalid.`
+    );
+  }
+}
+
+function requireProviderId(
+  value,
+  prefix,
+  field
+) {
+  if (
+    typeof value !== "string" ||
+    !value.startsWith(prefix) ||
+    value.length !== prefix.length + 26 ||
+    !/^[a-z\d]+$/.test(
+      value.slice(prefix.length)
+    )
+  ) {
+    throw new PaddleTransactionRequestError(
+      "invalid_provider_id",
       `${field} is invalid.`
     );
   }

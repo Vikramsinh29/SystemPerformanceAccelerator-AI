@@ -1,4 +1,4 @@
-import {
+﻿import {
   createLicensingIdentityBridge
 } from "./licensing-identity-bridge.js";
 
@@ -30,7 +30,9 @@ export function createCommercialCheckoutRuntime({
 
   maxSeats = 100,
 
-  idFactory
+  idFactory,
+
+  resolveProviderBillingContext = null
 } = {}) {
   if (
     typeof resolveAuthenticatedAccount !== "function"
@@ -52,6 +54,15 @@ export function createCommercialCheckoutRuntime({
   if (typeof idFactory !== "function") {
     throw new TypeError(
       "idFactory is required."
+    );
+  }
+
+  if (
+    resolveProviderBillingContext !== null &&
+    typeof resolveProviderBillingContext !== "function"
+  ) {
+    throw new TypeError(
+      "resolveProviderBillingContext must be a function."
     );
   }
 
@@ -98,6 +109,33 @@ export function createCommercialCheckoutRuntime({
           throw error;
         }
 
+        let providerBillingContext = null;
+
+        if (resolveProviderBillingContext !== null) {
+          providerBillingContext =
+            await resolveProviderBillingContext({
+              accountId:
+                command.accountId,
+
+              productId
+            });
+
+          if (
+            !providerBillingContext ||
+            typeof providerBillingContext !== "object"
+          ) {
+            const error =
+              new Error(
+                "Trusted provider billing context is unavailable."
+              );
+
+            error.code =
+              "checkout_unavailable";
+
+            throw error;
+          }
+        }
+
         return checkoutOrchestrator
           .createCheckout({
             accountId:
@@ -107,7 +145,13 @@ export function createCommercialCheckoutRuntime({
               command.plan,
 
             seats:
-              command.seats
+              command.seats,
+
+            providerCustomerId:
+              providerBillingContext?.customerId ?? null,
+
+            providerAddressId:
+              providerBillingContext?.addressId ?? null
           });
       }
     });

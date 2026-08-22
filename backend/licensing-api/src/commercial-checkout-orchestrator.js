@@ -1,4 +1,4 @@
-import {
+﻿import {
   buildPaddleTransactionRequest
 } from "./paddle-transaction-request.js";
 
@@ -49,7 +49,9 @@ export class CommercialCheckoutOrchestrator {
   async createCheckout({
     accountId,
     plan,
-    seats
+    seats,
+    providerCustomerId = null,
+    providerAddressId = null
   }) {
     requireTrustedAccountId(
       accountId
@@ -86,7 +88,11 @@ export class CommercialCheckoutOrchestrator {
           subscriptionId,
 
         productCode:
-          commercial.productId
+          commercial.productId,
+
+        providerCustomerId,
+
+        providerAddressId
       });
 
     const provider =
