@@ -1,3 +1,4 @@
+using System.Net.Http;
 using System.Windows;
 using System.Windows.Threading;
 using SystemPerformanceAccelerator.Core.Interfaces;
@@ -51,6 +52,9 @@ public partial class App : Application
                         MainWindow = mainWindow;
                         mainWindow.Show();
 
+                        _ = HandleDesktopAuthorizationStartupAsync(
+                            e.Args);
+
                         splashWindow.Close();
                         ShutdownMode = ShutdownMode.OnMainWindowClose;
                     }
@@ -84,6 +88,29 @@ public partial class App : Application
         }
     }
 
+    private static async Task HandleDesktopAuthorizationStartupAsync(
+        IReadOnlyList<string> arguments)
+    {
+        try
+        {
+            using var httpClient =
+                new HttpClient();
+
+            var handoff =
+                ProductionDesktopAuthorizationHandoffComposition
+                    .Create(httpClient);
+
+            await DesktopAuthorizationStartupHandler
+                .TryHandleAsync(
+                    arguments,
+                    handoff)
+                .ConfigureAwait(false);
+        }
+        catch
+        {
+            // Authorization handoff must never prevent normal app startup.
+        }
+    }
     protected override void OnExit(ExitEventArgs e)
     {
         UnregisterGlobalExceptionHandlers();
