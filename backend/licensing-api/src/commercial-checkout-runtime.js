@@ -1,4 +1,4 @@
-﻿import {
+import {
   createLicensingIdentityBridge
 } from "./licensing-identity-bridge.js";
 

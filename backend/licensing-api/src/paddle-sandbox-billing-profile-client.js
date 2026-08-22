@@ -1,4 +1,4 @@
-﻿const CUSTOMER_ID =
+const CUSTOMER_ID =
   /^ctm_[a-z\d]{26}$/;
 
 const ADDRESS_ID =

@@ -1,4 +1,4 @@
-﻿const PRICE_ID_PATTERN =
+const PRICE_ID_PATTERN =
   /^pri_[a-z\d]{26}$/;
 
 const INTERNAL_ID_PATTERN =

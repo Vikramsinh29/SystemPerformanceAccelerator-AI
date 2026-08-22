@@ -1,4 +1,4 @@
-﻿import {
+import {
   createPaddleHttpTransport
 } from "./paddle-http-transport.js";
 

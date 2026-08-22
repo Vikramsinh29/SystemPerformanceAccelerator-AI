@@ -1,4 +1,4 @@
-﻿import {
+import {
   buildPaddleTransactionRequest
 } from "./paddle-transaction-request.js";
 
